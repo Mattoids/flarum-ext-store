@@ -2,6 +2,10 @@ mattoid-store:
   # For more details on the format
   # Checkout https://docs.flarum.org/extend/i18n/#appendix-a-standard-key-format
   admin:
-    my_cool_key: My Cool Key
+    store-name: Store Name
+    store-name-requirement: The store name will be displayed in the homepage menu and title bar
+    decorationStoreTimezone: time zone
+    decorationStoreTimezone-requirement: Set the time zone. Default to "Asia/Shanghai"
 
   forum:
+    tital: Store

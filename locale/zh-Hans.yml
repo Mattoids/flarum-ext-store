@@ -1,0 +1,12 @@
+mattoid-store:
+  # For more details on the format
+  # Checkout https://docs.flarum.org/extend/i18n/#appendix-a-standard-key-format
+  admin:
+    settings:
+      store-name: 商店名称
+      store-name-requirement: 商店名称会显示在首页菜单与标题栏
+      decorationStoreTimezone: 时区设置
+      decorationStoreTimezone-requirement: 设置时区。默认为 "Asia/Shanghai"
+
+  forum:
+    tital: 商店
