@@ -9,13 +9,13 @@ A [Flarum](http://flarum.org) extension. store
 Install with composer:
 
 ```sh
-composer require mattoid/store:"*"
+composer require mattoid/flarum-ext-store:"*"
 ```
 
 ## Updating
 
 ```sh
-composer update mattoid/store:"*"
+composer update mattoid/flarum-ext-store:"*"
 php flarum migrate
 php flarum cache:clear
 ```
