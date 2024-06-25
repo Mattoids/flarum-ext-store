@@ -27,6 +27,12 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
         return $this;
     }
 
+    public function getStoreGoods(String $key)
+    {
+        $class = $this->goodList[$key];
+        return new $class();
+    }
+
     public function extend(Container $container, Extension $extension = null)
     {
     }
@@ -34,9 +40,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
 
     public function onEnable(Container $container, Extension $extension)
     {
-        $key = $extension->name;
-        $class = $this->goodList[$key];
-        $commodity = new $class();
+        $commodity = $this->getStoreGoods($extension->name);
 
         StoreCommodityModel::query()->insert([
             'code' => $commodity->code,
@@ -49,10 +53,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
 
     public function onDisable(Container $container, Extension $extension)
     {
-        $key = $extension->name;
-        $class = $this->goodList[$key];
-        $commodity = new $class();
-
+        $commodity = $this->getStoreGoods($extension->name);
         StoreCommodityModel::query()->where('code', $commodity->code)->delete();
     }
 }
