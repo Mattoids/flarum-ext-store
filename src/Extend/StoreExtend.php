@@ -6,6 +6,7 @@ use Flarum\Extend\ExtenderInterface;
 use Flarum\Extend\LifecycleInterface;
 use Flarum\Extension\Extension;
 use Illuminate\Contracts\Container\Container;
+use Mattoid\Store\Model\StoreCommodityModel;
 
 class StoreExtend implements ExtenderInterface, LifecycleInterface
 {
@@ -14,24 +15,25 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
 
     public function addStoreGoods(string $key, $callback): self
     {
-        app('log')->info($key);
         $this->goodList[$key] = $callback;
         return $this;
     }
 
     public function extend(Container $container, Extension $extension = null)
     {
-        app('log')->info("extend");
     }
 
 
     public function onEnable(Container $container, Extension $extension)
     {
-        app('log')->info("onEnable");
+        app('log')->info($extension->type);
+        $storeCommodity = new StoreCommodityModel();
+        $storeCommodity->code = $extension->name;
+        $storeCommodity->save();
     }
 
     public function onDisable(Container $container, Extension $extension)
     {
-        app('log')->info("onDisable");
+        StoreCommodityModel::query()->where('code', $extension->name)->delete();
     }
 }
