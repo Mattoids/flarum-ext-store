@@ -46,7 +46,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
             'code' => $commodity->code,
             'name' => $commodity->name,
             'uri' => $commodity->uri,
-            'pop_up' => $commodity->popUp,
+            'pop_up' => json_encode($commodity->popUp),
             'create_time' => Date("Y-m-d H:i:s")
         ]);
     }
