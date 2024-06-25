@@ -49,6 +49,10 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
 
     public function onDisable(Container $container, Extension $extension)
     {
-        StoreCommodityModel::query()->where('code', $extension->name)->delete();
+        $key = $extension->name;
+        $class = $this->goodList[$key];
+        $commodity = new $class();
+
+        StoreCommodityModel::query()->where('code', $commodity->code)->delete();
     }
 }
