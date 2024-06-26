@@ -8,6 +8,7 @@ use Flarum\Extension\Extension;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Contracts\Container\Container;
 use Mattoid\Store\Model\StoreCommodityModel;
+use Mattoid\Store\Model\StoreModel;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class StoreExtend implements ExtenderInterface, LifecycleInterface
@@ -54,6 +55,9 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
     public function onDisable(Container $container, Extension $extension)
     {
         $commodity = $this->getStoreGoods($extension->name);
+        // 插件关闭自动删除已上架商品
+        StoreModel::query()->where('code', $commodity->code)->delete();
+        // 插件关闭自动移除可上架商品
         StoreCommodityModel::query()->where('code', $commodity->code)->delete();
     }
 }

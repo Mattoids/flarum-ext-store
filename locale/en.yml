@@ -2,11 +2,30 @@ mattoid-store:
   # For more details on the format
   # Checkout https://docs.flarum.org/extend/i18n/#appendix-a-standard-key-format
   admin:
-    store-name: Store Name
-    store-name-requirement: The store name will be displayed in the homepage menu and title bar
-    decorationStoreTimezone: time zone
-    decorationStoreTimezone-requirement: Set the time zone. Default to "Asia/Shanghai"
-    group-view: Allow user groups to access the store
+    settings:
+      store-name: Store Name
+      store-name-requirement: The store name will be displayed in the homepage menu and title bar
+      decorationStoreTimezone: time zone
+      decorationStoreTimezone-requirement: Set the time zone. Default to "Asia/Shanghai"
+      group-view: Allow user groups to access the store
+      add-store-commodity: Add commodity
+      commodity-status: Status
+      commodity-title: Title
+      commodity-code: Code
+      commodity-desc: Desc
+      commodity-price: Price
+      commodity-stock: Stock
+      commodity-discount: Discount(%)
+      commodity-discount-limit: Discount limit
+      commodity-discount-limit-unit: Unit
+      commodity-type: Buy type
+      commodity-outtime: Outtime
+      commodity-icon: Icon
+      commodity-upload-button: Upload
+      commodity-hide: No authority to hide products for a limited time
+
+    error:
+      invalid-product: Invalid product
 
   forum:
     tital: Store

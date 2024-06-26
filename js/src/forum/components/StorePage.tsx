@@ -8,7 +8,6 @@ export interface IIndexPageAttrs extends IPageAttrs {}
 export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageAttrs> extends IndexPage {
 
   oncreate(vnode: Mithril.VnodeDOM<CustomAttrs, this>) {
-    console.log(app.forum.attribute("hideCreateMoney"))
     super.oncreate(vnode);
 
     app.setTitle(app.forum.attribute("storeName") || app.translator.trans('mattoid-store.forum.tital'));

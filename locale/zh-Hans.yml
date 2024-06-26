@@ -8,6 +8,24 @@ mattoid-store:
       decorationStoreTimezone: 时区设置
       decorationStoreTimezone-requirement: 设置时区。默认为 "Asia/Shanghai"
       group-view: 允许用户组访问商店
+      add-store-commodity: 添加商品
+      commodity-status: 商品状态
+      commodity-title: 商品名称
+      commodity-code: 商品编码
+      commodity-desc: 商品描述
+      commodity-price: 价格
+      commodity-stock: 库存
+      commodity-discount: 折扣(%)
+      commodity-discount-limit: 折扣时限
+      commodity-discount-limit-unit: 单位
+      commodity-type: 购买类型
+      commodity-outtime: 商品有效期
+      commodity-icon: 商品图标
+      commodity-upload-button: 上传
+      commodity-hide: 无权限时隐藏商品
+
+    error:
+      invalid-product: 无效商品
 
   forum:
     tital: 商店

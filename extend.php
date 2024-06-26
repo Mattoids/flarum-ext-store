@@ -10,6 +10,9 @@
  */
 
 use Flarum\Extend;
+use Mattoid\Store\Controller\ListCommodityController;
+use Mattoid\Store\Controller\ListStoreController;
+use Mattoid\Store\Controller\PostStoreController;
 
 return [
     (new Extend\Frontend('forum'))
@@ -21,6 +24,12 @@ return [
         ->css(__DIR__.'/less/admin.less'),
     new Extend\Locales(__DIR__.'/locale'),
 
+    (new Extend\Routes('api'))
+        ->get('/store/list', 'store.list', ListStoreController::class)
+        ->get('/store/commodity', 'store.commodity.list', ListCommodityController::class)
+        ->post('/store/commodity', 'store.commodity.post', PostStoreController::class),
+
     (new Extend\Settings())
         ->serializeToForum('storeName', 'mattoid-store.storeName'),
+
 ];
