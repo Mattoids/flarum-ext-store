@@ -37,7 +37,7 @@ class PostStoreController extends AbstractListController
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.admin.error.invalid-product')]);
         }
 
-        StoreModel::query()->insert([
+        $result = StoreModel::query()->insert([
             'code' => $parseBody['code'],
             'title' => $parseBody['title'],
             'uri' => $commodity->uri,
@@ -54,6 +54,6 @@ class PostStoreController extends AbstractListController
             'desc' => $parseBody['desc'],
         ]);
 
-        return [];
+        return $result;
     }
 }
