@@ -11,6 +11,7 @@ use Flarum\User\UserRepository;
 use Mattoid\Store\Model\StoreCommodityModel;
 use Mattoid\Store\Model\StoreModel;
 use Mattoid\Store\Serializer\StoreSerializer;
+use Mattoid\Store\Utils\ObjectsUtil;
 use Psr\Http\Message\ServerRequestInterface;
 use Flarum\Foundation\ValidationException;
 use Tobscure\JsonApi\Document;
@@ -32,31 +33,21 @@ class PostStoreController extends AbstractListController
     protected function data(ServerRequestInterface $request, Document $document) {
         $actor = RequestUtil::getActor($request);
         $parseBody = $request->getParsedBody();
+        $params = [];
 
         $commodity = StoreCommodityModel::query()->where('code', $parseBody['code'])->first();
         if (!$commodity) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.admin.error.invalid-product')]);
         }
 
-        $result = StoreModel::query()->insert([
-            'code' => $parseBody['code'],
-            'title' => $parseBody['title'],
-            'uri' => $commodity->uri,
-            'pop_up' => $commodity->pop_up,
-            'price' => $parseBody['price'],
-            'stock' => $parseBody['stock'],
-            'status' => $parseBody['status'],
-            'discount' => $parseBody['discount'] || 0,
-            'discount_limit' => $parseBody['limit'] || 0,
-            'discount_limit_unit' => $parseBody['limitUnit'] || 'day',
-            'type' => $parseBody['type'],
-            'outtime' => $parseBody['outtime'] || 0,
-            'icon' => $parseBody['icon'] || '',
-            'hide' => $parseBody['hide'],
-            'desc' => $parseBody['desc'] ? $parseBody['desc'] : '',
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now()
-        ]);
+        $params = ObjectsUtil::removeEmptySql($parseBody);
+        $params['uri'] = $commodity->uri;
+        $params['pop_up'] = $commodity->pop_up;
+        $params['created_at'] = Carbon::now();
+        $params['updated_at'] = Carbon::now();
+
+
+        $result = StoreModel::query()->insert($params);
 
         return $result;
     }

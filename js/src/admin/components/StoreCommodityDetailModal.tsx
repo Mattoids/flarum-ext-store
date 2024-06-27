@@ -16,8 +16,8 @@ export default class StoreCommodityDetailModal extends Modal {
     price: Stream(),
     stock: Stream(),
     discount: Stream(),
-    limit: Stream(),
-    limitUnit: Stream('day'),
+    discountLimit: Stream(),
+    discountLimitUnit: Stream('day'),
     type: Stream('permanent'),
     outtime: Stream(0),
     icon: Stream(),
@@ -41,8 +41,8 @@ export default class StoreCommodityDetailModal extends Modal {
       this.params.price = Stream(this.attrs.storeData.price);
       this.params.stock = Stream(this.attrs.storeData.stock);
       this.params.discount = Stream(this.attrs.storeData.discount);
-      this.params.limit = Stream(this.attrs.storeData.discountLimit);
-      this.params.limitUnit = Stream(this.attrs.storeData.discountLimitUnit);
+      this.params.discountLimit = Stream(this.attrs.storeData.discountLimit);
+      this.params.discountLimitUnit = Stream(this.attrs.storeData.discountLimitUnit);
       this.params.type = Stream(this.attrs.storeData.type);
       this.params.outtime = Stream(this.attrs.storeData.outtime);
       this.params.icon = Stream(this.attrs.storeData.icon);
@@ -113,7 +113,7 @@ export default class StoreCommodityDetailModal extends Modal {
                 <div
                   style="width: 60px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.commodity-discount-limit")}</div>
                 <input required class="FormControl" type="number" step="1" min="0"
-                       style="width: 145px; margin-left: 0px; display: inline-block;" bidi={this.params.limit}/>
+                       style="width: 145px; margin-left: 0px; display: inline-block;" bidi={this.params.discountLimit}/>
 
                 <div
                   style="width: 40px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.commodity-discount-limit-unit")}</div>
@@ -124,9 +124,9 @@ export default class StoreCommodityDetailModal extends Modal {
                     'minute': app.translator.trans("mattoid-store.lib.item-limit-unit-minute"),
                     'second': app.translator.trans("mattoid-store.lib.item-limit-unit-second")
                   },
-                  value: this.params.limitUnit(),
+                  value: this.params.discountLimitUnit(),
                   onchange: (val) => {
-                    this.params.limitUnit = Stream(val)
+                    this.params.discountLimitUnit = Stream(val)
                   },
                 })}
               </div>
