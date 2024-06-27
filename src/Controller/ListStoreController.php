@@ -36,10 +36,10 @@ class ListStoreController extends AbstractListController
         $type = Arr::get($params, 'filter.type');
         $status = Arr::get($params, 'filter.status');
 
-        if ($type != '-1') {
+        if ($type && $type != '-1') {
             $filter['type'] = $type;
         }
-        if ($status != '-1') {
+        if ($status && $status != '-1') {
             $filter['status'] = $status;
         }
 
