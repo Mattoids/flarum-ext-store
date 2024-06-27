@@ -66,9 +66,9 @@ export default class AddStoreCommodityDetail extends Modal<ISubscriptionModalAtt
                   </span>
                 </div>
                 <div class="decorationStoreSettingsLabel" style="display: flex; align-items: center;">
-                  <span>{app.translator.trans("mattoid-store.admin.settings.commodity-code")}  </span>
+                  <span>{app.translator.trans("mattoid-store.admin.settings.commodity-code")}</span>
                   <span
-                    style="font-weight: normal; cursor: pointer; border-bottom: 2px dotted;"> {this.attrs.code} </span>
+                    style="font-weight: normal; cursor: pointer; border-bottom: 2px dotted; margin-left: 15px;"> {this.attrs.code} </span>
                 </div>
                 <div class="decorationStoreSettingsLabel" style="align-items: center;">
                   <div
@@ -109,7 +109,12 @@ export default class AddStoreCommodityDetail extends Modal<ISubscriptionModalAtt
                   <div
                     style="width: 40px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.commodity-discount-limit-unit")}</div>
                   {Select.component({
-                    options: {'day': '天', 'hour': '小时', 'minute': '分钟', 'second': '秒'},
+                    options: {
+                      'day': app.translator.trans("mattoid-store.lib.item-limit-unit-day"),
+                      'hour': app.translator.trans("mattoid-store.lib.item-limit-unit-hour"),
+                      'minute': app.translator.trans("mattoid-store.lib.item-limit-unit-minute"),
+                      'second': app.translator.trans("mattoid-store.lib.item-limit-unit-second")
+                    },
                     value: this.params.limitUnit,
                     onchange: (val) => {
                       this.params.limitUnit = val
@@ -120,7 +125,10 @@ export default class AddStoreCommodityDetail extends Modal<ISubscriptionModalAtt
                 <div className="spacing">
                   <div style="width: 60px; display: inline-block;">{app.translator.trans("mattoid-store.admin.settings.commodity-type")}</div>
                   {Select.component({
-                    options: {'permanent': '永久有效', 'limit': '限时有效'},
+                    options: {
+                      'permanent': app.translator.trans("mattoid-store.lib.item-type-permanent"),
+                      'limit':  app.translator.trans("mattoid-store.lib.item-type-limit")
+                    },
                     value: this.params.type,
                     onchange: (val) => {
                       this.params.type = val

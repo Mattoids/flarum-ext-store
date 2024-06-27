@@ -1,5 +1,6 @@
 import app from 'flarum/admin/app';
 import StoreListPage from './components/StoreListPage';
+import StorePage from "./components/StorePage";
 
 app.initializers.add('mattoid-store', () => {
   app.extensionData.for("mattoid-store")

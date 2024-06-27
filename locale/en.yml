@@ -29,3 +29,27 @@ mattoid-store:
 
   forum:
     tital: Store
+
+  lib:
+    item-status-all: All product statuses
+    item-status-up: Listing
+    item-status-down: Delisting
+    item-type-all: All purchase types
+    item-type-permanent: Permanent validity
+    item-type-limit: Time limited validity
+
+    item-id: ID
+    item-desc: Product Description
+    item-title: Product Title
+    item-status: Product Status
+    item-status-0: 下架
+    item-status-1: 上架
+    item-price: Price
+    item-stock: Stock
+    item-discount: discount
+    item-discount_limit: Discount period
+    item-type: Purchase type
+    item-created-at: Add time
+
+    list-empty: This place is completely empty
+    list-load-more: more

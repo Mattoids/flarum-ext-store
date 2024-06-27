@@ -1,12 +1,10 @@
 mattoid-store:
-  # For more details on the format
-  # Checkout https://docs.flarum.org/extend/i18n/#appendix-a-standard-key-format
   admin:
     settings:
       store-name: 商店名称
       store-name-requirement: 商店名称会显示在首页菜单与标题栏
-      decorationStoreTimezone: 时区设置
-      decorationStoreTimezone-requirement: 设置时区。默认为 "Asia/Shanghai"
+      store-timezone: 时区设置
+      store-timezone-requirement: 设置时区。默认为 "Asia/Shanghai"
       group-view: 允许用户组访问商店
       add-store-commodity: 添加商品
       commodity-status: 商品状态
@@ -29,3 +27,31 @@ mattoid-store:
 
   forum:
     tital: 商店
+
+  lib:
+    item-status-all: 全部商品状态
+    item-status-up: 上架
+    item-status-down: 下架
+    item-type-all: 全部购买类型
+    item-type-permanent: 永久有效
+    item-type-limit: 限时有效
+    item-limit-unit-day: 天
+    item-limit-unit-hour: 小时
+    item-limit-unit-minute: 分钟
+    item-limit-unit-second: 秒
+
+    item-id: ID
+    item-desc: 商品描述
+    item-title: 商品名称
+    item-status: 商品状态
+    item-status-0: 下架
+    item-status-1: 上架
+    item-price: 价格
+    item-stock: 库存
+    item-discount: 折扣
+    item-discount_limit: 折扣期限
+    item-type: 购买类型
+    item-created-at: 添加时间
+
+    list-empty: 这里空空如也
+    list-load-more: 更多

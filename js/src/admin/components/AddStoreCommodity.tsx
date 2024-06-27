@@ -5,21 +5,13 @@ import React from "react";
 import AddStoreCommodityDetail from "./AddStoreCommodityDetail";
 
 export default class AddStoreCommodity extends Modal {
-  private _list: any[]
-  get list(): any[] {
-    return this._list;
-  }
-
-  set list(value: any[]) {
-    this._list = value;
-  }
+  private commodityList: any = []
+  private moreResults: boolean = false
 
   oninit(vnode) {
     super.oninit(vnode);
 
-    this.request().then(res => {
-      this.list = res.data || []
-    })
+    this.loadResults()
   }
 
   title() {
@@ -31,41 +23,83 @@ export default class AddStoreCommodity extends Modal {
   }
 
   content() {
-    if (!this.list || this.list.length == 0) {
-      return (
-        <div className="body">
-          <span className="text">暂无可用商品</span>
-        </div>
-      )
-    }
     return (
       <div>
-        {this.list.map((item: object, index: number) => (
-          <div className="ExtensionPage-body">
-            <div className="ExtensionPage-settings FlarumBadgesPage">
-              <div className="container">
-                <span>{item.attributes.name}</span>
-                <Button
-                  className="Button"
-                  onclick={() => {
-                    app.modal.show(AddStoreCommodityDetail, { code: item.attributes.code, title: item.attributes.name});
-                  }}
-                >
-                  { app.translator.trans('mattoid-store.admin.settings.add-store-commodity') }
-                </Button>
+        {this.commodityList.map((item: object, index: number) => (
+          <div className="storeItemContainer" style="margin: 10px">
+            <div className="ExtensionPage-body">
+              <div className="ExtensionPage-settings FlarumBadgesPage" style="margin-top: 10px">
+                <div className="container">
+                  <span className="leftAligned" style="padding: 8px">{item.attributes.name}</span>
+                  <Button
+                    className="Button rightAligned"
+                    onclick={() => {
+                      app.modal.show(AddStoreCommodityDetail, {
+                        code: item.attributes.code,
+                        title: item.attributes.name
+                      });
+                    }}
+                  >
+                    {app.translator.trans('mattoid-store.admin.settings.add-store-commodity')}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
         ))}
+
+        {!this.loading && this.commodityList.length === 0 && (
+          <div>
+            <div
+              style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">{app.translator.trans("mattoid-store.lib.list-empty")}</div>
+          </div>
+        )}
+
+        {!this.loading && this.hasMoreResults() && (
+          <div style="text-align:center;padding:20px">
+            <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading}
+                    onclick={() => this.loadMore()}>
+              {app.translator.trans('mattoid-store.lib.list-load-more')}
+            </Button>
+          </div>
+        )}
+
       </div>
     )
   }
 
-  request() {
-    return app.request<{ userMatchCount: number }>({
-      method: 'GET',
-      url: app.forum.attribute('apiUrl') + '/store/commodity',
-    });
+
+  hasMoreResults() {
+    return this.moreResults;
+  }
+
+  loadMore() {
+    this.loading = true;
+    this.loadResults(this.commodityList.length);
+  }
+
+  parseResults(results) {
+    this.moreResults = !!results.payload.links && !!results.payload.links.next;
+    [].push.apply(this.commodityList, results.payload.data);
+    this.loading = false;
+    m.redraw();
+
+    return results;
+  }
+
+  loadResults(offset = 0) {
+    const filters = {
+    };
+
+    return app.store
+      .find("/store/commodity", {
+        filter:filters,
+        page: {
+          offset,
+        },
+      })
+      .catch(() => {})
+      .then(this.parseResults.bind(this));
   }
 
 }

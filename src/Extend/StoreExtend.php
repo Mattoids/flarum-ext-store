@@ -56,7 +56,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
     {
         $commodity = $this->getStoreGoods($extension->name);
         // 插件关闭自动删除已上架商品
-        StoreModel::query()->where('code', $commodity->code)->delete();
+        StoreModel::query()->where('code', $commodity->code)->update(['status' => 0]);
         // 插件关闭自动移除可上架商品
         StoreCommodityModel::query()->where('code', $commodity->code)->delete();
     }

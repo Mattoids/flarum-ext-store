@@ -2,6 +2,7 @@
 
 namespace Mattoid\Store\Controller;
 
+use Carbon\Carbon;
 use Flarum\Api\Controller\AbstractListController;
 use Flarum\Http\RequestUtil;
 use Flarum\Http\UrlGenerator;
@@ -44,14 +45,17 @@ class PostStoreController extends AbstractListController
             'pop_up' => $commodity->pop_up,
             'price' => $parseBody['price'],
             'stock' => $parseBody['stock'],
-            'discount' => $parseBody['discount'],
-            'discount_limit' => $parseBody['limit'],
-            'discount_limit_unit' => $parseBody['limitUnit'],
+            'status' => $parseBody['status'],
+            'discount' => $parseBody['discount'] || 0,
+            'discount_limit' => $parseBody['limit'] || 0,
+            'discount_limit_unit' => $parseBody['limitUnit'] || 'day',
             'type' => $parseBody['type'],
-            'outtime' => $parseBody['outtime'],
-            'icon' => $parseBody['icon'],
+            'outtime' => $parseBody['outtime'] || 0,
+            'icon' => $parseBody['icon'] || '',
             'hide' => $parseBody['hide'],
-            'desc' => $parseBody['desc'],
+            'desc' => $parseBody['desc'] ? $parseBody['desc'] : '',
+            'created_at' => Carbon::now(),
+            'updated_at' => Carbon::now()
         ]);
 
         return $result;

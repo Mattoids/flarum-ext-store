@@ -14,9 +14,10 @@ return Migration::createTable(
         $table->decimal('price', 10 ,2)->comment("商品价格");
         $table->integer('stock')->comment("库存数量");
         $table->integer('discount')->comment("折扣(%)");
-        $table->integer('discount_limit')->comment("折扣(%)");
-        $table->integer('discount_limit_unit')->comment("折扣(%)");
-        $table->integer('type')->comment("购买类型");
+        $table->integer('discount_limit')->comment("折扣期限");
+        $table->string('discount_limit_unit')->comment("折扣期限单位");
+        $table->string('type')->comment("购买类型");
+        $table->integer('status')->default(1)->comment("商品状态 0-下架 1-上架");
         $table->integer('outtime')->comment("商品有效期");
         $table->string('icon')->comment("商品图标");
         $table->integer('hide')->comment("无权限时隐藏商品");

@@ -4,6 +4,8 @@ namespace Mattoid\Store\Serializer;
 
 use Flarum\Api\Serializer\AbstractSerializer;
 use Flarum\Locale\Translator;
+use Illuminate\Cache\RateLimiting\Limit;
+use Mattoid\Store\Enum\LimitUnitEnum;
 
 class StoreSerializer extends AbstractSerializer
 {
@@ -17,9 +19,22 @@ class StoreSerializer extends AbstractSerializer
         return [
             'id' => $data->id,
             'code' => $data->code,
-            'name' => $this->translator->trans($data->name),
+            'title' => $data->title,
             'uri' => $data->uri,
-            'createTime' => $data->create_time,
+            'price' => $data->price,
+            'stock' => $data->stock,
+            'discount' => $data->discount,
+            'discountLimit' => $data->discount_limit,
+            'discountLimitUnit' => LimitUnitEnum::$LIMIT_UNIT[$data->discount_limit_unit],
+            'type' => $data->type,
+            'outtime' => $data->outtime,
+            'icon' => $data->icon,
+            'hide' => $data->hide,
+            'desc' => $data->desc,
+            'popUp' => $data->pop_up,
+            'status' => $data->status,
+            'createdAt' => $data->created_at,
+            'updatedAt' => $data->updated_at,
         ];
     }
 }

@@ -7,6 +7,7 @@ use Flarum\Http\RequestUtil;
 use Flarum\Http\UrlGenerator;
 use Flarum\Locale\Translator;
 use Flarum\User\UserRepository;
+use Illuminate\Support\Arr;
 use Mattoid\Store\Model\StoreModel;
 use Mattoid\Store\Serializer\StoreSerializer;
 use Psr\Http\Message\ServerRequestInterface;
@@ -27,12 +28,23 @@ class ListStoreController extends AbstractListController
     }
 
     protected function data(ServerRequestInterface $request, Document $document) {
+        $filter = [];
         $actor = RequestUtil::getActor($request);
         $params = $request->getQueryParams();
         $limit = $this->extractLimit($request);
         $offset = $this->extractOffset($request);
+        $type = Arr::get($params, 'filter.type');
+        $status = Arr::get($params, 'filter.status');
+
+        if ($type != '-1') {
+            $filter['type'] = $type;
+        }
+        if ($status != '-1') {
+            $filter['status'] = $status;
+        }
 
         $list = StoreModel::query()
+            ->where($filter)
             ->skip($offset)
             ->take($limit + 1)
             ->get();
