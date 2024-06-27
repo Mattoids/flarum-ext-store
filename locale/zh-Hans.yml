@@ -7,6 +7,7 @@ mattoid-store:
       store-timezone-requirement: 设置时区。默认为 "Asia/Shanghai"
       group-view: 允许用户组访问商店
       add-store-commodity: 添加商品
+      edit-store-commodity: 修改商品
       commodity-status: 商品状态
       commodity-title: 商品名称
       commodity-code: 商品编码
@@ -21,6 +22,11 @@ mattoid-store:
       commodity-icon: 商品图标
       commodity-upload-button: 上传
       commodity-hide: 无权限时隐藏商品
+      commodity-edit: 编辑
+      commodity-delete: 删除
+      commodity-item-delete: 确定要删除该物品吗？
+      commodity-item-status-0: 确定要上架该物品吗？
+      commodity-item-status-1: 确定要下架该物品吗？
 
     error:
       invalid-product: 无效商品
@@ -55,3 +61,6 @@ mattoid-store:
 
     list-empty: 这里空空如也
     list-load-more: 更多
+
+    cancel: 取消
+    confirm: 确定

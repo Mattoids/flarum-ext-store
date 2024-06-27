@@ -10,9 +10,11 @@
  */
 
 use Flarum\Extend;
+use Mattoid\Store\Controller\DeleteStoreController;
 use Mattoid\Store\Controller\ListCommodityController;
 use Mattoid\Store\Controller\ListStoreController;
 use Mattoid\Store\Controller\PostStoreController;
+use Mattoid\Store\Controller\PutStoreController;
 
 return [
     (new Extend\Frontend('forum'))
@@ -27,6 +29,8 @@ return [
     (new Extend\Routes('api'))
         ->get('/store/list', 'store.list', ListStoreController::class)
         ->get('/store/commodity', 'store.commodity.list', ListCommodityController::class)
+        ->put('/store/commodity', 'store.commodity.put', PutStoreController::class)
+        ->delete('/store/commodity', 'store.commodity.delete', DeleteStoreController::class)
         ->post('/store/commodity', 'store.commodity.post', PostStoreController::class),
 
     (new Extend\Settings())

@@ -2,7 +2,7 @@ import app from 'flarum/admin/app';
 import Modal, {IInternalModalAttrs} from 'flarum/common/components/Modal';
 import Button from 'flarum/common/components/Button';
 import React from "react";
-import AddStoreCommodityDetail from "./AddStoreCommodityDetail";
+import StoreCommodityDetailModal from "./StoreCommodityDetailModal";
 
 export default class AddStoreCommodity extends Modal {
   private commodityList: any = []
@@ -34,7 +34,7 @@ export default class AddStoreCommodity extends Modal {
                   <Button
                     className="Button rightAligned"
                     onclick={() => {
-                      app.modal.show(AddStoreCommodityDetail, {
+                      app.modal.show(StoreCommodityDetailModal, {
                         code: item.attributes.code,
                         title: item.attributes.name
                       });

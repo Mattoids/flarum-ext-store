@@ -1,5 +1,8 @@
 import app from 'flarum/admin/app';
 import Component from "flarum/Component";
+import Button from 'flarum/components/Button';
+import StoreModal from "./StoreModal";
+import StoreCommodityDetailModal from "./StoreCommodityDetailModal";
 
 export default class StoreListItem extends Component {
   private storeData: object = {}
@@ -8,16 +11,45 @@ export default class StoreListItem extends Component {
     super.oninit(vnode);
 
     this.storeData = this.attrs.item.attributes
-    this.storeData.id = this.attrs.item.id
   }
 
   view() {
     const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
     const price = moneyName.replace('[money]', this.storeData.price);
+    const data = this.storeData;
 
     return (
       <div id={this.storeData.id} className="storeItemContainer">
         <div className="leftAligned">
+          <div className="margin">
+            <span>
+              <Button className={'Button Button--primary'}
+                onclick={() => {
+                  app.modal.show(StoreCommodityDetailModal, {storeData: data});
+                }}
+              >
+                {app.translator.trans('mattoid-store.admin.settings.commodity-edit')}
+              </Button>
+            </span>
+            <span className="margin">
+              <Button className={'Button Button--danger'}
+                onclick={() => {
+                  app.modal.show(StoreModal, {storeData: data, title: 'delete'});
+                }}
+              >
+                {app.translator.trans('mattoid-store.admin.settings.commodity-delete')}
+              </Button>
+            </span>
+            <span className="margin">
+              <Button className={'Button'}
+                onclick={() => {
+                  app.modal.show(StoreModal, {storeData: data, title: 'status-' + this.storeData.status});
+                }}
+              >
+                {this.storeData.status === 0 ? app.translator.trans('mattoid-store.lib.item-status-1') : app.translator.trans('mattoid-store.lib.item-status-0')}
+              </Button>
+            </span>
+          </div>
           <div>
             {app.translator.trans('mattoid-store.lib.item-id')}: {this.storeData.id} | &nbsp;
             {app.translator.trans('mattoid-store.lib.item-title')}: {this.storeData.title}
@@ -43,7 +75,5 @@ export default class StoreListItem extends Component {
       </div>
     )
   }
-
-
 
 }

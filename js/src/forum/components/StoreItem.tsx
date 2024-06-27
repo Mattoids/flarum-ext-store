@@ -1,5 +1,6 @@
 import app from 'flarum/forum/app';
 import Component from "flarum/Component";
+import StoreBox from "./StoreBox";
 
 export default class StoreItem extends Component {
   private storeData: object = {}
@@ -16,7 +17,7 @@ export default class StoreItem extends Component {
     const price = moneyName.replace('[money]', this.storeData.price);
 
     return (
-      <div id={this.storeData.id}>
+      <div id={this.storeData.id} onclick={() => this.showDetails(this.storeData)}>
         <div className="itemTitle">
           {this.storeData.title}
         </div>
@@ -27,6 +28,7 @@ export default class StoreItem extends Component {
           {app.translator.trans('mattoid-store.lib.item-stock')}: {this.storeData.stock} | {app.translator.trans('mattoid-store.lib.item-type-' + this.storeData.type)}
         </div>
         <div className="spacing">
+          <div id="box"></div>
           {this.storeData.desc}
         </div>
         <div className="spacing center">
@@ -34,5 +36,11 @@ export default class StoreItem extends Component {
         </div>
       </div>
     )
+  }
+
+  showDetails(storeData) {
+    if(app.session.user){
+      app.modal.show(StoreBox, {storeData});
+    }
   }
 }
