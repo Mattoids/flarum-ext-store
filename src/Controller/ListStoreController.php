@@ -54,7 +54,7 @@ class ListStoreController extends AbstractListController
             $list->pop();
         }
         $document->addPaginationLinks(
-            $this->url->to('api')->route('decorationStore.get'),
+            $this->url->to('api')->route('store.list'),
             $params,
             $offset,
             $limit,

@@ -12,6 +12,9 @@ export default class StoreListItem extends Component {
   }
 
   view() {
+    const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
+    const price = moneyName.replace('[money]', this.storeData.price);
+
     return (
       <div id={this.storeData.id} className="storeItemContainer">
         <div className="leftAligned">
@@ -24,7 +27,7 @@ export default class StoreListItem extends Component {
           </div>
           <div>
             {app.translator.trans('mattoid-store.lib.item-status')}: <span className={this.storeData.status === 0 ? 'red': 'green'}>{ app.translator.trans('mattoid-store.lib.item-status-' + this.storeData.status) }</span> |&nbsp;
-            {app.translator.trans('mattoid-store.lib.item-price')}: {this.storeData.price} |&nbsp;
+            {app.translator.trans('mattoid-store.lib.item-price')}: {price} |&nbsp;
             {app.translator.trans('mattoid-store.lib.item-stock')}: {this.storeData.stock} |&nbsp;
             {app.translator.trans('mattoid-store.lib.item-discount')}: {this.storeData.discount || '无'} |&nbsp;
             {app.translator.trans('mattoid-store.lib.item-discount_limit')}: {this.storeData.discountLimit || 0}&nbsp;{this.storeData.discountLimitUnit}
