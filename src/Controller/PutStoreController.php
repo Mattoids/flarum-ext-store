@@ -44,7 +44,7 @@ class PutStoreController extends AbstractListController
         $params['uri'] = $commodity->uri;
         $params['pop_up'] = $commodity->pop_up;
         $params['updated_at'] = Carbon::now();
-        
+
         $result = StoreModel::query()->where('id', $parseBody['id'])->update($params);
 
         return $result;

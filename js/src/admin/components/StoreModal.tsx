@@ -32,7 +32,7 @@ export default class StoreModal extends Modal {
           )}&nbsp;
           {Button.component(
             {
-              className: 'Button decorationButton--gray',
+              className: 'Button storeButton--gray',
               loading: this.loading,
               onclick: () => {
                 this.hide();
