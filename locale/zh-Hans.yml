@@ -33,6 +33,7 @@ mattoid-store:
 
   forum:
     tital: 商店
+    button: 购买
 
   lib:
     item-status-all: 全部商品状态

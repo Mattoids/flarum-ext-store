@@ -35,18 +35,16 @@ class PutStoreController extends AbstractListController
         $parseBody = $request->getParsedBody();
         $params = [];
 
-        if ($parseBody['status'] == 1) {
-            $commodity = StoreCommodityModel::query()->where('code', $parseBody['code'])->first();
-            if (!$commodity) {
-                throw new ValidationException(['message' => $this->translator->trans('mattoid-store.admin.error.invalid-product')]);
-            }
-
-            $params['uri'] = $commodity->uri;
-            $params['pop_up'] = $commodity->pop_up;
+        $commodity = StoreCommodityModel::query()->where('code', $parseBody['code'])->first();
+        if (!$commodity && $parseBody['status'] == 1) {
+            throw new ValidationException(['message' => $this->translator->trans('mattoid-store.admin.error.invalid-product')]);
         }
 
+        $params = ObjectsUtil::removeEmptySql($parseBody);
+        $params['uri'] = $commodity->uri;
+        $params['pop_up'] = $commodity->pop_up;
         $params['updated_at'] = Carbon::now();
-
+        
         $result = StoreModel::query()->where('id', $parseBody['id'])->update($params);
 
         return $result;

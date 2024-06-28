@@ -62,7 +62,7 @@ export default class StoreListItem extends Component {
             {app.translator.trans('mattoid-store.lib.item-price')}: {price} |&nbsp;
             {app.translator.trans('mattoid-store.lib.item-stock')}: {this.storeData.stock} |&nbsp;
             {app.translator.trans('mattoid-store.lib.item-discount')}: {this.storeData.discount || '无'} |&nbsp;
-            {app.translator.trans('mattoid-store.lib.item-discount_limit')}: {this.storeData.discountLimit || 0}&nbsp;{this.storeData.discountLimitUnit}
+            {app.translator.trans('mattoid-store.lib.item-discount_limit')}: {this.storeData.discountLimit || 0}&nbsp;{this.storeData.discountLimitUnitStr}
           </div>
           <div>
             {app.translator.trans('mattoid-store.lib.item-type')}: {app.translator.trans('mattoid-store.lib.item-type-' + this.storeData.type)} |&nbsp;

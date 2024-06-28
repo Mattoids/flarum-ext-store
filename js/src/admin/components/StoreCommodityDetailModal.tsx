@@ -60,11 +60,11 @@ export default class StoreCommodityDetailModal extends Modal {
 
   content() {
     return (
-      <div className="Modal-body DecorationStoreModalBody">
+      <div className="Modal-body">
         <div className="Form">
           <div className="Form-group">
             <div style="text-align: left;">
-              <div class="decorationStoreSettingsLabel" style="display: flex; align-items: center;">
+              <div class="spacing" style="display: flex; align-items: center;">
                 <span>{app.translator.trans("mattoid-store.admin.settings.commodity-status")}</span>
                 <span style="margin-left: 15px;">
                     <Switch state={this.params.status()}
@@ -74,20 +74,20 @@ export default class StoreCommodityDetailModal extends Modal {
                     > </Switch>
                   </span>
               </div>
-              <div class="decorationStoreSettingsLabel" style="display: flex; align-items: center;">
+              <div class="spacing" style="display: flex; align-items: center;">
                 <span>{app.translator.trans("mattoid-store.admin.settings.commodity-code")}</span>
                 <span
                   style="font-weight: normal; cursor: pointer; border-bottom: 2px dotted; margin-left: 15px;"> {this.params.code()} </span>
               </div>
-              <div class="decorationStoreSettingsLabel" style="align-items: center;">
+              <div class="spacing" style="align-items: center;">
                 <div
-                  className="decorationStoreSettingsLabel">{app.translator.trans("mattoid-store.admin.settings.commodity-title")}
+                  className="">{app.translator.trans("mattoid-store.admin.settings.commodity-title")}
                 </div>
                 <input required class="FormControl" type="text" bidi={this.params.title}/>
               </div>
-              <div class="decorationStoreSettingsLabel" style="align-items: center;">
+              <div class="spacing" style="align-items: center;">
                 <div
-                  className="decorationStoreSettingsLabel">{app.translator.trans("mattoid-store.admin.settings.commodity-desc")}
+                  className="">{app.translator.trans("mattoid-store.admin.settings.commodity-desc")}
                 </div>
                 <textarea class="FormControl" bidi={this.params.desc}></textarea>
               </div>
@@ -157,7 +157,7 @@ export default class StoreCommodityDetailModal extends Modal {
 
               <div className="spacing">
                 <div
-                  className="decorationStoreSettingsLabel">{app.translator.trans("mattoid-store.admin.settings.commodity-icon")}
+                  className="">{app.translator.trans("mattoid-store.admin.settings.commodity-icon")}
                 </div>
                 <div style="position: relative;">
                   <div>

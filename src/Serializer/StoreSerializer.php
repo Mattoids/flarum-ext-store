@@ -26,6 +26,7 @@ class StoreSerializer extends AbstractSerializer
             'discount' => $data->discount,
             'discountLimit' => $data->discount_limit,
             'discountLimitUnit' => $data->discount_limit_unit,
+            'discountLimitUnitStr' => LimitUnitEnum::$LIMIT_UNIT[$data->discount_limit_unit],
             'type' => $data->type,
             'outtime' => $data->outtime,
             'icon' => $data->icon,
