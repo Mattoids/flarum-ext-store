@@ -11,3 +11,5 @@ tests/.phpunit.result.cache
 .vscode
 js/coverage-ts
 js/package-lock.json
+
+package-lock.json
