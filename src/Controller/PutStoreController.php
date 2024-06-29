@@ -7,6 +7,7 @@ use Flarum\Api\Controller\AbstractListController;
 use Flarum\Http\RequestUtil;
 use Flarum\Http\UrlGenerator;
 use Flarum\Locale\Translator;
+use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\Exception\PermissionDeniedException;
 use Flarum\User\UserRepository;
 use Mattoid\Store\Model\StoreGoodsModel;
@@ -24,9 +25,10 @@ class PutStoreController extends AbstractListController
      */
     public $serializer = StoreSerializer::class;
 
-    public function __construct(UserRepository $repository, UrlGenerator $url, Translator $translator)
+    public function __construct(SettingsRepositoryInterface $settings, UserRepository $repository, UrlGenerator $url, Translator $translator)
     {
         $this->url = $url;
+        $this->settings = $settings;
         $this->translator = $translator;
         $this->repository = $repository;
     }
@@ -58,7 +60,7 @@ class PutStoreController extends AbstractListController
         $params = ObjectsUtil::removeEmptySql($parseBody);
         $params['pop_up'] = $goods->pop_up;
         $params['class_name'] = $goods->class_name;
-        $params['updated_at'] = Carbon::now();
+        $params['updated_at'] = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone'));
 
         $result = StoreModel::query()->where('id', $parseBody['id'])->update($params);
 

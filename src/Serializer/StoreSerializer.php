@@ -30,6 +30,7 @@ class StoreSerializer extends AbstractSerializer
             'outtime' => $data->outtime,
             'icon' => $data->icon,
             'hide' => $data->hide,
+            'repeat' => $data->repeat,
             'desc' => $data->desc,
             'popUp' => $data->pop_up,
             'status' => $data->status,

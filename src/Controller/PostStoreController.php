@@ -24,9 +24,10 @@ class PostStoreController extends AbstractListController
      */
     public $serializer = StoreSerializer::class;
 
-    public function __construct(UserRepository $repository, UrlGenerator $url, Translator $translator)
+    public function __construct(SettingsRepositoryInterface $settings, UserRepository $repository, UrlGenerator $url, Translator $translator)
     {
         $this->url = $url;
+        $this->settings = $settings;
         $this->translator = $translator;
         $this->repository = $repository;
     }
@@ -58,9 +59,8 @@ class PostStoreController extends AbstractListController
         $params = ObjectsUtil::removeEmptySql($parseBody);
         $params['pop_up'] = $goods->pop_up;
         $params['class_name'] = $goods->class_name;
-        $params['created_at'] = Carbon::now();
-        $params['updated_at'] = Carbon::now();
-
+        $params['created_at'] = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone'));
+        $params['updated_at'] = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone'));
 
         $result = StoreModel::query()->insert($params);
 

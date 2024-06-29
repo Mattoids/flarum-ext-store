@@ -5,6 +5,7 @@ namespace Mattoid\Store\Controller;
 use Carbon\Carbon;
 use Flarum\Api\Controller\AbstractListController;
 use Flarum\Foundation\ValidationException;
+use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Contracts\Events\Dispatcher;
 use Flarum\Http\RequestUtil;
 use Flarum\Locale\Translator;
@@ -28,9 +29,10 @@ class BuyGoodsController extends AbstractListController
     protected $settings;
     protected $events;
 
-    public function __construct(UserRepository $repository, Dispatcher $events, Translator $translator)
+    public function __construct(SettingsRepositoryInterface $settings, UserRepository $repository, Dispatcher $events, Translator $translator)
     {
         $this->events = $events;
+        $this->settings = $settings;
         $this->translator = $translator;
         $this->repository = $repository;
     }
@@ -53,7 +55,13 @@ class BuyGoodsController extends AbstractListController
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.insufficient-inventory')]);
         }
         if ($store->repeat == 0) {
-            $storeCart = StoreCartModel::query()->where('user_id', $actor->id)->where('store_id', $store->id)->where('type', 1)->wher('outtime', '>=', Carbon::now())->first();
+            $storeCart = StoreCartModel::query()->where('user_id', $actor->id)->where('store_id', $store->id)
+                ->where('status', 1)->where(function($where) {
+                $where->where(function($where) {
+                    $where->where('type', 'limit')->where('outtime', '>=', Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone')));
+                });
+                $where->orWhere('type', 'permanent');
+            })->first();
             if ($storeCart) {
                 throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.cannot-purchase-repeatedly')]);
             }
@@ -69,7 +77,7 @@ class BuyGoodsController extends AbstractListController
         $price = $store->price;
         // 计算折扣
         $time = time();
-        $endTime = Carbon::parse($store->updated_at)->modify('+' . $store->discount_limit . ' ' . $store->discount_limit_unit)->getTimestamp();
+        $endTime = Carbon::parse($store->updated_at)->tz($this->settings->get('mattoid-store.storeTimezone'))->modify('+' . $store->discount_limit . ' ' . $store->discount_limit_unit)->getTimestamp();
         if ($store->discount_price > 0 && $store->discount > 0 && $time < $endTime) {
             $price = $store->discount_price;
         }
@@ -94,11 +102,11 @@ class BuyGoodsController extends AbstractListController
             'pay_amt' => $price,
             'type' => $store->type,
             'status' => 1,
-            'created_at' => Carbon::now(),
-            'updated_at' => Carbon::now(),
+            'created_at' => Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone')),
+            'updated_at' => Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone')),
         ];
         if ($store->type == 1) {
-            $cart['outtime'] = Carbon::now()->subDays($store->outtime);
+            $cart['outtime'] = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone'))->subDays($store->outtime);
         }
         StoreCartModel::query()->insert($cart);
 
