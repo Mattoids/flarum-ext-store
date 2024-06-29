@@ -5,7 +5,7 @@ import Stream from "flarum/common/utils/Stream";
 import Switch from "flarum/common/components/Switch";
 import Select from "flarum/common/components/Select";
 
-export default class StoreCommodityDetailModal extends Modal {
+export default class StoreGoodsDetailModal extends Modal {
 
   private method: string = 'POST';
   private params: object = {
@@ -17,11 +17,12 @@ export default class StoreCommodityDetailModal extends Modal {
     stock: Stream(),
     discount: Stream(),
     discountLimit: Stream(),
-    discountLimitUnit: Stream('day'),
+    discountLimitUnit: Stream('days'),
     type: Stream('permanent'),
     outtime: Stream(0),
     icon: Stream(),
-    hide: Stream(0)
+    hide: Stream(0),
+    repeat: Stream(1)
   };
 
   oninit(vnode) {
@@ -39,7 +40,7 @@ export default class StoreCommodityDetailModal extends Modal {
       this.params.title = Stream(this.attrs.storeData.title);
       this.params.desc = Stream(this.attrs.storeData.desc);
       this.params.price = Stream(this.attrs.storeData.price);
-      this.params.stock = Stream(this.attrs.storeData.stock);
+      this.params.stock = Stream(this.attrs.storeData.stock == -99 ? 0 : this.attrs.storeData.stock);
       this.params.discount = Stream(this.attrs.storeData.discount);
       this.params.discountLimit = Stream(this.attrs.storeData.discountLimit);
       this.params.discountLimitUnit = Stream(this.attrs.storeData.discountLimitUnit);
@@ -47,6 +48,7 @@ export default class StoreCommodityDetailModal extends Modal {
       this.params.outtime = Stream(this.attrs.storeData.outtime);
       this.params.icon = Stream(this.attrs.storeData.icon);
       this.params.hide = Stream(this.attrs.storeData.hide);
+      this.params.repeat = Stream(this.attrs.storeData.repeat);
     }
   }
 
@@ -65,61 +67,61 @@ export default class StoreCommodityDetailModal extends Modal {
           <div className="Form-group">
             <div style="text-align: left;">
               <div class="spacing" style="display: flex; align-items: center;">
-                <span>{app.translator.trans("mattoid-store.admin.settings.commodity-status")}</span>
+                <span>{app.translator.trans("mattoid-store.admin.settings.goods-status")}</span>
                 <span style="margin-left: 15px;">
                     <Switch state={this.params.status()}
                             onchange={(val) => {
-                              this.params.status = Stream(val)
+                              this.params.status = Stream(Number(val))
                             }}
                     > </Switch>
                   </span>
               </div>
               <div class="spacing" style="display: flex; align-items: center;">
-                <span>{app.translator.trans("mattoid-store.admin.settings.commodity-code")}</span>
+                <span>{app.translator.trans("mattoid-store.admin.settings.goods-code")}</span>
                 <span
                   style="font-weight: normal; cursor: pointer; border-bottom: 2px dotted; margin-left: 15px;"> {this.params.code()} </span>
               </div>
               <div class="spacing" style="align-items: center;">
                 <div
-                  className="">{app.translator.trans("mattoid-store.admin.settings.commodity-title")}
+                  className="">{app.translator.trans("mattoid-store.admin.settings.goods-title")}
                 </div>
                 <input required class="FormControl" type="text" bidi={this.params.title}/>
               </div>
               <div class="spacing" style="align-items: center;">
                 <div
-                  className="">{app.translator.trans("mattoid-store.admin.settings.commodity-desc")}
+                  className="">{app.translator.trans("mattoid-store.admin.settings.goods-desc")}
                 </div>
                 <textarea class="FormControl" bidi={this.params.desc}></textarea>
               </div>
 
               <div className="spacing">
                 <div
-                  style="width: 60px; display: inline-block;">{app.translator.trans("mattoid-store.admin.settings.commodity-price")}</div>
+                  style="width: 60px; display: inline-block;">{app.translator.trans("mattoid-store.admin.settings.goods-price")}</div>
                 <input required class="FormControl" type="number" step="1" min="0"
                        style="width: 195px; margin-left: 0px; display: inline-block;" bidi={this.params.price}/>
 
                 <div
-                  style="width: 60px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.commodity-stock")}</div>
+                  style="width: 60px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.goods-stock")}</div>
                 <input required class="FormControl" type="number" step="1" min="0"
                        style="width: 195px; margin-left: 0px; display: inline-block;" bidi={this.params.stock}/>
               </div>
 
               <div className="spacing">
                 <div
-                  style="width: 60px; display: inline-block;">{app.translator.trans("mattoid-store.admin.settings.commodity-discount")}</div>
+                  style="width: 60px; display: inline-block;">{app.translator.trans("mattoid-store.admin.settings.goods-discount")}</div>
                 <input required class="FormControl" type="number" step="1" min="0"
                        style="width: 100px; margin-left: 0px; display: inline-block;" bidi={this.params.discount}/>
 
                 <div
-                  style="width: 60px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.commodity-discount-limit")}</div>
+                  style="width: 60px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.goods-discount-limit")}</div>
                 <input required class="FormControl" type="number" step="1" min="0"
                        style="width: 145px; margin-left: 0px; display: inline-block;" bidi={this.params.discountLimit}/>
 
                 <div
-                  style="width: 40px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.commodity-discount-limit-unit")}</div>
+                  style="width: 40px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.goods-discount-limit-unit")}</div>
                 {Select.component({
                   options: {
-                    'day': app.translator.trans("mattoid-store.lib.item-limit-unit-day"),
+                    'days': app.translator.trans("mattoid-store.lib.item-limit-unit-days"),
                     'hour': app.translator.trans("mattoid-store.lib.item-limit-unit-hour"),
                     'minute': app.translator.trans("mattoid-store.lib.item-limit-unit-minute"),
                     'second': app.translator.trans("mattoid-store.lib.item-limit-unit-second")
@@ -133,7 +135,7 @@ export default class StoreCommodityDetailModal extends Modal {
 
               <div className="spacing">
                 <div
-                  style="width: 60px; display: inline-block;">{app.translator.trans("mattoid-store.admin.settings.commodity-type")}</div>
+                  style="width: 60px; display: inline-block;">{app.translator.trans("mattoid-store.admin.settings.goods-type")}</div>
                 {Select.component({
                   options: {
                     'permanent': app.translator.trans("mattoid-store.lib.item-type-permanent"),
@@ -147,7 +149,7 @@ export default class StoreCommodityDetailModal extends Modal {
 
                 <div style={this.params.type() === 'limit' ? 'display:inline-block' : 'display: none'}>
                   <div
-                    style="width: 80px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.commodity-outtime")}</div>
+                    style="width: 80px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.goods-outtime")}</div>
                   <input required class="FormControl" type="number"
                          style="width: 200px; margin-left: 0px; display: inline-block;" bidi={this.params.outtime}/>
                   <span style="margin-left: 10px;">天</span>
@@ -157,7 +159,7 @@ export default class StoreCommodityDetailModal extends Modal {
 
               <div className="spacing">
                 <div
-                  className="">{app.translator.trans("mattoid-store.admin.settings.commodity-icon")}
+                  className="">{app.translator.trans("mattoid-store.admin.settings.goods-icon")}
                 </div>
                 <div style="position: relative;">
                   <div>
@@ -169,23 +171,37 @@ export default class StoreCommodityDetailModal extends Modal {
                       onclick={() => {
 
                       }}>
-                      {app.translator.trans('mattoid-store.admin.settings.commodity-upload-button')}
+                      {app.translator.trans('mattoid-store.admin.settings.goods-upload-button')}
                     </Button>
                   </div>
                 </div>
               </div>
 
               <div className="spacing">
-                <Switch
-                  state={this.params.hide()}
-                  onchange={(val) => {
-                    this.params.hide = Stream(val)
-                  }}
-                >
-                  {app.translator.trans(
-                    "mattoid-store.admin.settings.commodity-hide"
-                  )}
-                </Switch>
+                <div style="width: 200px; display: inline-block;">
+                  <Switch
+                    state={this.params.repeat()}
+                    onchange={(val) => {
+                      this.params.repeat = Stream(Number(val))
+                    }}
+                  >
+                    {app.translator.trans(
+                      "mattoid-store.admin.settings.goods-repeat"
+                    )}
+                  </Switch>
+                </div>
+                <div style="width: 200px; display: inline-block; margin-left: 26px;">
+                  <Switch
+                    state={this.params.hide()}
+                    onchange={(val) => {
+                      this.params.hide = Stream(Number(val))
+                    }}
+                  >
+                    {app.translator.trans(
+                      "mattoid-store.admin.settings.goods-hide"
+                    )}
+                  </Switch>
+                </div>
               </div>
             </div>
 
@@ -196,7 +212,7 @@ export default class StoreCommodityDetailModal extends Modal {
                   type: 'submit',
                   loading: this.loading,
                 },
-                app.translator.trans('mattoid-store.admin.settings.edit-store-commodity')
+                app.translator.trans('mattoid-store.admin.settings.edit-store-goods')
               )}
             </div>
           </div>
@@ -212,7 +228,7 @@ export default class StoreCommodityDetailModal extends Modal {
 
     app.request({
       method: this.method,
-      url: app.forum.attribute('apiUrl') + '/store/commodity',
+      url: app.forum.attribute('apiUrl') + '/store/goods',
       body: this.params
     }).then(
       () => location.reload(),

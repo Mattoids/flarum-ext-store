@@ -2,10 +2,10 @@ import app from 'flarum/admin/app';
 import Modal, {IInternalModalAttrs} from 'flarum/common/components/Modal';
 import Button from 'flarum/common/components/Button';
 import React from "react";
-import StoreCommodityDetailModal from "./StoreCommodityDetailModal";
+import StoreGoodsDetailModal from "./StoreGoodsDetailModal";
 
-export default class AddStoreCommodity extends Modal {
-  private commodityList: any = []
+export default class AddStoreGoods extends Modal {
+  private goodsList: any = []
   private moreResults: boolean = false
 
   oninit(vnode) {
@@ -15,7 +15,7 @@ export default class AddStoreCommodity extends Modal {
   }
 
   title() {
-    return app.translator.trans('mattoid-store.admin.settings.add-store-commodity');
+    return app.translator.trans('mattoid-store.admin.settings.add-store-goods');
   }
 
   className(): string {
@@ -25,7 +25,7 @@ export default class AddStoreCommodity extends Modal {
   content() {
     return (
       <div>
-        {this.commodityList.map((item: object, index: number) => (
+        {this.goodsList.map((item: object, index: number) => (
           <div className="storeItemContainer" style="margin: 10px">
             <div className="ExtensionPage-body">
               <div className="ExtensionPage-settings FlarumBadgesPage" style="margin-top: 10px">
@@ -34,13 +34,13 @@ export default class AddStoreCommodity extends Modal {
                   <Button
                     className="Button rightAligned"
                     onclick={() => {
-                      app.modal.show(StoreCommodityDetailModal, {
+                      app.modal.show(StoreGoodsDetailModal, {
                         code: item.attributes.code,
                         title: item.attributes.name
                       });
                     }}
                   >
-                    {app.translator.trans('mattoid-store.admin.settings.add-store-commodity')}
+                    {app.translator.trans('mattoid-store.admin.settings.add-store-goods')}
                   </Button>
                 </div>
               </div>
@@ -48,7 +48,7 @@ export default class AddStoreCommodity extends Modal {
           </div>
         ))}
 
-        {!this.loading && this.commodityList.length === 0 && (
+        {!this.loading && this.goodsList.length === 0 && (
           <div>
             <div
               style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">{app.translator.trans("mattoid-store.lib.list-empty")}</div>
@@ -75,12 +75,12 @@ export default class AddStoreCommodity extends Modal {
 
   loadMore() {
     this.loading = true;
-    this.loadResults(this.commodityList.length);
+    this.loadResults(this.goodsList.length);
   }
 
   parseResults(results) {
     this.moreResults = !!results.payload.links && !!results.payload.links.next;
-    [].push.apply(this.commodityList, results.payload.data);
+    [].push.apply(this.goodsList, results.payload.data);
     this.loading = false;
     m.redraw();
 
@@ -92,7 +92,7 @@ export default class AddStoreCommodity extends Modal {
     };
 
     return app.store
-      .find("/store/commodity", {
+      .find("/store/goods", {
         filter:filters,
         page: {
           offset,

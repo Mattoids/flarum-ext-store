@@ -2,7 +2,7 @@ import app from 'flarum/admin/app';
 import ExtensionPage from 'flarum/admin/components/ExtensionPage';
 import Button from 'flarum/common/components/Button';
 import  Mithril from 'mithril';
-import AddStoreCommodity from "./AddStoreCommodity";
+import AddStoreGoods from "./AddStoreGoods";
 import Select from "flarum/common/components/Select";
 import Stream from 'flarum/common/utils/Stream';
 import StoreListItem from "./StoreListItem";
@@ -48,9 +48,9 @@ export default class StoreListPage extends ExtensionPage {
                 return m('.Form-group', Button.component({
                   className: 'Button',
                   onclick() {
-                    app.modal.show(AddStoreCommodity);
+                    app.modal.show(AddStoreGoods);
                   },
-                }, app.translator.trans('mattoid-store.admin.settings.add-store-commodity')));
+                }, app.translator.trans('mattoid-store.admin.settings.add-store-goods')));
             })}
           </div>
           <div className="container">

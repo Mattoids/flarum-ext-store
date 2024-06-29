@@ -18,7 +18,7 @@ class ObjectsUtil
     public static function removeEmptySql(array $params) {
         $result = [];
         foreach (array_keys($params) as $key) {
-            if (!empty($params[$key])) {
+            if (!empty($params[$key]) || $params[$key] === 0 || $params[$key] === '0') {
                 $result[StringUtil::toUnderScore($key)] = $params[$key];
             }
         }

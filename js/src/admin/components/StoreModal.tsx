@@ -14,7 +14,7 @@ export default class StoreModal extends Modal {
   }
 
   title() {
-    return app.translator.trans('mattoid-store.admin.settings.commodity-item-' + this.type);
+    return app.translator.trans('mattoid-store.admin.settings.goods-item-' + this.type);
   }
 
   content() {
@@ -56,7 +56,7 @@ export default class StoreModal extends Modal {
     const method = this.type === 'delete' ? 'DELETE' : 'PUT';
     app.request({
       method: method,
-      url: app.forum.attribute('apiUrl') + '/store/commodity',
+      url: app.forum.attribute('apiUrl') + '/store/goods',
       body: this.storeData
     }).then(
       () => location.reload(),

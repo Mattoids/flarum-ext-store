@@ -8,21 +8,21 @@ mattoid-store:
       decorationStoreTimezone: time zone
       decorationStoreTimezone-requirement: Set the time zone. Default to "Asia/Shanghai"
       group-view: Allow user groups to access the store
-      add-store-commodity: Add commodity
-      commodity-status: Status
-      commodity-title: Title
-      commodity-code: Code
-      commodity-desc: Desc
-      commodity-price: Price
-      commodity-stock: Stock
-      commodity-discount: Discount(%)
-      commodity-discount-limit: Discount limit
-      commodity-discount-limit-unit: Unit
-      commodity-type: Buy type
-      commodity-outtime: Outtime
-      commodity-icon: Icon
-      commodity-upload-button: Upload
-      commodity-hide: No authority to hide products for a limited time
+      add-store-goods: Add goods
+      goods-status: Status
+      goods-title: Title
+      goods-code: Code
+      goods-desc: Desc
+      goods-price: Price
+      goods-stock: Stock
+      goods-discount: Discount(%)
+      goods-discount-limit: Discount limit
+      goods-discount-limit-unit: Unit
+      goods-type: Buy type
+      goods-outtime: Outtime
+      goods-icon: Icon
+      goods-upload-button: Upload
+      goods-hide: No authority to hide products for a limited time
 
     error:
       invalid-product: Invalid product

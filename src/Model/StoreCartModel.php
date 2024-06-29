@@ -5,10 +5,10 @@ namespace Mattoid\Store\Model;
 use Flarum\Database\AbstractModel;
 use Flarum\Formatter\Formatter;
 
-class StoreCommodityModel extends AbstractModel
+class StoreCartModel extends AbstractModel
 {
 
-    protected $table = "store_commodity";
+    protected $table = "store_cart";
 
     /**
      * The text formatter instance.

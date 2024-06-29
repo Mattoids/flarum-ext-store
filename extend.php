@@ -9,9 +9,12 @@
  * file that was distributed with this source code.
  */
 
+use Flarum\Api\Serializer\BasicUserSerializer;
 use Flarum\Extend;
+use Mattoid\Store\Attributes\UserAttributes;
+use Mattoid\Store\Controller\BuyGoodsController;
 use Mattoid\Store\Controller\DeleteStoreController;
-use Mattoid\Store\Controller\ListCommodityController;
+use Mattoid\Store\Controller\ListGoodsController;
 use Mattoid\Store\Controller\ListStoreController;
 use Mattoid\Store\Controller\PostStoreController;
 use Mattoid\Store\Controller\PutStoreController;
@@ -28,12 +31,16 @@ return [
 
     (new Extend\Routes('api'))
         ->get('/store/list', 'store.list', ListStoreController::class)
-        ->get('/store/commodity', 'store.commodity.list', ListCommodityController::class)
-        ->put('/store/commodity', 'store.commodity.put', PutStoreController::class)
-        ->delete('/store/commodity', 'store.commodity.delete', DeleteStoreController::class)
-        ->post('/store/commodity', 'store.commodity.post', PostStoreController::class),
+        ->get('/store/goods', 'store.goods.list', ListGoodsController::class)
+        ->put('/store/goods', 'store.goods.put', PutStoreController::class)
+        ->delete('/store/goods', 'store.goods.delete', DeleteStoreController::class)
+        ->post('/store/buy/goods', 'store.buy.goods', BuyGoodsController::class)
+        ->post('/store/goods', 'store.goods.post', PostStoreController::class),
 
     (new Extend\Settings())
         ->serializeToForum('storeName', 'mattoid-store.storeName'),
+
+    (new Extend\ApiSerializer(BasicUserSerializer::class))
+        ->attributes(UserAttributes::class),
 
 ];

@@ -11,6 +11,10 @@ app.initializers.add('mattoid/store', () => {
   };
 
   extend(IndexPage.prototype, 'navItems', function (items) {
+    if (!app.session.user.attribute('canStoreView')) {
+      return false;
+    }
+
     items.add('store', LinkButton.component({
       href: app.route('store'),
       icon: 'fas fa-store',

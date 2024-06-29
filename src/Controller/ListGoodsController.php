@@ -4,8 +4,9 @@ namespace Mattoid\Store\Controller;
 
 use Askvortsov\AutoModerator\Api\Serializer\AutomoderatorDriversSerializer;
 use Flarum\Api\Controller\AbstractListController;
-use Mattoid\Store\Model\StoreCommodityModel;
-use Mattoid\Store\Serializer\CommoditySerializer;
+use Flarum\User\Exception\PermissionDeniedException;
+use Mattoid\Store\Model\StoreGoodsModel;
+use Mattoid\Store\Serializer\GoodsSerializer;
 use Psr\Http\Message\ServerRequestInterface;
 use Flarum\Http\RequestUtil;
 use Flarum\Http\UrlGenerator;
@@ -15,13 +16,13 @@ use Flarum\User\UserRepository;
 
 use Illuminate\Support\Arr;
 
-class ListCommodityController extends AbstractListController
+class ListGoodsController extends AbstractListController
 {
 
     /**
      * {@inheritdoc}
      */
-    public $serializer = CommoditySerializer::class;
+    public $serializer = GoodsSerializer::class;
 
     public function __construct(UserRepository $repository, UrlGenerator $url, Translator $translator)
     {
@@ -36,10 +37,14 @@ class ListCommodityController extends AbstractListController
         $limit = $this->extractLimit($request);
         $offset = $this->extractOffset($request);
 
-        $list = StoreCommodityModel::query()
+        if (!$actor->can('mattoid-store.group-view')) {
+            throw new PermissionDeniedException();
+        }
+
+        $list = StoreGoodsModel::query()
             ->skip($offset)
             ->take($limit + 1)
-            ->orderByDesc('create_time')
+            ->orderByDesc('created_at')
             ->get();
 
         $results = $limit > 0 && $list->count() > $limit;
@@ -47,7 +52,7 @@ class ListCommodityController extends AbstractListController
             $list->pop();
         }
         $document->addPaginationLinks(
-            $this->url->to('api')->route('store.commodity.list'),
+            $this->url->to('api')->route('store.goods.list'),
             $params,
             $offset,
             $limit,

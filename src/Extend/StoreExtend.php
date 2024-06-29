@@ -2,36 +2,58 @@
 
 namespace Mattoid\Store\Extend;
 
+use Carbon\Carbon;
 use Flarum\Extend\ExtenderInterface;
 use Flarum\Extend\LifecycleInterface;
 use Flarum\Extension\Extension;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Contracts\Container\Container;
-use Mattoid\Store\Model\StoreCommodityModel;
+use Mattoid\Store\Model\StoreGoodsModel;
 use Mattoid\Store\Model\StoreModel;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class StoreExtend implements ExtenderInterface, LifecycleInterface
 {
 
-    protected $goodList = [];
+    private $key = '';
+    public static $goodList = [];
+    public static $validateList = [];
 
-    public function __construct()
+    public function __construct(string $key = '')
     {
+        $this->key = $key;
         $this->settings = resolve(SettingsRepositoryInterface::class);
         $this->translator = resolve(TranslatorInterface::class);
     }
 
-    public function addStoreGoods(string $key, $callback): self
+    public function addStoreGoods($callback): self
     {
-        $this->goodList[$key] = $callback;
+        StoreExtend::$goodList[$this->key] = $callback;
+        return $this;
+    }
+
+    public function addValidate($callback): self
+    {
+        StoreExtend::$validateList[$this->key] = $callback;
         return $this;
     }
 
     public function getStoreGoods(String $key)
     {
-        $class = $this->goodList[$key];
-        return new $class();
+        $class = StoreExtend::$goodList[$key];
+        if (!$class) {
+            return null;
+        }
+        return new $class;
+    }
+
+    public static function getValidate(String $key)
+    {
+        $class = StoreExtend::$validateList[$key];
+        if (!$class) {
+            return null;
+        }
+        return new $class;
     }
 
     public function extend(Container $container, Extension $extension = null)
@@ -41,23 +63,23 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
 
     public function onEnable(Container $container, Extension $extension)
     {
-        $commodity = $this->getStoreGoods($extension->name);
-
-        StoreCommodityModel::query()->insert([
-            'code' => $commodity->code,
-            'name' => $commodity->name,
-            'uri' => $commodity->uri,
-            'pop_up' => json_encode($commodity->popUp),
-            'create_time' => Date("Y-m-d H:i:s")
-        ]);
+        $goods = $this->getStoreGoods($this->key);
+        if ($goods) {
+            StoreGoodsModel::query()->insert([
+                'code' => $this->key,
+                'name' => $goods->name,
+                'class_name' => $goods->className,
+                'pop_up' => json_encode($goods->popUp),
+                'created_at' => Carbon::now()
+            ]);
+        }
     }
 
     public function onDisable(Container $container, Extension $extension)
     {
-        $commodity = $this->getStoreGoods($extension->name);
-        // 插件关闭自动删除已上架商品
-        StoreModel::query()->where('code', $commodity->code)->update(['status' => 0]);
+        // 插件关闭自动下架对应商品
+        StoreModel::query()->where('code', $this->key)->update(['status' => 0]);
         // 插件关闭自动移除可上架商品
-        StoreCommodityModel::query()->where('code', $commodity->code)->delete();
+        StoreGoodsModel::query()->where('code', $this->key)->delete();
     }
 }

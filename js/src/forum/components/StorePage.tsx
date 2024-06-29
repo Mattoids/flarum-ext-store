@@ -39,11 +39,13 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
               <div className="Store-Body">
                 {
                   this.storeList.map((item) => {
-                    return (
-                      <div className="storeItemContainer">
-                        {StoreItem.component({ item })}
-                      </div>
-                    );
+                    if (!item.attributes.hide || app.session.user.attribute('can'+item.attributes.code.slice(0, 1).toUpperCase()+item.attributes.code.slice(1)+'View')) {
+                      return (
+                        <div className="storeItemContainer">
+                          {StoreItem.component({ item })}
+                        </div>
+                      );
+                    }
                   })
                 }
               </div>

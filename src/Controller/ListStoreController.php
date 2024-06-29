@@ -2,10 +2,12 @@
 
 namespace Mattoid\Store\Controller;
 
+use Carbon\Carbon;
 use Flarum\Api\Controller\AbstractListController;
 use Flarum\Http\RequestUtil;
 use Flarum\Http\UrlGenerator;
 use Flarum\Locale\Translator;
+use Flarum\User\Exception\PermissionDeniedException;
 use Flarum\User\UserRepository;
 use Illuminate\Support\Arr;
 use Mattoid\Store\Model\StoreModel;
@@ -36,6 +38,10 @@ class ListStoreController extends AbstractListController
         $type = Arr::get($params, 'filter.type');
         $status = Arr::get($params, 'filter.status');
 
+        if (!$actor->can('mattoid-store.group-view')) {
+            throw new PermissionDeniedException();
+        }
+
         if ($type && $type != '-1') {
             $filter['type'] = $type;
         }
@@ -47,6 +53,7 @@ class ListStoreController extends AbstractListController
             ->where($filter)
             ->skip($offset)
             ->take($limit + 1)
+            ->orderByDesc('id')
             ->get();
 
         $results = $limit > 0 && $list->count() > $limit;

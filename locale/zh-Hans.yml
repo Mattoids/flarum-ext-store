@@ -6,34 +6,43 @@ mattoid-store:
       store-timezone: 时区设置
       store-timezone-requirement: 设置时区。默认为 "Asia/Shanghai"
       group-view: 允许用户组访问商店
-      add-store-commodity: 添加商品
-      edit-store-commodity: 修改商品
-      commodity-status: 商品状态
-      commodity-title: 商品名称
-      commodity-code: 商品编码
-      commodity-desc: 商品描述
-      commodity-price: 价格
-      commodity-stock: 库存
-      commodity-discount: 折扣(%)
-      commodity-discount-limit: 折扣时限
-      commodity-discount-limit-unit: 单位
-      commodity-type: 购买类型
-      commodity-outtime: 商品有效期
-      commodity-icon: 商品图标
-      commodity-upload-button: 上传
-      commodity-hide: 无权限时隐藏商品
-      commodity-edit: 编辑
-      commodity-delete: 删除
-      commodity-item-delete: 确定要删除该物品吗？
-      commodity-item-status-0: 确定要上架该物品吗？
-      commodity-item-status-1: 确定要下架该物品吗？
+      add-store-goods: 添加商品
+      edit-store-goods: 修改商品
+      goods-status: 商品状态
+      goods-title: 商品名称
+      goods-code: 商品编码
+      goods-desc: 商品描述
+      goods-price: 价格
+      goods-stock: 库存
+      goods-discount: 折扣(%)
+      goods-discount-limit: 折扣时限
+      goods-discount-limit-unit: 单位
+      goods-type: 购买类型
+      goods-outtime: 商品有效期
+      goods-icon: 商品图标
+      goods-upload-button: 上传
+      goods-hide: 无权限时隐藏商品
+      goods-repeat: 允许重复购买
+      goods-edit: 编辑
+      goods-delete: 删除
+      goods-item-delete: 确定要删除该物品吗？
+      goods-item-status-0: 确定要上架该物品吗？
+      goods-item-status-1: 确定要下架该物品吗？
 
     error:
       invalid-product: 无效商品
+      validate-fail: 购买物品失败
 
   forum:
     tital: 商店
     button: 购买
+
+    error:
+      insufficient-inventory: 库存不足
+      user-balance-low: 用户余额不足
+      store-goods-non-existent: 商品不存在或已下架
+      validate-fail: 购买物品失败
+      cannot-purchase-repeatedly: 有效期内不允许重复购买
 
   lib:
     item-status-all: 全部商品状态
@@ -42,7 +51,7 @@ mattoid-store:
     item-type-all: 全部购买类型
     item-type-permanent: 永久有效
     item-type-limit: 限时有效
-    item-limit-unit-day: 天
+    item-limit-unit-days: 天
     item-limit-unit-hour: 小时
     item-limit-unit-minute: 分钟
     item-limit-unit-second: 秒

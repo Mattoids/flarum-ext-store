@@ -5,7 +5,7 @@ namespace Mattoid\Store\Serializer;
 use Flarum\Api\Serializer\AbstractSerializer;
 use Flarum\Locale\Translator;
 
-class CommoditySerializer extends AbstractSerializer
+class GoodsSerializer extends AbstractSerializer
 {
 
     public function __construct(Translator $translator)
@@ -17,8 +17,7 @@ class CommoditySerializer extends AbstractSerializer
         return [
             'code' => $data->code,
             'name' => $this->translator->trans($data->name),
-            'uri' => $data->uri,
-            'createTime' => $data->create_time,
+            'createdAt' => $data->created_at,
         ];
     }
 }
