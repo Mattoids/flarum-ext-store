@@ -58,7 +58,7 @@ class BuyGoodsController extends AbstractListController
             $storeCart = StoreCartModel::query()->where('user_id', $actor->id)->where('store_id', $store->id)
                 ->where('status', 1)->where(function($where) {
                 $where->where(function($where) {
-                    $where->where('type', 'limit')->where('outtime', '>=', Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone')));
+                    $where->where('type', 'limit')->where('outtime', '>=', Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai')));
                 });
                 $where->orWhere('type', 'permanent');
             })->first();
@@ -77,7 +77,7 @@ class BuyGoodsController extends AbstractListController
         $price = $store->price;
         // 计算折扣
         $time = time();
-        $endTime = Carbon::parse($store->updated_at)->tz($this->settings->get('mattoid-store.storeTimezone'))->modify('+' . $store->discount_limit . ' ' . $store->discount_limit_unit)->getTimestamp();
+        $endTime = Carbon::parse($store->updated_at)->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai'))->modify('+' . $store->discount_limit . ' ' . $store->discount_limit_unit)->getTimestamp();
         if ($store->discount_price > 0 && $store->discount > 0 && $time < $endTime) {
             $price = $store->discount_price;
         }
@@ -102,11 +102,11 @@ class BuyGoodsController extends AbstractListController
             'pay_amt' => $price,
             'type' => $store->type,
             'status' => 1,
-            'created_at' => Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone')),
-            'updated_at' => Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone')),
+            'created_at' => Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai')),
+            'updated_at' => Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai')),
         ];
-        if ($store->type == 1) {
-            $cart['outtime'] = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone'))->subDays($store->outtime);
+        if ($store->type == 'limit') {
+            $cart['outtime'] = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai'))->addDays($store->outtime);
         }
         StoreCartModel::query()->insert($cart);
 

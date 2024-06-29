@@ -59,8 +59,8 @@ class PostStoreController extends AbstractListController
         $params = ObjectsUtil::removeEmptySql($parseBody);
         $params['pop_up'] = $goods->pop_up;
         $params['class_name'] = $goods->class_name;
-        $params['created_at'] = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone'));
-        $params['updated_at'] = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone'));
+        $params['created_at'] = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai'));
+        $params['updated_at'] = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai'));
 
         $result = StoreModel::query()->insert($params);
 

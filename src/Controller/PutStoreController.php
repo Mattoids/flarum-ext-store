@@ -60,7 +60,7 @@ class PutStoreController extends AbstractListController
         $params = ObjectsUtil::removeEmptySql($parseBody);
         $params['pop_up'] = $goods->pop_up;
         $params['class_name'] = $goods->class_name;
-        $params['updated_at'] = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone'));
+        $params['updated_at'] = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai'));
 
         $result = StoreModel::query()->where('id', $parseBody['id'])->update($params);
 

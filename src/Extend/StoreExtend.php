@@ -70,7 +70,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
                 'name' => $goods->name,
                 'class_name' => $goods->className,
                 'pop_up' => json_encode($goods->popUp),
-                'created_at' => Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone'))
+                'created_at' => Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai'))
             ]);
         }
     }
