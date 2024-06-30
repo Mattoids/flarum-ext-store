@@ -18,6 +18,16 @@ use Mattoid\Store\Controller\ListGoodsController;
 use Mattoid\Store\Controller\ListStoreController;
 use Mattoid\Store\Controller\PostStoreController;
 use Mattoid\Store\Controller\PutStoreController;
+use Mattoid\Store\Event\StoreBuyFailEvent;
+use Mattoid\Store\Event\StoreCartAddEvent;
+use Mattoid\Store\Event\StoreCartEditEvent;
+use Mattoid\Store\Event\StoreStockAddEvent;
+use Mattoid\Store\Event\StoreStockSubEvent;
+use Mattoid\Store\Listeners\StoreBuyFailListeners;
+use Mattoid\Store\Listeners\StoreCartAddListeners;
+use Mattoid\Store\Listeners\StoreCartEditListeners;
+use Mattoid\Store\Listeners\StoreStockAddListeners;
+use Mattoid\Store\Listeners\StoreStockSubListeners;
 
 return [
     (new Extend\Frontend('forum'))
@@ -42,5 +52,12 @@ return [
 
     (new Extend\ApiSerializer(BasicUserSerializer::class))
         ->attributes(UserAttributes::class),
+
+    (new Extend\Event())
+        ->listen(StoreBuyFailEvent::class, StoreBuyFailListeners::class)
+        ->listen(StoreCartAddEvent::class, StoreCartAddListeners::class)
+        ->listen(StoreCartEditEvent::class, StoreCartEditListeners::class)
+        ->listen(StoreStockAddEvent::class, StoreStockAddListeners::class)
+        ->listen(StoreStockSubEvent::class, StoreStockSubListeners::class),
 
 ];

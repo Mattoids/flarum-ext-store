@@ -36,6 +36,8 @@ mattoid-store:
   forum:
     tital: 商店
     button: 购买
+    buy-goods: 购买商品：{title}
+    buy-goods-fail: 商品退款：{title}
 
     error:
       insufficient-inventory: 库存不足

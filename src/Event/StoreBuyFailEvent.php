@@ -6,7 +6,7 @@ use Flarum\User\User;
 use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Model\StoreModel;
 
-class StoreBuyEvent
+class StoreBuyFailEvent
 {
     public $user;
     public $cart;
