@@ -113,9 +113,14 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
           m('.Form-group', [
             m('label', app.translator.trans(column.label)),
             m('.helpText', app.translator.trans(column.helpText)),
-            <textarea className="FormControl" value={this.params[column.value]}>{this.params[column.value]}</textarea>
-      ])
-      )
+            m('textarea.FormControl', {
+              value: this.params[column.value],
+              onchange: (event: InputEvent) => {
+                this.params[column.value] = (event.target as HTMLInputElement).value;
+              },
+            })
+          ])
+        )
         break
     }
 

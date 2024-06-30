@@ -14,7 +14,7 @@ export default class StoreItem extends Component {
 
   view() {
     const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
-    const price = moneyName.replace('[money]', this.storeData.price);
+    const price = this.storeData.price > 0 ? moneyName.replace('[money]', this.storeData.price) : '免费';
     const discountPrice = moneyName.replace('[money]', this.storeData.discountPrice);
 
     return (
