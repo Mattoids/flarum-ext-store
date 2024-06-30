@@ -76,7 +76,7 @@ class BuyGoodsController extends AbstractListController
         }
 
         $validate = StoreExtend::getValidate($store->code);
-        if ($validate && !$validate->validate($actor, $store, $params)) {
+        if ($validate && !$validate->validate($actor, $store, $params, $this->translator, $this->settings, $this->events, $this->cache)) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.validate-fail')]);
         }
 
@@ -118,7 +118,7 @@ class BuyGoodsController extends AbstractListController
         if ($after) {
             // 商品处理失败，通知购买失败事件进行回滚操作
             if (!$after->after($actor, $store, $params)) {
-                $this->events->dispatch(new StoreBuyFailEvent($user, $store, $cart, $params));
+                $this->events->dispatch(new StoreBuyFailEvent($user, $store, $cart, $params, $this->translator, $this->settings, $this->events, $this->cache));
                 throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.buy-goods-fail', ['title' => $store->title])]);
             }
         }
