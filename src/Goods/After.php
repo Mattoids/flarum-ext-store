@@ -12,5 +12,5 @@ use Mattoid\Store\Model\StoreModel;
 abstract class After
 {
 
-    abstract static function after(User $user, StoreModel $store, $params, Translator $translator = null, SettingsRepositoryInterface $settings = null, Dispatcher $events = null, CacheContract $cache = null);
+    abstract static function after(User $user, StoreModel $store, $params);
 }

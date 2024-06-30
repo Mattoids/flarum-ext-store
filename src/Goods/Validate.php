@@ -15,5 +15,5 @@ abstract class Validate
      * @param array $params 购买入参
      * @return boolean 返回 true-验证成功 false-验证失败
      */
-    abstract static function validate(User $user, StoreModel $store, $params, Translator $translator = null, SettingsRepositoryInterface $settings = null, Dispatcher $events = null, CacheContract $cache = null);
+    abstract static function validate(User $user, StoreModel $store, $params);
 }
