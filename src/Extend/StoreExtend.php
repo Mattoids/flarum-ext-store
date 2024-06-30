@@ -17,7 +17,9 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
 
     private $key = '';
     public static $goodList = [];
+    public static $afterList = [];
     public static $validateList = [];
+
 
     public function __construct(string $key = '')
     {
@@ -38,10 +40,16 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
         return $this;
     }
 
+    public function addAfter($callback): self
+    {
+        StoreExtend::$afterList[$this->key] = $callback;
+        return $this;
+    }
+
     public function getStoreGoods(String $key)
     {
         $class = StoreExtend::$goodList[$key];
-        if (!$class) {
+        if (!class_exists($class)) {
             return null;
         }
         return new $class;
@@ -50,7 +58,16 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
     public static function getValidate(String $key)
     {
         $class = StoreExtend::$validateList[$key];
-        if (!$class) {
+        if (!class_exists($class)) {
+            return null;
+        }
+        return new $class;
+    }
+
+    public static function getAfter(String $key)
+    {
+        $class = StoreExtend::$afterList[$key];
+        if (!class_exists($class)) {
             return null;
         }
         return new $class;

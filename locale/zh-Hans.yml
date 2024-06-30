@@ -45,6 +45,7 @@ mattoid-store:
       store-goods-non-existent: 商品不存在或已下架
       validate-fail: 购买物品失败
       cannot-purchase-repeatedly: 有效期内不允许重复购买
+      buy-goods-fail: 购买【{title}】失败
 
   lib:
     item-status-all: 全部商品状态

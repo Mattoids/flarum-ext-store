@@ -35,7 +35,7 @@ class StoreBuyFailListeners
         // 回滚用户余额
         $user = User::query()->where('id', $event->user->id)->first();
         $money = $user->money;
-        $user->money = $user->money - $cart->pay_amt;
+        $user->money = $user->money + $cart->pay_amt;
         $user->where('money', $money);
         $user->save();
 

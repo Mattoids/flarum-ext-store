@@ -12,6 +12,7 @@ use Flarum\Locale\Translator;
 use Flarum\User\UserRepository;
 use Illuminate\Support\Arr;
 use Flarum\User\User;
+use Mattoid\Store\Event\StoreBuyFailEvent;
 use Mattoid\Store\Event\StoreCartAddEvent;
 use Mattoid\Store\Event\StoreBuyEvent;
 use Mattoid\Store\Event\StoreCartEditEvent;
@@ -113,7 +114,14 @@ class BuyGoodsController extends AbstractListController
         }
 
         // 处理商品插件后置事件
-
+        $after = StoreExtend::getAfter($store->code);
+        if ($after) {
+            // 商品处理失败，通知购买失败事件进行回滚操作
+            if (!$after->after($actor, $store, $params)) {
+                $this->events->dispatch(new StoreBuyFailEvent($user, $store, $cart, $params));
+                throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.buy-goods-fail', ['title' => $store->title])]);
+            }
+        }
 
         // 通知购物车购买成功
         $cart->status = 1;
