@@ -23,12 +23,34 @@ mattoid-store:
       goods-icon: Icon
       goods-upload-button: Upload
       goods-hide: No authority to hide products for a limited time
+      store-timezone: Time zone
+      store-timezone-requirement: 设置时区。默认为 "Asia/Shanghai"
+      edit-store-goods: Edit Goods
+      goods-repeat: Allow duplicate purchases
+      goods-edit: Edit
+      goods-delete: Delete
+      goods-item-delete: Are you sure you want to delete this item？
+      goods-item-status-0: Are you sure you want to list this item？
+      goods-item-status-1: Are you sure you want to remove this item from the shelves？
+
 
     error:
       invalid-product: Invalid product
+      validate-fail: Failed to purchase item
 
   forum:
     tital: Store
+    button: Buy
+    buy-goods: Purchase goods：{title}
+    buy-goods-fail: Product refund：{title}
+
+    error:
+      insufficient-inventory: Insufficient inventory
+      user-balance-low: Insufficient user balance
+      store-goods-non-existent: The product does not exist or has been delisted
+      validate-fail: Failed to purchase item
+      cannot-purchase-repeatedly: No duplicate purchases allowed within the validity period
+      buy-goods-fail: Purchase failed [{title}]
 
   lib:
     item-status-all: All product statuses
@@ -37,19 +59,23 @@ mattoid-store:
     item-type-all: All purchase types
     item-type-permanent: Permanent validity
     item-type-limit: Time limited validity
-
     item-id: ID
     item-desc: Product Description
     item-title: Product Title
     item-status: Product Status
-    item-status-0: 下架
-    item-status-1: 上架
+    item-status-0: Remove from shelves
+    item-status-1: Listing
     item-price: Price
     item-stock: Stock
     item-discount: discount
     item-discount_limit: Discount period
     item-type: Purchase type
     item-created-at: Add time
-
     list-empty: This place is completely empty
     list-load-more: more
+    item-limit-unit-days: days
+    item-limit-unit-hour: hour
+    item-limit-unit-minute: minute
+    item-limit-unit-second: second
+    cancel: Cancel
+    confirm: Ok
