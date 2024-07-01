@@ -165,13 +165,22 @@ export default class StoreGoodsDetailModal extends Modal {
                   <div>
                     <input id="icon" required class="FormControl" type="text" bidi={this.params.icon}/>
                   </div>
-                  <div style="margin-top: 5px;">
+                  <div style="margin-top: 5px; display: inline-block;">
                     <Button
                       className="Button Button--primary"
-                      onclick={() => {
-
+                      onclick={(e) => {
+                        this.uploadIcon(e)
                       }}>
                       {app.translator.trans('mattoid-store.admin.settings.goods-upload-button')}
+                    </Button>
+                  </div>
+                  <div style="margin-top: 5px; display: inline-block; margin-left: 26px;">
+                    <Button
+                      className="Button Button--primary"
+                      onclick={(e) => {
+
+                      }}>
+                      {app.translator.trans('mattoid-store.admin.settings.show-icon-button')}
                     </Button>
                   </div>
                 </div>
@@ -212,13 +221,36 @@ export default class StoreGoodsDetailModal extends Modal {
                   type: 'submit',
                   loading: this.loading,
                 },
-                app.translator.trans('mattoid-store.admin.settings.edit-store-goods')
+                this.params.id ? app.translator.trans('mattoid-store.admin.settings.edit-store-goods') : app.translator.trans('mattoid-store.admin.settings.add-store-goods')
               )}
             </div>
           </div>
         </div>
       </div>
     );
+  }
+
+
+  uploadIcon(event) {
+    event.preventDefault();
+
+    const $input = $('<input type="file">');
+
+    $input.appendTo('body').hide().trigger('click').on('change', event => {
+      const body = new FormData();
+      body.append('file', event.target.files[0])
+
+      app.request({
+        url: `${app.forum.attribute('apiUrl')}/store/upload/icon`,
+        method: 'POST',
+        body,
+      }).then((result) => {
+        this.params.icon = Stream(result.data.attributes.path)
+        this.loading = false;
+        m.redraw();
+      });
+    })
+
   }
 
   onsubmit(e) {

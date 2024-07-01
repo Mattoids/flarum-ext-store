@@ -28,6 +28,7 @@ mattoid-store:
       goods-item-delete: 确定要删除该物品吗？
       goods-item-status-0: 确定要上架该物品吗？
       goods-item-status-1: 确定要下架该物品吗？
+      show-icon-button: 图库
 
     error:
       invalid-product: 无效商品
@@ -46,6 +47,7 @@ mattoid-store:
       validate-fail: 购买物品失败
       cannot-purchase-repeatedly: 有效期内不允许重复购买
       buy-goods-fail: 购买【{title}】失败
+      file-exist: 文件已存在
 
   lib:
     item-status-all: 全部商品状态

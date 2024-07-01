@@ -11,6 +11,8 @@
 
 use Flarum\Api\Serializer\BasicUserSerializer;
 use Flarum\Extend;
+use Flarum\Foundation\Paths;
+use Flarum\Http\UrlGenerator;
 use Mattoid\Store\Attributes\UserAttributes;
 use Mattoid\Store\Controller\BuyGoodsController;
 use Mattoid\Store\Controller\DeleteStoreController;
@@ -18,6 +20,7 @@ use Mattoid\Store\Controller\ListGoodsController;
 use Mattoid\Store\Controller\ListStoreController;
 use Mattoid\Store\Controller\PostStoreController;
 use Mattoid\Store\Controller\PutStoreController;
+use Mattoid\Store\Controller\StoreUpdateIconController;
 use Mattoid\Store\Event\StoreBuyFailEvent;
 use Mattoid\Store\Event\StoreCartAddEvent;
 use Mattoid\Store\Event\StoreCartEditEvent;
@@ -44,6 +47,7 @@ return [
         ->get('/store/goods', 'store.goods.list', ListGoodsController::class)
         ->put('/store/goods', 'store.goods.put', PutStoreController::class)
         ->delete('/store/goods', 'store.goods.delete', DeleteStoreController::class)
+        ->post('/store/upload/icon', 'store.upload.icon', StoreUpdateIconController::class)
         ->post('/store/buy/goods', 'store.buy.goods', BuyGoodsController::class)
         ->post('/store/goods', 'store.goods.post', PostStoreController::class),
 
@@ -60,4 +64,11 @@ return [
         ->listen(StoreStockAddEvent::class, StoreStockAddListeners::class)
         ->listen(StoreStockSubEvent::class, StoreStockSubListeners::class),
 
+    (new Extend\Filesystem())
+        ->disk('mattoid-store', function (Paths $paths, UrlGenerator $url) {
+            return [
+                'root'   => "$paths->public/assets/mattoid/store",
+                'url'    => $url->to('forum')->path('assets/mattoid/store')
+            ];
+        }),
 ];

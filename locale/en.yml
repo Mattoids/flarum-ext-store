@@ -32,6 +32,7 @@ mattoid-store:
       goods-item-delete: Are you sure you want to delete this item？
       goods-item-status-0: Are you sure you want to list this item？
       goods-item-status-1: Are you sure you want to remove this item from the shelves？
+      show-icon-button: Gallery
 
 
     error:
@@ -51,6 +52,7 @@ mattoid-store:
       validate-fail: Failed to purchase item
       cannot-purchase-repeatedly: No duplicate purchases allowed within the validity period
       buy-goods-fail: Purchase failed [{title}]
+      file-exist: file already exist
 
   lib:
     item-status-all: All product statuses
