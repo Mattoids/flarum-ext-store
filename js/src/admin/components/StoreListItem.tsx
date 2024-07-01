@@ -72,7 +72,7 @@ export default class StoreListItem extends Component {
           </div>
         </div>
         <div className="rightAligned icon-size">
-        <img src={this.storeData.icon}/>
+        <img className="icon-size" src={this.storeData.icon}/>
         </div>
       </div>
     )
