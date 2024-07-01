@@ -5,8 +5,8 @@ import LinkButton from 'flarum/common/components/LinkButton';
 import StorePage from "./components/StorePage";
 
 app.initializers.add('mattoid/store', () => {
-  app.routes.superStore = {
-    path: '/super/store',
+  app.routes.store = {
+    path: '/store',
     component: StorePage,
   };
 
@@ -15,8 +15,8 @@ app.initializers.add('mattoid/store', () => {
       return false;
     }
 
-    items.add('superStore', LinkButton.component({
-      href: app.route('superStore'),
+    items.add('store', LinkButton.component({
+      href: app.route('store'),
       icon: 'fas fa-store',
     }, app.forum.attribute("storeName") || app.translator.trans('mattoid-store.forum.tital')));
   });
