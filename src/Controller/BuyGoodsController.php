@@ -55,6 +55,11 @@ class BuyGoodsController extends AbstractListController
             throw new PermissionDeniedException();
         }
 
+        $key = md5($params['id'] + $actor->id);
+        if (!$this->cache->add($key, time(), 5)) {
+            throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.validate-fail')]);
+        }
+
         $store = StoreModel::query()->where('id', $id)->where('status', 1)->first();
         if (!$store) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.store-goods-non-existent')]);
@@ -131,6 +136,8 @@ class BuyGoodsController extends AbstractListController
 
         // 通知其他插件购买完成
         $this->events->dispatch(new StoreBuyEvent($user, $store, $cart, $params));
+
+        $this->cache->delete($key);
 
         return $store;
     }
