@@ -17,6 +17,7 @@ use Mattoid\Store\Attributes\UserAttributes;
 use Mattoid\Store\Controller\BuyGoodsController;
 use Mattoid\Store\Controller\DeleteStoreController;
 use Mattoid\Store\Controller\ListGoodsController;
+use Mattoid\Store\Controller\ListIconController;
 use Mattoid\Store\Controller\ListStoreController;
 use Mattoid\Store\Controller\PostStoreController;
 use Mattoid\Store\Controller\PutStoreController;
@@ -45,6 +46,7 @@ return [
     (new Extend\Routes('api'))
         ->get('/store/list', 'store.list', ListStoreController::class)
         ->get('/store/goods', 'store.goods.list', ListGoodsController::class)
+        ->get('/store/icon/list', 'store.icon.list', ListIconController::class)
         ->put('/store/goods', 'store.goods.put', PutStoreController::class)
         ->delete('/store/goods', 'store.goods.delete', DeleteStoreController::class)
         ->post('/store/upload/icon', 'store.upload.icon', StoreUpdateIconController::class)

@@ -7,6 +7,8 @@ import Select from "flarum/common/components/Select";
 
 export default class StoreGoodsDetailModal extends Modal {
 
+  private moreResults: boolean = false
+  private iconList: Array = [];
   private method: string = 'POST';
   private params: object = {
     status: Stream(1),
@@ -29,6 +31,7 @@ export default class StoreGoodsDetailModal extends Modal {
     super.oninit(vnode);
 
     this.method = 'POST';
+    this.moreResults = false;
     this.params.code = Stream(this.attrs.code || '');
     this.params.title = Stream(this.attrs.title || '');
 
@@ -60,11 +63,26 @@ export default class StoreGoodsDetailModal extends Modal {
     return this.params.title();
   }
 
+  onModalReady() {
+    const _this = this;
+    const closeButton = $(".Modal-close .Button");
+    $(closeButton).prop('id', 'storeCloseButton');
+
+    const closeButtonClone = closeButton.clone();
+    $(closeButtonClone).prop('id', 'storeCloseIconButton');
+    $(closeButtonClone).css('display', 'none');
+    $(".Modal-close").append(closeButtonClone);
+
+    $(closeButtonClone).on("click", function(){
+      _this.closeIcon();
+    });
+  }
+
   content() {
     return (
-      <div className="Modal-body">
+      <div className="Modal-body" oncreate={this.onModalReady.bind(this)}>
         <div className="Form">
-          <div className="Form-group">
+          <div id="StoreGoods" className="Form-group">
             <div style="text-align: left;">
               <div class="spacing" style="display: flex; align-items: center;">
                 <span>{app.translator.trans("mattoid-store.admin.settings.goods-status")}</span>
@@ -178,12 +196,16 @@ export default class StoreGoodsDetailModal extends Modal {
                     <Button
                       className="Button Button--primary"
                       onclick={(e) => {
-
+                        this.showIcon(e);
                       }}>
                       {app.translator.trans('mattoid-store.admin.settings.show-icon-button')}
                     </Button>
                   </div>
                 </div>
+              </div>
+
+              <div className="spacing" style={this.params.icon() ? '' : 'display: none'}>
+                <img className="icon-size" src={this.params.icon()} />
               </div>
 
               <div className="spacing">
@@ -225,11 +247,96 @@ export default class StoreGoodsDetailModal extends Modal {
               )}
             </div>
           </div>
+
+          <div id="StoreIcon" className="Form-group" style="display: none">
+            <div>
+              {
+                this.iconList.map((item) => {
+                  return (
+                    <div className="icon-frame inlineBlock" onclick={() => this.selectIconItem(item.attributes.url)}>
+                      <img className="icon-size" src={item.attributes.url}/>
+                    </div>
+                  )
+                })
+              }
+            </div>
+            {!this.loading && this.iconList.length===0 && (
+              <div>
+                <div style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">{app.translator.trans("mattoid-store.lib.list-empty")}</div>
+              </div>
+            )}
+
+            {!this.loading && this.hasMoreResults() && (
+              <div style="text-align:center;padding:20px">
+                <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading} onclick={() => this.loadMore()}>
+                  {app.translator.trans('mattoid-store.lib.list-load-more')}
+                </Button>
+              </div>
+            )}
+
+            {this.loading && <div className="Store-loadMore">{this.loading}</div>}
+          </div>
         </div>
       </div>
     );
   }
 
+  loadIconList(offset = 0) {
+    this.loading = true;
+
+    return app.store
+      .find("/store/icon/list", {
+        page: {
+          offset,
+        },
+      })
+      .catch(() => {})
+      .then(this.parseResults.bind(this));
+  }
+
+  parseResults(results) {
+    this.moreResults = !!results.payload.links && !!results.payload.links.next;
+    [].push.apply(this.iconList, results.payload.data);
+    this.loading = false;
+    m.redraw();
+
+    return results;
+  }
+
+  loadMore() {
+    this.loading = true;
+    this.loadIconList(this.iconList.length);
+  }
+
+  hasMoreResults() {
+    return this.moreResults;
+  }
+
+
+  closeIcon() {
+    $("#StoreGoods").css("display","block");
+    $("#storeCloseButton").css("display","block");
+    $("#StoreIcon").css("display","none");
+    $("#storeCloseIconButton").css("display","none");
+  }
+
+  selectIconItem(url){
+    $("#StoreGoods").css("display","block");
+    $("#storeCloseButton").css("display","block");
+    $("#StoreIcon").css("display","none");
+    $("#storeCloseIconButton").css("display","none");
+    this.params.icon(url);
+  }
+
+  showIcon(event) {
+    $("#StoreGoods").css("display","none");
+    $("#storeCloseButton").css("display","none");
+    $("#StoreIcon").css("display","block");
+    $("#storeCloseIconButton").css("display","block");
+    this.params.title = Stream(app.translator.trans('mattoid-store.admin.settings.show-icon-button'));
+    this.iconList = [];
+    this.loadIconList();
+  }
 
   uploadIcon(event) {
     event.preventDefault();
