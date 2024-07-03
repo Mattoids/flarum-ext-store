@@ -33,7 +33,7 @@ php flarum cache:clear
       ->addAfter(InviteAfter::class)
 ```
 
-### Event Introduction
+### 事件简介
 - 购买前执行
 
   用户点击购买按钮后，优先执行`Mattoid\Store\Goods\Validate`，若要验证用户提交的表单或用户是否拥有商品权限则需要重写本类
