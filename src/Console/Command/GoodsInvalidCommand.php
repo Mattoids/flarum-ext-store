@@ -64,7 +64,10 @@ class GoodsInvalidCommand extends AbstractCommand
                 $this->error("[{$cart->code}]-{$cart->id}-{$cart->store_id}: 自动扣费失败【{$e->getMessage()}】");
                 try {
                     // 超期商品自动失效
-                    StoreExtend::getInvalid($cart->code);
+                    $invalid = StoreExtend::getInvalid($cart->code);
+                    if ($invalid) {
+                        $invalid->invalid($store, $cart);
+                    }
 
                     $cart->status = 2;
                     $cart->save();
