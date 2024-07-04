@@ -56,9 +56,7 @@ class GoodsInvalidCommand extends AbstractCommand
             $store = $storeMap[$cart->store_id];
             try {
                 // 自动扣费，扣费成功
-                if ($cart->auto_deduction) {
-                    $this->autoDeduction($store, $cart);
-                }
+                $this->autoDeduction($store, $cart);
             } catch (\Exception $e) {
                 $buyStatus = false;
                 $this->error("[{$cart->code}]-{$cart->id}-{$cart->store_id}: 自动扣费失败【{$e->getMessage()}】");
@@ -86,6 +84,16 @@ class GoodsInvalidCommand extends AbstractCommand
 
     private function autoDeduction(StoreModel $store, StoreCartModel $cart)
     {
+        // 商品未开启自动扣费
+        if ($cart->auto_deduction) {
+
+        }
+
+        // 商品下架不支持续费
+        if ($store->status != 1) {
+            throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.invalid-product')]);
+        }
+
         $key = md5("{$store->store_id}-{$cart->user_id}");
         if (!$this->cache->add($key, time(), 5)) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.validate-fail')]);

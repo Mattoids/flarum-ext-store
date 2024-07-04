@@ -36,9 +36,7 @@ export default class StoreItem extends Component {
           {app.translator.trans('mattoid-store.lib.item-stock')}: {this.storeData.stock == -99 ? app.translator.trans('mattoid-store.forum.infinite') : this.storeData.stock }&nbsp;|&nbsp;
           {app.translator.trans('mattoid-store.lib.item-type-' + this.storeData.type)}&nbsp;
           <span style={this.storeData.type === 'limit' ? 'display:inline-block' : 'display: none'}>({this.storeData.outtime}{app.translator.trans('mattoid-store.forum.days')})</span>
-        </div>
-        <div className="spacing" style={this.storeData.type === 'limit' && this.storeData.autoDeduction ? 'display:inline-block' : 'display: none'}>
-          {app.translator.trans('mattoid-store.lib.item-invalid', {'day' : this.storeData.outtime})}
+          <span style={this.storeData.type === 'limit' && this.storeData.autoDeduction ? 'display:inline-block' : 'display: none'}>&nbsp;|&nbsp;{app.translator.trans('mattoid-store.lib.item-invalid', {'day' : this.storeData.outtime})}</span>
         </div>
         <div className="spacing">
           <div id="box">

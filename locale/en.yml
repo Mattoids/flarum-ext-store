@@ -85,6 +85,6 @@ mattoid-store:
     item-limit-unit-hour: hour
     item-limit-unit-minute: minute
     item-limit-unit-second: second
-    item-invalid: Deduction of fees every {day} day
+    item-invalid: Automatic renewal
     cancel: Cancel
     confirm: Ok

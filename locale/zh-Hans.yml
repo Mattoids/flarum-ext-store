@@ -83,7 +83,7 @@ mattoid-store:
     list-empty: 这里空空如也
     list-load-more: 更多
 
-    item-invalid: 每{day}天扣费一次
+    item-invalid: 自动续费
 
     cancel: 取消
     confirm: 确定

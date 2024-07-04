@@ -94,7 +94,7 @@ export default class StoreGoodsDetailModal extends Modal {
                               this.params.status = Stream(Number(val))
                             }}
                     > </Switch>
-                  </span>
+                </span>
               </div>
               <div class="spacing" style="display: flex; align-items: center;">
                 <span>{app.translator.trans("mattoid-store.admin.settings.goods-code")}</span>
@@ -179,16 +179,16 @@ export default class StoreGoodsDetailModal extends Modal {
 
               <div className="spacing" style={this.params.type() === 'limit' ? 'display:inline-block' : 'display: none'}>
                 <div style="width: 200px; display: inline-block;">
-                  <Switch
-                    state={this.params.autoDeduction()}
-                    onchange={(val) => {
-                      this.params.autoDeduction = Stream(Number(val))
-                    }}
-                  >
-                    {app.translator.trans(
-                      "mattoid-store.admin.settings.goods-auto-deduction"
-                    )}
-                  </Switch>
+                  <span>{app.translator.trans("mattoid-store.admin.settings.goods-auto-deduction")}</span>
+                  <span style="margin-left: 15px;">
+                    <Switch
+                      state={this.params.autoDeduction()}
+                      onchange={(val) => {
+                        this.params.autoDeduction = Stream(Number(val))
+                      }}
+                    >
+                    </Switch>
+                  </span>
                 </div>
               </div>
 
