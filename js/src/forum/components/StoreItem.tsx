@@ -14,7 +14,7 @@ export default class StoreItem extends Component {
 
   view() {
     const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
-    const price = this.storeData.price > 0 ? moneyName.replace('[money]', this.storeData.price) : '免费';
+    const price = this.storeData.price > 0 ? moneyName.replace('[money]', this.storeData.price) : app.translator.trans('mattoid-store.forum.free');
     const discountPrice = moneyName.replace('[money]', this.storeData.discountPrice);
 
     return (
@@ -33,11 +33,17 @@ export default class StoreItem extends Component {
             (<span className="price">{price}</span>)}
         </div>
         <div className="spacing">
-          {app.translator.trans('mattoid-store.lib.item-stock')}: {this.storeData.stock == -99 ? '无限' : this.storeData.stock } | {app.translator.trans('mattoid-store.lib.item-type-' + this.storeData.type)}
+          {app.translator.trans('mattoid-store.lib.item-stock')}: {this.storeData.stock == -99 ? app.translator.trans('mattoid-store.forum.infinite') : this.storeData.stock }&nbsp;|&nbsp;
+          {app.translator.trans('mattoid-store.lib.item-type-' + this.storeData.type)}&nbsp;
+          <span style={this.storeData.type === 'limit' ? 'display:inline-block' : 'display: none'}>({this.storeData.outtime}{app.translator.trans('mattoid-store.forum.days')})</span>
+        </div>
+        <div className="spacing" style={this.storeData.type === 'limit' && this.storeData.autoDeduction ? 'display:inline-block' : 'display: none'}>
+          {app.translator.trans('mattoid-store.lib.item-invalid', {'day' : this.storeData.outtime})}
         </div>
         <div className="spacing">
-          <div id="box"></div>
-          {this.storeData.desc}
+          <div id="box">
+            {this.storeData.desc}
+          </div>
         </div>
         <div className="spacing center">
           <img className="icon-size" src={this.storeData.icon}/>

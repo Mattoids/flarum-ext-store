@@ -33,6 +33,8 @@ mattoid-store:
       goods-item-status-0: Are you sure you want to list this item？
       goods-item-status-1: Are you sure you want to remove this item from the shelves？
       show-icon-button: Gallery
+      goods-auto-deduction: Auto Deduction
+      days: day
 
 
     error:
@@ -44,6 +46,10 @@ mattoid-store:
     button: Buy
     buy-goods: Purchase goods：{title}
     buy-goods-fail: Product refund：{title}
+    auto-deduction: Automatic deduction of fees for products：{title}
+    infinite: Infinite
+    free: Free
+    days: day
 
     error:
       insufficient-inventory: Insufficient inventory
@@ -79,5 +85,6 @@ mattoid-store:
     item-limit-unit-hour: hour
     item-limit-unit-minute: minute
     item-limit-unit-second: second
+    item-invalid: Deduction of fees every {day} day
     cancel: Cancel
     confirm: Ok

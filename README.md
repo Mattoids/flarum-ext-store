@@ -24,13 +24,13 @@ php flarum cache:clear
 ## 帮助
 ### 注册商品事件
 ```php
-    (new StoreExtend('商品的唯一KEY，不可与其他拓展重复'))
-      // 注册商品信息
-      ->addStoreGoods(InviteGoods::class)
-      // 注册前置校验器
-      ->addValidate(InviteValidate::class)
-      // 注册商品的业务逻辑
-      ->addAfter(InviteAfter::class)
+(new StoreExtend('商品的唯一KEY，不可与其他拓展重复'))
+  // 注册商品信息
+  ->addStoreGoods(InviteGoods::class)
+  // 注册前置校验器
+  ->addValidate(InviteValidate::class)
+  // 注册商品的业务逻辑
+  ->addAfter(InviteAfter::class)
 ```
 
 ### 事件简介

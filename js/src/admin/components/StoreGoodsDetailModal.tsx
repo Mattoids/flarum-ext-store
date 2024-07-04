@@ -24,7 +24,8 @@ export default class StoreGoodsDetailModal extends Modal {
     outtime: Stream(0),
     icon: Stream(),
     hide: Stream(0),
-    repeat: Stream(1)
+    repeat: Stream(1),
+    autoDeduction: Stream(0),
   };
 
   oninit(vnode) {
@@ -52,6 +53,7 @@ export default class StoreGoodsDetailModal extends Modal {
       this.params.icon = Stream(this.attrs.storeData.icon);
       this.params.hide = Stream(this.attrs.storeData.hide);
       this.params.repeat = Stream(this.attrs.storeData.repeat);
+      this.params.autoDeduction = Stream(this.attrs.storeData.autoDeduction);
     }
   }
 
@@ -170,9 +172,24 @@ export default class StoreGoodsDetailModal extends Modal {
                     style="width: 80px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.goods-outtime")}</div>
                   <input required class="FormControl" type="number"
                          style="width: 200px; margin-left: 0px; display: inline-block;" bidi={this.params.outtime}/>
-                  <span style="margin-left: 10px;">天</span>
+                  <span style="margin-left: 10px;">{app.translator.trans("mattoid-store.admin.settings.days")}</span>
                 </div>
 
+              </div>
+
+              <div className="spacing" style={this.params.type() === 'limit' ? 'display:inline-block' : 'display: none'}>
+                <div style="width: 200px; display: inline-block;">
+                  <Switch
+                    state={this.params.autoDeduction()}
+                    onchange={(val) => {
+                      this.params.autoDeduction = Stream(Number(val))
+                    }}
+                  >
+                    {app.translator.trans(
+                      "mattoid-store.admin.settings.goods-auto-deduction"
+                    )}
+                  </Switch>
+                </div>
               </div>
 
               <div className="spacing">

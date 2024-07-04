@@ -29,6 +29,8 @@ mattoid-store:
       goods-item-status-0: 确定要上架该物品吗？
       goods-item-status-1: 确定要下架该物品吗？
       show-icon-button: 图库
+      goods-auto-deduction: 自动扣费
+      days: 天
 
     error:
       invalid-product: 无效商品
@@ -39,6 +41,10 @@ mattoid-store:
     button: 购买
     buy-goods: 购买商品：{title}
     buy-goods-fail: 商品退款：{title}
+    auto-deduction: 商品自动扣费：{title}
+    infinite: 无限
+    free: 免费
+    days: 天
 
     error:
       insufficient-inventory: 库存不足
@@ -76,6 +82,8 @@ mattoid-store:
 
     list-empty: 这里空空如也
     list-load-more: 更多
+
+    item-invalid: 每{day}天扣费一次
 
     cancel: 取消
     confirm: 确定

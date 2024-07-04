@@ -14,6 +14,8 @@ use Flarum\Extend;
 use Flarum\Foundation\Paths;
 use Flarum\Http\UrlGenerator;
 use Mattoid\Store\Attributes\UserAttributes;
+use Mattoid\Store\Console\Command\GoodsInvalidCommand;
+use Mattoid\Store\Console\PublishSchedule;
 use Mattoid\Store\Controller\BuyGoodsController;
 use Mattoid\Store\Controller\DeleteStoreController;
 use Mattoid\Store\Controller\ListGoodsController;
@@ -70,7 +72,10 @@ return [
         ->disk('mattoid-store', function (Paths $paths, UrlGenerator $url) {
             return [
                 'root'   => "$paths->public/assets/mattoid/store",
-                'url'    => $url->to('forum')->path('assets/mattoid/store')
+                'url'    => $url->to('forum')->path('assets/mattoid/store'),
             ];
         }),
+    (new Extend\Console())
+        ->command(GoodsInvalidCommand::class)
+        ->schedule(GoodsInvalidCommand::class, new PublishSchedule()),
 ];

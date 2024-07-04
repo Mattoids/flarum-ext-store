@@ -55,7 +55,7 @@ class BuyGoodsController extends AbstractListController
             throw new PermissionDeniedException();
         }
 
-        $key = md5($params['id'] + $actor->id);
+        $key = md5("{$params['id']}-{$actor->id}");
         if (!$this->cache->add($key, time(), 5)) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.validate-fail')]);
         }

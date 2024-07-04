@@ -16,9 +16,10 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
 {
 
     private $key = '';
-    public static $goodList = [];
-    public static $afterList = [];
-    public static $validateList = [];
+    private static $goodList = [];
+    private static $afterList = [];
+    private static $validateList = [];
+    private static $invalidList = [];
 
 
     public function __construct(string $key = '')
@@ -46,7 +47,13 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
         return $this;
     }
 
-    public function getStoreGoods(String $key)
+    public function addInvalid($callback): self
+    {
+        StoreExtend::$invalidList[$this->key] = $callback;
+        return $this;
+    }
+
+    public static function getStoreGoods(String $key)
     {
         $class = StoreExtend::$goodList[$key];
         if (!class_exists($class)) {
@@ -73,6 +80,15 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
         return new $class;
     }
 
+    public static function getInvalid(string $key)
+    {
+        $class = StoreExtend::$invalidList[$key];
+        if (!class_exists($class)) {
+            return null;
+        }
+        return new $class;
+    }
+
     public function extend(Container $container, Extension $extension = null)
     {
     }
@@ -80,7 +96,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
 
     public function onEnable(Container $container, Extension $extension)
     {
-        $goods = $this->getStoreGoods($this->key);
+        $goods = StoreExtend::getStoreGoods($this->key);
         if ($goods) {
             StoreGoodsModel::query()->insert([
                 'code' => $this->key,

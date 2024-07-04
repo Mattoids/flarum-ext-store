@@ -34,6 +34,7 @@ class StoreSerializer extends AbstractSerializer
             'desc' => $data->desc,
             'popUp' => $data->pop_up,
             'status' => $data->status,
+            'autoDeduction' => $data->auto_deduction,
             'createdAt' => $data->created_at,
             'updatedAt' => $data->updated_at,
         ];
