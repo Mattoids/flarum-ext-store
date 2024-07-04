@@ -107,7 +107,7 @@ php flarum cache:clear
 
 
 
-### Goods plugin
+### 商品插件
 - [邀请码（审核版）](https://github.com/invites-fun/flarum-ext-store-invite)
 - [补签卡](https://github.com/invites-fun/flarum-ext-store-check-in)
 
