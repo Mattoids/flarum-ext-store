@@ -23,6 +23,7 @@ use Mattoid\Store\Model\StoreModel;
 use Flarum\User\Exception\PermissionDeniedException;
 use Illuminate\Contracts\Cache\Repository as CacheContract;
 use Mattoid\Store\Serializer\GoodsSerializer;
+use Mockery\Exception;
 use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Document;
 
@@ -124,7 +125,12 @@ class BuyGoodsController extends AbstractListController
         if ($after) {
             // 商品处理失败，通知购买失败事件进行回滚操作
             // $this->translator, $this->settings, $this->events, $this->cache
-            if (!$after->after($actor, $store, $params)) {
+            try {
+                if (!$after->after($actor, $store, $params)) {
+                    $this->events->dispatch(new StoreBuyFailEvent($user, $store, $cart, $params));
+                    throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.buy-goods-fail', ['title' => $store->title])]);
+                }
+            } catch (Exception $e) {
                 $this->events->dispatch(new StoreBuyFailEvent($user, $store, $cart, $params));
                 throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.buy-goods-fail', ['title' => $store->title])]);
             }

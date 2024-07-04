@@ -51,6 +51,7 @@ class GoodsInvalidCommand extends AbstractCommand
         }
 
         foreach ($invalidList as $cart) {
+            $buyStatus = true;
             // 获取商品信息
             $store = $storeMap[$cart->store_id];
             try {
@@ -59,18 +60,23 @@ class GoodsInvalidCommand extends AbstractCommand
                     $this->autoDeduction($store, $cart);
                 }
             } catch (\Exception $e) {
-                $this->info("[{$cart->code}]-{$cart->id}-{$cart->store_id}: 自动扣费失败【{$e->getMessage()}】");
+                $buyStatus = false;
+                $this->error("[{$cart->code}]-{$cart->id}-{$cart->store_id}: 自动扣费失败【{$e->getMessage()}】");
                 try {
                     // 超期商品自动失效
                     StoreExtend::getInvalid($cart->code);
 
                     $cart->status = 2;
                     $cart->save();
-
-                    $this->events->dispatch(new StoreInvalidEvent($store, $cart));
                 } catch (\Exception $e) {
-                    $this->info("[{$cart->code}]-{$cart->id}-{$cart->store_id}: 通知商品失效逻辑失败【{$e->getMessage()}】");
+                    $this->error("[{$cart->code}]-{$cart->id}-{$cart->store_id}: 执行商品失效逻辑失败【{$e->getMessage()}】");
                 }
+            }
+
+            try {
+                $this->events->dispatch(new StoreInvalidEvent($store, $cart, $buyStatus));
+            } catch (\Exception $e) {
+                $this->error("[{$cart->code}]-{$cart->id}-{$cart->store_id}: 通知商品失效事件失败【{$e->getMessage()}】");
             }
         }
     }
