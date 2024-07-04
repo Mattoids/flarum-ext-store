@@ -5,7 +5,7 @@ namespace Mattoid\Store\Console\Command;
 use Carbon\Carbon;
 use Flarum\Console\AbstractCommand;
 use Flarum\Foundation\ValidationException;
-use Flarum\Locale\Translator;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\User;
 use Illuminate\Contracts\Events\Dispatcher;
@@ -20,31 +20,30 @@ class GoodsInvalidCommand extends AbstractCommand
     protected $events;
     protected $settings;
 
-    public function __construct() {
+    public function __construct(SettingsRepositoryInterface $settings, TranslatorInterface $translator, Repository $cache, Dispatcher $events) {
         parent::__construct();
-        $this->cache = resolve(Repository::class);
-        $this->events = resolve(Dispatcher::class);
-        $this->translator = resolve(Translator::class);
-        $this->settings = resolve(SettingsRepositoryInterface::class);
+        $this->cache = $cache;
+        $this->events = $events;
+        $this->settings = $settings;
+        $this->translator = $translator;
     }
 
     protected function configure()
     {
-        $this->setName('mattoid:store:check:date')->setDescription('Check the expiration time of the goods');
+        $this->setName('mattoid:store:check:date')->setDescription('Check the expiration time of the product');
     }
 
     protected function fire()
     {
         $storeMap = [];
-        $dateTime = Carbon::now()->tz($this->settings->get($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai')));
+        $dateTime = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai'));
         $invalidList = StoreCartModel::query()->where('outtime', '<=', $dateTime)->where('type', 'limit')->where('status', 1)->get();
-
         if (!$invalidList) {
             // 未发现失效商品，跳过处理
             return;
         }
 
-        $storeIdList = array_column(json_decode($invalidList, true), 'id');
+        $storeIdList = array_column(json_decode($invalidList, true), 'store_id');
         $storeList = StoreModel::query()->whereIn('id', $storeIdList)->get();
         foreach ($storeList as $store) {
             $storeMap[$store->id] = $store;
@@ -59,7 +58,7 @@ class GoodsInvalidCommand extends AbstractCommand
                 $this->autoDeduction($store, $cart);
             } catch (\Exception $e) {
                 $buyStatus = false;
-                $this->error("[{$cart->code}]-{$cart->id}-{$cart->store_id}: Automatic fee deduction failed【{$e->getMessage()}】");
+                $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.automatic-renewal-fail', ['message' => $e->getMessage()])}");
                 try {
                     // 超期商品自动失效
                     $invalid = StoreExtend::getInvalid($cart->code);
@@ -70,14 +69,14 @@ class GoodsInvalidCommand extends AbstractCommand
                     $cart->status = 2;
                     $cart->save();
                 } catch (\Exception $e) {
-                    $this->error("[{$cart->code}]-{$cart->id}-{$cart->store_id}: Failed to execute product invalidation logic【{$e->getMessage()}】");
+                    $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.goods-invalid-fail', ['message' => $e->getMessage()])}");
                 }
             }
 
             try {
                 $this->events->dispatch(new StoreInvalidEvent($store, $cart, $buyStatus));
             } catch (\Exception $e) {
-                $this->error("[{$cart->code}]-{$cart->id}-{$cart->store_id}: Failed to notify product expiration event【{$e->getMessage()}】");
+                $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.goods-invalid-event-fail', ['message' => $e->getMessage()])}");
             }
         }
     }
@@ -85,7 +84,7 @@ class GoodsInvalidCommand extends AbstractCommand
     private function autoDeduction(StoreModel $store, StoreCartModel $cart)
     {
         // 商品未开启自动扣费
-        if ($cart->auto_deduction) {
+        if (!$cart->auto_deduction) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.automatic-renewal')]);
         }
 
@@ -94,7 +93,7 @@ class GoodsInvalidCommand extends AbstractCommand
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.invalid-product')]);
         }
 
-        $key = md5("{$store->store_id}-{$cart->user_id}");
+        $key = md5("{$cart->store_id}-{$cart->user_id}");
         if (!$this->cache->add($key, time(), 5)) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.validate-fail')]);
         }
@@ -114,6 +113,7 @@ class GoodsInvalidCommand extends AbstractCommand
         }
 
         // 刷新过期时间
+        $cart->pay_amt = $cart->price;
         $cart->outtime = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai'))->addDays($store->outtime);
         $cart->created_at = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai'));
         $cart->save();
@@ -122,5 +122,7 @@ class GoodsInvalidCommand extends AbstractCommand
         if (class_exists('Mattoid\MoneyHistory\Event\MoneyHistoryEvent')) {
             $this->events->dispatch(new \Mattoid\MoneyHistory\Event\MoneyHistoryEvent($user, -$cart->price, 'AUTODEDUCTION', $this->translator->trans("mattoid-store.forum.auto-deduction", ['title' => $store->title]), ''));
         }
+
+        $this->cache->delete($key);
     }
 }

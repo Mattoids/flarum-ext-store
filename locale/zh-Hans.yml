@@ -56,6 +56,10 @@ mattoid-store:
       buy-goods-fail: 购买【{title}】失败
       file-exist: 文件已存在
       automatic-renewal: 未开启自动续费
+      invalid-product: 无效商品
+      automatic-renewal-fail: 自动续费失败【{message}】
+      goods-invalid-fail: 商品失效逻辑执行失败【{message}】
+      goods-invalid-event-fail: 商品失效事件推送失败【{message}】
 
   lib:
     item-status-all: 全部商品状态

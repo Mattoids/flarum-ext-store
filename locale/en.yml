@@ -61,6 +61,10 @@ mattoid-store:
       buy-goods-fail: Purchase failed [{title}]
       file-exist: file already exist
       automatic-renewal: Automatic renewal not enabled
+      invalid-product: Invalid product
+      automatic-renewal-fail: Automatic renewal failed [{message}]
+      goods-invalid-fail: Product failure logic execution failed [{message}]
+      goods-invalid-event-fail: Product failure event push failed [{message}]
 
   lib:
     item-status-all: All product statuses

@@ -19,7 +19,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
     private static $goodList = [];
     private static $afterList = [];
     private static $validateList = [];
-    private static $invalidList = [];
+    public static $invalidList = [];
 
 
     public function __construct(string $key = '')
@@ -55,38 +55,38 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
 
     public static function getStoreGoods(String $key)
     {
-        $class = StoreExtend::$goodList[$key];
-        if (!class_exists($class)) {
-            return null;
+        if (array_key_exists($key, StoreExtend::$goodList)) {
+            $class = StoreExtend::$goodList[$key];
+            return new $class;
         }
-        return new $class;
+        return null;
     }
 
     public static function getValidate(String $key)
     {
-        $class = StoreExtend::$validateList[$key];
-        if (!class_exists($class)) {
-            return null;
+        if (array_key_exists($key, StoreExtend::$validateList)) {
+            $class = StoreExtend::$validateList[$key];
+            return new $class;
         }
-        return new $class;
+        return null;
     }
 
     public static function getAfter(String $key)
     {
-        $class = StoreExtend::$afterList[$key];
-        if (!class_exists($class)) {
-            return null;
+        if (array_key_exists($key, StoreExtend::$afterList)) {
+            $class = StoreExtend::$afterList[$key];
+            return new $class;
         }
-        return new $class;
+        return null;
     }
 
     public static function getInvalid(string $key)
     {
-        $class = StoreExtend::$invalidList[$key];
-        if (!class_exists($class)) {
-            return null;
+        if (array_key_exists($key, StoreExtend::$invalidList)) {
+            $class = StoreExtend::$invalidList[$key];
+            return new $class;
         }
-        return new $class;
+        return null;
     }
 
     public function extend(Container $container, Extension $extension = null)
