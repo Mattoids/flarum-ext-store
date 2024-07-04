@@ -4,7 +4,7 @@
 
 A [Flarum](http://flarum.org) extension. store 
 
-[中文](https://github.com/Mattoids/flarum-ext-store/docs/readme_cn.md)
+[中文](https://github.com/invites-fun/flarum-ext-store/blob/master/docs/readme_cn.md)
 
 
 ## Installation
