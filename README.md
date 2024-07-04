@@ -4,7 +4,7 @@
 
 A [Flarum](http://flarum.org) extension. store 
 
-[中文](https://github.com/invites-fun/flarum-ext-store/blob/master/docs/readme_cn.md)
+[中文](https://github.com/Mattoids/flarum-ext-store/blob/master/docs/readme_cn.md)
 
 
 ## Installation
@@ -102,8 +102,8 @@ This event is listened to by this plugin. Product plugins can implement inventor
 This event is listened to by the product plugin and is triggered when a product becomes invalid (regardless of successful payment deduction).
 
 ### Product Plugins
-- [Invitation Code (Audit Version)](https://github.com/invites-fun/flarum-ext-store-invite)
-- [Check-in Card](https://github.com/invites-fun/flarum-ext-store-check-in)
+- [Invitation Code (Audit Version)](https://github.com/Mattoids/flarum-ext-store-invite)
+- [Check-in Card](https://github.com/Mattoids/flarum-ext-store-check-in)
 
 
 
