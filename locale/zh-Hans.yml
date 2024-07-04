@@ -45,6 +45,7 @@ mattoid-store:
     infinite: 无限
     free: 免费
     days: 天
+    ckeck-goods-outtime: 检查商品失效时间
 
     error:
       insufficient-inventory: 库存不足
@@ -54,6 +55,7 @@ mattoid-store:
       cannot-purchase-repeatedly: 有效期内不允许重复购买
       buy-goods-fail: 购买【{title}】失败
       file-exist: 文件已存在
+      automatic-renewal: 未开启自动续费
 
   lib:
     item-status-all: 全部商品状态

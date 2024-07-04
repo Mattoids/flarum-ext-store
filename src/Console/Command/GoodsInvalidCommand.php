@@ -30,7 +30,7 @@ class GoodsInvalidCommand extends AbstractCommand
 
     protected function configure()
     {
-        $this->setName('mattoid:store:check:date')->setDescription('检查商品失效时间');
+        $this->setName('mattoid:store:check:date')->setDescription('Check the expiration time of the goods');
     }
 
     protected function fire()
@@ -59,7 +59,7 @@ class GoodsInvalidCommand extends AbstractCommand
                 $this->autoDeduction($store, $cart);
             } catch (\Exception $e) {
                 $buyStatus = false;
-                $this->error("[{$cart->code}]-{$cart->id}-{$cart->store_id}: 自动扣费失败【{$e->getMessage()}】");
+                $this->error("[{$cart->code}]-{$cart->id}-{$cart->store_id}: Automatic fee deduction failed【{$e->getMessage()}】");
                 try {
                     // 超期商品自动失效
                     $invalid = StoreExtend::getInvalid($cart->code);
@@ -70,14 +70,14 @@ class GoodsInvalidCommand extends AbstractCommand
                     $cart->status = 2;
                     $cart->save();
                 } catch (\Exception $e) {
-                    $this->error("[{$cart->code}]-{$cart->id}-{$cart->store_id}: 执行商品失效逻辑失败【{$e->getMessage()}】");
+                    $this->error("[{$cart->code}]-{$cart->id}-{$cart->store_id}: Failed to execute product invalidation logic【{$e->getMessage()}】");
                 }
             }
 
             try {
                 $this->events->dispatch(new StoreInvalidEvent($store, $cart, $buyStatus));
             } catch (\Exception $e) {
-                $this->error("[{$cart->code}]-{$cart->id}-{$cart->store_id}: 通知商品失效事件失败【{$e->getMessage()}】");
+                $this->error("[{$cart->code}]-{$cart->id}-{$cart->store_id}: Failed to notify product expiration event【{$e->getMessage()}】");
             }
         }
     }
@@ -86,7 +86,7 @@ class GoodsInvalidCommand extends AbstractCommand
     {
         // 商品未开启自动扣费
         if ($cart->auto_deduction) {
-
+            throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.automatic-renewal')]);
         }
 
         // 商品下架不支持续费

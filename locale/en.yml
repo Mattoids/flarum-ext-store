@@ -50,6 +50,7 @@ mattoid-store:
     infinite: Infinite
     free: Free
     days: day
+    ckeck-goods-outtime: Check the expiration time of the product
 
     error:
       insufficient-inventory: Insufficient inventory
@@ -59,6 +60,7 @@ mattoid-store:
       cannot-purchase-repeatedly: No duplicate purchases allowed within the validity period
       buy-goods-fail: Purchase failed [{title}]
       file-exist: file already exist
+      automatic-renewal: Automatic renewal not enabled
 
   lib:
     item-status-all: All product statuses
