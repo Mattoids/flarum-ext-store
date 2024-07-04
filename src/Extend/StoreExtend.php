@@ -19,7 +19,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
     private static $goodList = [];
     private static $afterList = [];
     private static $validateList = [];
-    public static $invalidList = [];
+    private static $invalidList = [];
 
 
     public function __construct(string $key = '')
