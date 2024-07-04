@@ -58,7 +58,7 @@ php flarum cache:clear
 
 - 商品信息
 
-  注册产品信息（显示在管理端的添加产品页面上），用户需要重写并注册 `Mattoid\Store\Goods\Goods` 类。
+  注册商品信息（显示在管理端的添加商品页面上），用户需要重写并注册 `Mattoid\Store\Goods\Goods` 类。
 
 
 ## 事件介绍
