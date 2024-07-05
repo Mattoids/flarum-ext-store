@@ -104,6 +104,7 @@ This event is listened to by the product plugin and is triggered when a product 
 ### Product Plugins
 - [Invitation Code (Audit Version)](https://github.com/Mattoids/flarum-ext-store-invite)
 - [Check-in Card](https://github.com/Mattoids/flarum-ext-store-check-in)
+- [Auto Check-in Card](https://github.com/Mattoids/flarum-ext-store-auto-check-in)
 
 
 
