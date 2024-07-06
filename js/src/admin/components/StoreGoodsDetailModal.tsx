@@ -7,6 +7,7 @@ import Select from "flarum/common/components/Select";
 
 export default class StoreGoodsDetailModal extends Modal {
 
+  private pageTitle: string = ""
   private moreResults: boolean = false
   private iconList: Array = [];
   private method: string = 'POST';
@@ -35,6 +36,7 @@ export default class StoreGoodsDetailModal extends Modal {
     this.moreResults = false;
     this.params.code = Stream(this.attrs.code || '');
     this.params.title = Stream(this.attrs.title || '');
+    this.pageTitle = this.attrs.title;
 
     if (this.attrs.storeData) {
       this.method = 'PUT'
@@ -62,7 +64,7 @@ export default class StoreGoodsDetailModal extends Modal {
   }
 
   title() {
-    return this.params.title();
+    return this.pageTitle;
   }
 
   onModalReady() {
@@ -331,13 +333,16 @@ export default class StoreGoodsDetailModal extends Modal {
 
 
   closeIcon() {
+    this.pageTitle = this.attrs.title;
     $("#StoreGoods").css("display","block");
     $("#storeCloseButton").css("display","block");
     $("#StoreIcon").css("display","none");
     $("#storeCloseIconButton").css("display","none");
+    m.redraw();
   }
 
   selectIconItem(url){
+    this.pageTitle = this.attrs.title;
     $("#StoreGoods").css("display","block");
     $("#storeCloseButton").css("display","block");
     $("#StoreIcon").css("display","none");
@@ -350,7 +355,7 @@ export default class StoreGoodsDetailModal extends Modal {
     $("#storeCloseButton").css("display","none");
     $("#StoreIcon").css("display","block");
     $("#storeCloseIconButton").css("display","block");
-    this.params.title = Stream(app.translator.trans('mattoid-store.admin.settings.show-icon-button'));
+    this.pageTitle = app.translator.trans('mattoid-store.admin.settings.show-icon-button');
     this.iconList = [];
     this.loadIconList();
   }
