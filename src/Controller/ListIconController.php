@@ -13,7 +13,10 @@ use Flarum\Locale\Translator;
 use Tobscure\JsonApi\Document;
 use Flarum\User\UserRepository;
 
-
+/**
+ * 获取商品图标列表（管理端使用）
+ * Get a list of product icons (for management purposes)
+ */
 class ListIconController extends AbstractListController
 {
 

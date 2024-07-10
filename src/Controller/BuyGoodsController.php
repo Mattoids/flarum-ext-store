@@ -27,6 +27,10 @@ use Mockery\Exception;
 use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Document;
 
+/**
+ * 购买商品
+ * Purchase goods
+ */
 class BuyGoodsController extends AbstractListController
 {
     public $serializer = GoodsSerializer::class;

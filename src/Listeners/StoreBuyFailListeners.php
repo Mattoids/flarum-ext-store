@@ -10,6 +10,10 @@ use Mattoid\Store\Event\StoreBuyFailEvent;
 use Mattoid\Store\Event\StoreCartEditEvent;
 use Mattoid\Store\Event\StoreStockSubEvent;
 
+/**
+ * 购买失败处理逻辑
+ * Purchase failure processing logic
+ */
 class StoreBuyFailListeners
 {
     private $events;
@@ -29,10 +33,12 @@ class StoreBuyFailListeners
         $store = $event->store;
 
         // 通知购物车购买失败
+        // Notify shopping cart purchase failure
         $cart->status = 2;
         $this->events->dispatch(new StoreCartEditEvent($cart));
 
         // 回滚用户余额
+        // Rollback user balance
         $user = User::query()->where('id', $event->user->id)->first();
         $money = $user->money;
         $user->money = $user->money + $cart->pay_amt;
@@ -40,6 +46,7 @@ class StoreBuyFailListeners
         $user->save();
 
         // 通知资金消费记录插件资金回滚
+        // Notify the fund consumption record plugin to roll back funds
         if (class_exists('Mattoid\MoneyHistory\Event\MoneyHistoryEvent')) {
             $this->events->dispatch(new \Mattoid\MoneyHistory\Event\MoneyHistoryEvent($user, $cart->pay_amt, 'STOREBUYGOODSFAIL', $this->translator->trans("mattoid-store.forum.buy-goods-fail", ['title' => $store->title]), ''));
         }

@@ -16,6 +16,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use Flarum\Foundation\ValidationException;
 use Tobscure\JsonApi\Document;
 
+/**
+ * 从商店删除商品
+ * Delete item from store
+ */
 class DeleteStoreController extends AbstractListController
 {
     /**

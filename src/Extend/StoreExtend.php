@@ -12,6 +12,10 @@ use Mattoid\Store\Model\StoreGoodsModel;
 use Mattoid\Store\Model\StoreModel;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+/**
+ * 商品注册处理类
+ * Product registration processing class
+ */
 class StoreExtend implements ExtenderInterface, LifecycleInterface
 {
 
@@ -29,24 +33,52 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
         $this->translator = resolve(TranslatorInterface::class);
     }
 
+    /**
+     * 注册商品信息
+     * Registered product information
+     *
+     * @param $callback 回调方法    Callback method
+     * @return $this
+     */
     public function addStoreGoods($callback): self
     {
         StoreExtend::$goodList[$this->key] = $callback;
         return $this;
     }
 
+    /**
+     * 注册前置验证
+     * Pre registration verification
+     *
+     * @param $callback
+     * @return $this
+     */
     public function addValidate($callback): self
     {
         StoreExtend::$validateList[$this->key] = $callback;
         return $this;
     }
 
+    /**
+     * 注册购买成功后处理逻辑
+     * Processing logic after successful registration and purc
+     *
+     * @param $callback
+     * @return $this
+     */
     public function addAfter($callback): self
     {
         StoreExtend::$afterList[$this->key] = $callback;
         return $this;
     }
 
+    /**
+     * 注册商品失效处理逻辑
+     * Registration product invalidation processing logic
+     *
+     * @param $callback
+     * @return $this
+     */
     public function addInvalid($callback): self
     {
         StoreExtend::$invalidList[$this->key] = $callback;
@@ -94,8 +126,18 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
     }
 
 
+    /**
+     * 开启插件时触发
+     * Trigger when opening plugin
+     *
+     * @param Container $container
+     * @param Extension $extension
+     * @return void
+     */
     public function onEnable(Container $container, Extension $extension)
     {
+        // 添加商品信息到数据库
+        // Add product information to the database
         $goods = StoreExtend::getStoreGoods($this->key);
         if ($goods) {
             StoreGoodsModel::query()->insert([
@@ -108,6 +150,14 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
         }
     }
 
+    /**
+     * 关闭插件触发
+     * Close plugin trigger
+     *
+     * @param Container $container
+     * @param Extension $extension
+     * @return void
+     */
     public function onDisable(Container $container, Extension $extension)
     {
         // 插件关闭自动下架对应商品

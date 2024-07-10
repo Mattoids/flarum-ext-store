@@ -15,6 +15,10 @@ use Mattoid\Store\Serializer\StoreSerializer;
 use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Document;
 
+/**
+ * 获取商品列表
+ * Get product list
+ */
 class ListStoreController extends AbstractListController
 {
     /**

@@ -18,6 +18,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use Flarum\Foundation\ValidationException;
 use Tobscure\JsonApi\Document;
 
+/**
+ * 编辑商品
+ * Edit Goods
+ */
 class PutStoreController extends AbstractListController
 {
     /**

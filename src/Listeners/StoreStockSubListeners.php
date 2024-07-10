@@ -9,6 +9,10 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Mattoid\Store\Event\StoreStockSubEvent;
 use Mattoid\Store\Model\StoreModel;
 
+/**
+ * 减少库存
+ * reduce inventory
+ */
 class StoreStockSubListeners
 {
 

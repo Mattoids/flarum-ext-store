@@ -16,6 +16,10 @@ use Flarum\User\UserRepository;
 
 use Illuminate\Support\Arr;
 
+/**
+ * 获取可添加商品列表（管理端）
+ * Get a list of products that can be added (on the management end)
+ */
 class ListGoodsController extends AbstractListController
 {
 

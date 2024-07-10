@@ -15,6 +15,9 @@ use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Model\StoreModel;
 
+/**
+ * 处理失效商品通知逻辑
+ */
 class GoodsInvalidCommand extends AbstractCommand
 {
     protected $events;

@@ -8,6 +8,10 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Mattoid\Store\Event\StoreStockAddEvent;
 use Mattoid\Store\Model\StoreModel;
 
+/**
+ * 增加库存（用于购买失败库存回滚）
+ * Increase inventory (for rolling back failed inventory purchases)
+ */
 class StoreStockAddListeners
 {
     private $events;

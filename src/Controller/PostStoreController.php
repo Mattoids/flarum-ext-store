@@ -18,6 +18,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use Flarum\Foundation\ValidationException;
 use Tobscure\JsonApi\Document;
 
+/**
+ * 添加商品
+ * Add Goods
+ */
 class PostStoreController extends AbstractListController
 {
     /**

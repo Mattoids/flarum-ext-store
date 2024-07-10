@@ -10,6 +10,10 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Mattoid\Store\Event\StoreStockSubEvent;
 use Mattoid\Store\Model\StoreCartModel;
 
+/**
+ * 添加购物车
+ * Add shopping cart
+ */
 class StoreCartAddListeners
 {
 
@@ -30,6 +34,8 @@ class StoreCartAddListeners
         $store = $event->store;
         $price = $event->price;
 
+        // 创建购物车对象
+        // Create shopping cart object
         $cart = new StoreCartModel();
         $cart->user_id = $actor->id;
         $cart->store_id = $store->id;
@@ -47,7 +53,8 @@ class StoreCartAddListeners
         }
         $cart->save();
 
-        // 添加购物车同时减库存
+        // 通知扣除库存事件
+        // Notification of inventory deduction events
         $this->events->dispatch(new StoreStockSubEvent($store));
 
         return $cart;

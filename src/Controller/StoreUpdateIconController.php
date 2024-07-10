@@ -16,6 +16,10 @@ use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Document;
 use Illuminate\Database\QueryException;
 
+/**
+ * 上传图标
+ * upload icon
+ */
 class StoreUpdateIconController extends AbstractCreateController{
     public $serializer = UploadSerializer::class;
     public $include = ['store'];
