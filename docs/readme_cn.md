@@ -1,6 +1,6 @@
 # Flarum-ext-store
 
-![License](https://img.shields.io/badge/license-LPL-1.02-blue.svg) [![Latest Stable Version](https://img.shields.io/packagist/v/mattoid/store.svg)](https://packagist.org/packages/mattoid/flarum-ext-store) [![Total Downloads](https://img.shields.io/packagist/dt/mattoid/store.svg)](https://packagist.org/packages/mattoid/flarum-ext-store)
+![License](https://img.shields.io/badge/license-LPL-1.02-blue.svg) [![Latest Stable Version](https://img.shields.io/packagist/v/mattoid/flarum-ext-store.svg)](https://packagist.org/packages/mattoid/flarum-ext-store) [![Total Downloads](https://img.shields.io/packagist/dt/mattoid/flarum-ext-store.svg)](https://packagist.org/packages/mattoid/flarum-ext-store)
 
 A [Flarum](http://flarum.org) extension. store
 
