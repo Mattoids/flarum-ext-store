@@ -1,7 +1,5 @@
 # Flarum-ext-store
 
-![License](https://img.shields.io/badge/license-LPL-1.02-blue.svg) [![Latest Stable Version](https://img.shields.io/packagist/v/mattoid/store.svg)](https://packagist.org/packages/mattoid/store) [![Total Downloads](https://img.shields.io/packagist/dt/mattoid/store.svg)](https://packagist.org/packages/mattoid/store)
-
 A [Flarum](http://flarum.org) extension. store
 
 
@@ -111,9 +109,3 @@ php flarum cache:clear
 - [邀请码（审核版）](https://github.com/Mattoids/flarum-ext-store-invite)
 - [补签卡](https://github.com/Mattoids/flarum-ext-store-check-in)
 - [自动签到卡](https://github.com/Mattoids/flarum-ext-store-auto-check-in)
-
-## Links
-
-- [Packagist](https://packagist.org/packages/mattoid/store)
-- [GitHub](https://github.com/mattoid/store)
-- [Discuss](https://discuss.flarum.org/d/PUT_DISCUSS_SLUG_HERE)
