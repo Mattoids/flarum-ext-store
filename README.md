@@ -1,5 +1,7 @@
 # Flarum-ext-store
 
+![License](https://img.shields.io/badge/license-LPL-1.02-blue.svg) [![Latest Stable Version](https://img.shields.io/packagist/v/mattoid/store.svg)](https://packagist.org/packages/mattoid/flarum-ext-store) [![Total Downloads](https://img.shields.io/packagist/dt/mattoid/store.svg)](https://packagist.org/packages/mattoid/flarum-ext-store)
+
 A [Flarum](http://flarum.org) extension. store 
 
 [中文](https://github.com/Mattoids/flarum-ext-store/blob/master/docs/readme_cn.md)
@@ -103,3 +105,10 @@ This event is listened to by the product plugin and is triggered when a product 
 - [Invitation Code (Audit Version)](https://github.com/Mattoids/flarum-ext-store-invite)
 - [Check-in Card](https://github.com/Mattoids/flarum-ext-store-check-in)
 - [Auto Check-in Card](https://github.com/Mattoids/flarum-ext-store-auto-check-in)
+
+
+## Links
+
+- [Packagist](https://packagist.org/packages/mattoid/flarum-ext-store)
+- [GitHub](https://github.com/mattoids/flarum-ext-store)
+- [Discuss](https://discuss.flarum.org/d/34793)
