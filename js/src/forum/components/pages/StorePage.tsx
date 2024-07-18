@@ -4,8 +4,7 @@ import listItems from 'flarum/common/helpers/listItems';
 import Mithril from 'mithril';
 import Button from "flarum/common/components/Button";
 import Stream from "flarum/common/utils/Stream";
-import StoreItem from "./StoreItem";
-import StoreListItem from "../../admin/components/StoreListItem";
+import StoreItem from "../component/StoreItem";
 
 export interface IIndexPageAttrs extends IPageAttrs {}
 

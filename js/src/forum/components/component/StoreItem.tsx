@@ -1,6 +1,6 @@
 import app from 'flarum/forum/app';
 import Component from "flarum/Component";
-import StoreBox from "./StoreBox";
+import StoreBox from "../modal/StoreBox";
 
 export default class StoreItem extends Component {
   private storeData: object = {}

@@ -18,6 +18,7 @@ use Mattoid\Store\Console\Command\GoodsInvalidCommand;
 use Mattoid\Store\Console\PublishSchedule;
 use Mattoid\Store\Controller\BuyGoodsController;
 use Mattoid\Store\Controller\DeleteStoreController;
+use Mattoid\Store\Controller\ListCartController;
 use Mattoid\Store\Controller\ListGoodsController;
 use Mattoid\Store\Controller\ListIconController;
 use Mattoid\Store\Controller\ListStoreController;
@@ -49,6 +50,7 @@ return [
         ->get('/store/list', 'store.list', ListStoreController::class)
         ->get('/store/goods', 'store.goods.list', ListGoodsController::class)
         ->get('/store/icon/list', 'store.icon.list', ListIconController::class)
+        ->get('/store/cart/list', 'store.cart.list', ListCartController::class)
         ->put('/store/goods', 'store.goods.put', PutStoreController::class)
         ->delete('/store/goods', 'store.goods.delete', DeleteStoreController::class)
         ->post('/store/upload/icon', 'store.upload.icon', StoreUpdateIconController::class)
