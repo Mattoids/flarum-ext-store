@@ -52,8 +52,8 @@ class StoreUpdateIconController extends AbstractCreateController{
         $icon->increment('count');
 
         $icon->url = $url;
-        $icon->created_at = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai'));
-        $icon->updated_at = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai'));
+        $icon->created_at = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai');
+        $icon->updated_at = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai');
         $icon->save();
 
         return $result;

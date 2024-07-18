@@ -76,7 +76,7 @@ class BuyGoodsController extends AbstractListController
             $storeCart = StoreCartModel::query()->where('user_id', $actor->id)->where('store_id', $store->id)
                 ->where('status', 1)->where(function($where) {
                     $where->where(function($where) {
-                        $where->where('type', 'limit')->where('outtime', '>=', Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai')));
+                        $where->where('type', 'limit')->where('outtime', '>=', Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai'));
                     });
                     $where->orWhere('type', 'permanent');
                 })->first();

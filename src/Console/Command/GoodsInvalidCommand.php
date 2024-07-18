@@ -39,7 +39,7 @@ class GoodsInvalidCommand extends AbstractCommand
     protected function fire()
     {
         $storeMap = [];
-        $dateTime = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai'));
+        $dateTime = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai');
         $invalidList = StoreCartModel::query()->where('outtime', '<=', $dateTime)->where('type', 'limit')->where('status', 1)->get();
         if (!$invalidList) {
             // 未发现失效商品，跳过处理
@@ -117,8 +117,8 @@ class GoodsInvalidCommand extends AbstractCommand
 
         // 刷新过期时间
         $cart->pay_amt = $cart->price;
-        $cart->outtime = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai'))->addDays($store->outtime);
-        $cart->created_at = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai'));
+        $cart->outtime = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai')->addDays($store->outtime);
+        $cart->created_at = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai');
         $cart->save();
 
         // 通知资金消费记录插件
