@@ -64,7 +64,7 @@ export default class StoreItem extends Component {
           </div>
           <div className="col-md-2" style="height: 71px;line-height: 71px;">
             {
-              this.cartData.enable ?
+              this.cartData.enableType ?
               Button.component({
                 type: 'submit',
                 className: 'Button Button--primary margin-left-30',
@@ -72,7 +72,7 @@ export default class StoreItem extends Component {
                 onclick: (e) => {
                   this.onsubmit(e)
                 }
-              }, app.translator.trans(this.cartData.useStatus ? 'mattoid-store.lib.item-cart-button-use' : 'mattoid-store.lib.item-cart-button-cancel'))
+              }, app.translator.trans(this.cartData.enable == 0 ? 'mattoid-store.lib.item-cart-button-use' : 'mattoid-store.lib.item-cart-button-cancel'))
                 : ""
             }
           </div>

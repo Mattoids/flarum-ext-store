@@ -53,9 +53,7 @@ class StoreCartAddListeners
         if ($store->type == 'limit') {
             $cart->outtime = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai')->addDays($store->outtime);
         }
-        if (StoreExtend::getEnable($store->code)) {
-            $cart->enable = 1;
-        }
+
         $cart->save();
 
         // 通知扣除库存事件

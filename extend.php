@@ -25,6 +25,7 @@ use Mattoid\Store\Controller\ListStoreController;
 use Mattoid\Store\Controller\PostStoreController;
 use Mattoid\Store\Controller\PutStoreController;
 use Mattoid\Store\Controller\StoreUpdateIconController;
+use Mattoid\Store\Controller\UseGoodsController;
 use Mattoid\Store\Event\StoreBuyFailEvent;
 use Mattoid\Store\Event\StoreCartAddEvent;
 use Mattoid\Store\Event\StoreCartEditEvent;
@@ -52,6 +53,7 @@ return [
         ->get('/store/goods', 'store.goods.list', ListGoodsController::class)
         ->get('/store/icon/list', 'store.icon.list', ListIconController::class)
         ->get('/store/cart/list', 'store.cart.list', ListCartController::class)
+        ->post('/store/use/goods', 'store.use.goods', UseGoodsController::class)
         ->put('/store/goods', 'store.goods.put', PutStoreController::class)
         ->delete('/store/goods', 'store.goods.delete', DeleteStoreController::class)
         ->post('/store/upload/icon', 'store.upload.icon', StoreUpdateIconController::class)

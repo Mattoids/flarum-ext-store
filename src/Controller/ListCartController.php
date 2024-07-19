@@ -9,6 +9,7 @@ use Flarum\Locale\Translator;
 use Flarum\User\Exception\PermissionDeniedException;
 use Flarum\User\UserRepository;
 use Illuminate\Support\Arr;
+use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Serializer\CartSerializer;
 use Psr\Http\Message\ServerRequestInterface;
@@ -60,6 +61,10 @@ class ListCartController extends AbstractListController
             ->take($limit + 1)
             ->orderByDesc('created_at')
             ->get();
+
+        foreach ($list as $item) {
+            $item->enableType = StoreExtend::getEnable($item->code) ? 1 : 0;
+        }
 
         $results = $limit > 0 && $list->count() > $limit;
         if($results){
