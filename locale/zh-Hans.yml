@@ -83,9 +83,9 @@ mattoid-store:
     item-cart-type-permanent: 永久有效
     item-cart-type-limit: 限时有效
 
-    item-cart-auto-deduction-all: 限时有效
-    item-cart-auto-deduction-0: 限时有效
-    item-cart-auto-deduction-1: 限时有效
+    item-cart-auto-deduction-all: 全部续期类型
+    item-cart-auto-deduction-0: 不续期
+    item-cart-auto-deduction-1: 自动续期
 
     item-id: ID
     item-desc: 商品描述
