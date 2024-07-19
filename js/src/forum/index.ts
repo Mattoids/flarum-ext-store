@@ -26,7 +26,7 @@ app.initializers.add('mattoid/store', () => {
         username: this.user.slug(),
       }),
       icon: 'fas fa-check-square',
-    }, app.translator.trans('mattoid-store-invite.forum.cart')));
+    }, app.translator.trans('mattoid-store.forum.cart')));
   });
 
   extend(IndexPage.prototype, 'navItems', function (items) {

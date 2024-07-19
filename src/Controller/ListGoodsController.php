@@ -2,7 +2,6 @@
 
 namespace Mattoid\Store\Controller;
 
-use Askvortsov\AutoModerator\Api\Serializer\AutomoderatorDriversSerializer;
 use Flarum\Api\Controller\AbstractListController;
 use Flarum\User\Exception\PermissionDeniedException;
 use Mattoid\Store\Model\StoreGoodsModel;

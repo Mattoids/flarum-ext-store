@@ -7,7 +7,7 @@ use Flarum\Locale\Translator;
 use Illuminate\Cache\RateLimiting\Limit;
 use Mattoid\Store\Enum\LimitUnitEnum;
 
-class UploadSerializer extends AbstractSerializer
+class DataSerializer extends AbstractSerializer
 {
 
     public function __construct(Translator $translator)

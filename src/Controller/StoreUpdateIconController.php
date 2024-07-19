@@ -9,7 +9,7 @@ use Flarum\Locale\Translator;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Support\Arr;
 use Mattoid\Store\Model\StoreGoodsIconModel;
-use Mattoid\Store\Serializer\UploadSerializer;
+use Mattoid\Store\Serializer\DataSerializer;
 use Mattoid\Store\Upload\StoreUploader;
 use Mattoid\Store\Upload\StoreValidator;
 use Psr\Http\Message\ServerRequestInterface;
@@ -21,7 +21,7 @@ use Illuminate\Database\QueryException;
  * upload icon
  */
 class StoreUpdateIconController extends AbstractCreateController{
-    public $serializer = UploadSerializer::class;
+    public $serializer = DataSerializer::class;
     public $include = ['store'];
     protected $settings;
     protected $translator;
@@ -47,15 +47,15 @@ class StoreUpdateIconController extends AbstractCreateController{
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.file-exist')]);
         }
 
-        $result['path'] = $url = $this->uploader->upload($file);
-
         $icon->increment('count');
 
-        $icon->url = $url;
+        $icon->url = $this->uploader->upload($file);;
         $icon->created_at = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai');
         $icon->updated_at = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai');
         $icon->save();
 
+        $result['id'] = $icon->id;
+        $result['path'] = $icon->url;
         return $result;
     }
 }

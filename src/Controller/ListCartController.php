@@ -53,12 +53,26 @@ class ListCartController extends AbstractListController
             $filter['autoDeduction'] = $autoDeduction;
         }
 
-        StoreCartModel::query()
+        $list = StoreCartModel::query()
             ->where('user_id', $actor->id)
             ->where($filter)
             ->skip($offset)
             ->take($limit + 1)
             ->orderByDesc('created_at')
             ->get();
+
+        $results = $limit > 0 && $list->count() > $limit;
+        if($results){
+            $list->pop();
+        }
+        $document->addPaginationLinks(
+            $this->url->to('api')->route('store.icon.list'),
+            $params,
+            $offset,
+            $limit,
+            $results ? null : 0
+        );
+
+        return $list;
     }
 }

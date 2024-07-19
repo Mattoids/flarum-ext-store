@@ -3,7 +3,7 @@
 namespace Mattoid\Store\Controller;
 
 use Carbon\Carbon;
-use Flarum\Api\Controller\AbstractListController;
+use Flarum\Api\Controller\AbstractCreateController;
 use Flarum\Http\RequestUtil;
 use Flarum\Http\UrlGenerator;
 use Flarum\Locale\Translator;
@@ -12,7 +12,7 @@ use Flarum\User\Exception\PermissionDeniedException;
 use Flarum\User\UserRepository;
 use Mattoid\Store\Model\StoreGoodsModel;
 use Mattoid\Store\Model\StoreModel;
-use Mattoid\Store\Serializer\StoreSerializer;
+use Mattoid\Store\Serializer\DataSerializer;
 use Mattoid\Store\Utils\ObjectsUtil;
 use Psr\Http\Message\ServerRequestInterface;
 use Flarum\Foundation\ValidationException;
@@ -22,12 +22,12 @@ use Tobscure\JsonApi\Document;
  * 添加商品
  * Add Goods
  */
-class PostStoreController extends AbstractListController
+class PostStoreController extends AbstractCreateController
 {
     /**
      * {@inheritdoc}
      */
-    public $serializer = StoreSerializer::class;
+    public $serializer = DataSerializer::class;
 
     public function __construct(SettingsRepositoryInterface $settings, UserRepository $repository, UrlGenerator $url, Translator $translator)
     {
