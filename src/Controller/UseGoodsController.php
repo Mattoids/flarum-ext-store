@@ -50,11 +50,11 @@ class UseGoodsController extends AbstractCreateController
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.cart-no-use')]);
         }
         $store = StoreModel::query()->where('id', $cart->store_id)->first();
+        $cart->enable = !$cart->enable;
         if (!$enable::enable($actor, $store, $cart)) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.cart-use-fail')]);
         }
 
-        $cart->enable = !$cart->enable;
         $result = $cart->save();
 
         return $result;

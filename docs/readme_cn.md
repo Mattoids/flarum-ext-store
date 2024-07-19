@@ -33,6 +33,8 @@ php flarum cache:clear
   ->addAfter(After::class)
   // 商品失效逻辑
   ->addInvalid(Invalid::class)
+  // 注册商品使用逻辑
+  ->addEnable(Enable::class);
 ```
 
 ### 商品事件简介
@@ -59,6 +61,9 @@ php flarum cache:clear
 - 商品信息
 
   注册商品信息（显示在管理端的添加商品页面上），用户需要重写并注册 `Mattoid\Store\Goods\Goods` 类。
+
+- 使用商品
+  注册商品使用逻辑，在购物车界面增加`使用/取消`按钮，在用户点击按钮时通知商品处理事件。
 
 
 ## 事件介绍

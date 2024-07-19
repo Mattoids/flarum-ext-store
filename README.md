@@ -35,7 +35,9 @@ php flarum cache:clear
   // Register business logic of the product
   ->addAfter(After::class)
   // Product invalidation logic
-  ->addInvalid(Invalid::class);
+  ->addInvalid(Invalid::class)
+  // Product usage logic
+  ->addEnable(Enable::class);
 ```
 
 ### Product Events Overview
@@ -58,6 +60,9 @@ php flarum cache:clear
 - Product Information
 
   Register product information (displayed on the admin's add product page) by overriding and registering the `Mattoid\Store\Goods\Goods` class.
+
+- Use Product
+  Register product usage logic, add `use/cancel` buttons on the shopping cart interface, and notify product processing events when the user clicks the button.
 
 ## Event Introduction
 All events are not transaction-managed; they notify other plugins before code execution ends without interception or similar processing. For transactional atomicity, use `Mattoid\Store\Extend\StoreExtend` class for registration, treating all capabilities registered by this class as proprietary business logic of this plugin.
