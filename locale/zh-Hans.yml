@@ -105,5 +105,16 @@ mattoid-store:
 
     item-invalid: 自动续费
 
+    item-cart-title: 商品名称
+    item-cart-status: 支付状态
+    item-cart-price: 续费价格
+    item-cart-pay-amt: 支付金额
+    item-cart-type: 商品类型
+    item-cart-outtime: 到期时间
+    item-cart-auto-deduction: 自动续费
+
+    item-cart-button-use: 使用
+    item-cart-button-cancel: 取消
+
     cancel: 取消
     confirm: 确定

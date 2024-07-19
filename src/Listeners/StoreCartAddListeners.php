@@ -8,6 +8,7 @@ use Flarum\Locale\Translator;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Contracts\Events\Dispatcher;
 use Mattoid\Store\Event\StoreStockSubEvent;
+use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreCartModel;
 
 /**
@@ -45,11 +46,15 @@ class StoreCartAddListeners
         $cart->pay_amt = $price;
         $cart->type = $store->type;
         $cart->status = 0;
+        $cart->enable = 0;
         $cart->created_at = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai');
         $cart->updated_at = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai');
 
         if ($store->type == 'limit') {
             $cart->outtime = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai')->addDays($store->outtime);
+        }
+        if (StoreExtend::getEnable($store->code)) {
+            $cart->enable = 1;
         }
         $cart->save();
 

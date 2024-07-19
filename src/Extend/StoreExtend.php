@@ -24,6 +24,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
     private static $afterList = [];
     private static $validateList = [];
     private static $invalidList = [];
+    private static $enableList = [];
 
 
     public function __construct(string $key = '')
@@ -85,6 +86,18 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
         return $this;
     }
 
+    /**
+     * 注册商品使用功能
+     *
+     * @param String $key
+     * @return mixed|null
+     */
+    public function addEnable($callback): self
+    {
+        StoreExtend::$enableList[$this->key] = $callback;
+        return $this;
+    }
+
     public static function getStoreGoods(String $key)
     {
         if (array_key_exists($key, StoreExtend::$goodList)) {
@@ -116,6 +129,15 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
     {
         if (array_key_exists($key, StoreExtend::$invalidList)) {
             $class = StoreExtend::$invalidList[$key];
+            return new $class;
+        }
+        return null;
+    }
+
+    public static function getEnable(String $key)
+    {
+        if (array_key_exists($key, StoreExtend::$enableList_)) {
+            $class = StoreExtend::$enableList[$key];
             return new $class;
         }
         return null;
