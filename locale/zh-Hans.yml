@@ -61,6 +61,8 @@ mattoid-store:
       automatic-renewal-fail: 自动续费失败【{message}】
       goods-invalid-fail: 商品失效逻辑执行失败【{message}】
       goods-invalid-event-fail: 商品失效事件推送失败【{message}】
+      cart-no-use: 该商品没有使用功能
+      cart-use-fail: 商品使用失败
 
   lib:
     item-status-all: 全部商品状态

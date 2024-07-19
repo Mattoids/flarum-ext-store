@@ -5,11 +5,13 @@ import Button from "flarum/common/components/Button";
 export default class StoreItem extends Component {
 
   private cartData: any = {};
+  private params: any = {};
 
   oninit(vnode) {
     super.oninit(vnode);
 
-    this.cartData = this.attrs.item.attributes
+    this.cartData = this.attrs.item.attributes;
+    this.params.id = this.attrs.item.id;
   }
 
   view() {
@@ -82,5 +84,18 @@ export default class StoreItem extends Component {
   }
 
   onsubmit(event: Event) {
+    event.preventDefault();
+    this.loading = true;
+
+    app.request({
+      method: 'POST',
+      url: app.forum.attribute('apiUrl') + '/store/use/goods',
+      body: this.params
+    }).then(
+      () => location.reload(),
+      (result) => {
+        this.loading = false;
+        // this.handleErrors(result);
+      });
   }
 }

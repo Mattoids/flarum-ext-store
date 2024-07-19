@@ -136,7 +136,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
 
     public static function getEnable(String $key)
     {
-        if (array_key_exists($key, StoreExtend::$enableList_)) {
+        if (array_key_exists($key, StoreExtend::$enableList)) {
             $class = StoreExtend::$enableList[$key];
             return new $class;
         }
