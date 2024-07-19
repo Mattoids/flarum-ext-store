@@ -114,6 +114,7 @@ mattoid-store:
     item-cart-type: 商品类型
     item-cart-outtime: 到期时间
     item-cart-auto-deduction: 自动续费
+    item-cart-created: 购买时间
 
     item-cart-button-use: 使用
     item-cart-button-cancel: 取消

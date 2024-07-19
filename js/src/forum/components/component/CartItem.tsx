@@ -60,8 +60,12 @@ export default class StoreItem extends Component {
               }
             </div>
             <div>
-              <label className="Cart-Label">{app.translator.trans('mattoid-store.lib.item-cart-auto-deduction')}: </label> <span
-              className={this.cartData.autoDeduction == 0 ? "color-red" : "color-green"}>{this.cartData.autoDeduction == 0 ? "否" : "是" }</span>
+              <label
+                className="Cart-Label">{app.translator.trans('mattoid-store.lib.item-cart-auto-deduction')}: </label>
+              <span
+                className={this.cartData.autoDeduction == 0 ? "color-red" : "color-green"}>{this.cartData.autoDeduction == 0 ? "否" : "是"}</span> &nbsp;|&nbsp;
+              <label className="Cart-Label">{app.translator.trans('mattoid-store.lib.item-cart-created')}: </label> <span
+              className="">{this.cartData.createdAt}</span>
             </div>
           </div>
           <div className="col-md-2" style="height: 71px;line-height: 71px;">
