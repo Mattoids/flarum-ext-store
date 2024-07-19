@@ -16,10 +16,20 @@ export default class StoreItem extends Component {
     const price = this.cartData.price > 0 ? moneyName.replace('[money]', this.cartData.price) : app.translator.trans('mattoid-store.forum.free');
     const payAmt = this.cartData.payAmt > 0 ? moneyName.replace('[money]', this.cartData.payAmt) : app.translator.trans('mattoid-store.forum.free');
     return (
-      <div>
-        {this.cartData.title}
-        {price}
-        {payAmt}
+      <div className="">
+        <div className="itemTitle">
+          {this.cartData.title}
+        </div>
+        <div className="price spacing">
+          {this.cartData.payAmt > 0 ?
+            (
+              <div>
+                <span className="price">{payAmt}</span>&nbsp;
+                <span className="discount">{price}</span>
+              </div>
+            ) :
+            (<span className="price">{price}</span>)}
+        </div>
 
         <span
           style={this.cartData.type === 'limit' ? 'display:inline-block' : 'display: none'}>({this.cartData.outtime}{app.translator.trans('mattoid-store.forum.days')})</span>
