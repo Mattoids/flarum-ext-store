@@ -25,7 +25,7 @@ app.initializers.add('mattoid/store', () => {
       href: app.route('myCartPage', {
         username: this.user.slug(),
       }),
-      icon: 'fas fa-shopify',
+      icon: 'fas fa-shopping-cart',
     }, app.translator.trans('mattoid-store.forum.cart')));
   });
 
