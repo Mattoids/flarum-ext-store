@@ -62,6 +62,7 @@ php flarum cache:clear
   Register product information (displayed on the admin's add product page) by overriding and registering the `Mattoid\Store\Goods\Goods` class.
 
 - Use Product
+- 
   Register product usage logic, add `use/cancel` buttons on the shopping cart interface, and notify product processing events when the user clicks the button.
 
 ## Event Introduction
