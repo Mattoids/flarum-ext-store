@@ -29,6 +29,8 @@ class CartSerializer extends AbstractSerializer
             'createdAt' => $data->created_at,
             'updatedAt' => $data->updated_at,
             'autoDeduction' => $data->auto_deduction,
+            'enableType' => $data->enableType,
+            'enable' => $data->enable
         ];
     }
 }

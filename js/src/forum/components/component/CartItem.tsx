@@ -66,7 +66,7 @@ export default class StoreItem extends Component {
           </div>
           <div className="col-md-2" style="height: 71px;line-height: 71px;">
             {
-              this.cartData.enableType ?
+              this.cartData.enableType == 1 ?
               Button.component({
                 type: 'submit',
                 className: 'Button Button--primary margin-left-30',
