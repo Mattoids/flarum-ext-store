@@ -17,7 +17,7 @@ app.initializers.add('mattoid/store', () => {
   };
 
   extend(UserPage.prototype, 'navItems', function(items) {
-    if (!app.session.user.attribute('canStoreView')) {
+    if (!app.session || !app.session.user || !app.session.user.attribute('canStoreView')) {
       return false;
     }
 
@@ -30,7 +30,7 @@ app.initializers.add('mattoid/store', () => {
   });
 
   extend(IndexPage.prototype, 'navItems', function (items) {
-    if (!app.session.user.attribute('canStoreView')) {
+    if (!app.session || !app.session.user || !app.session.user.attribute('canStoreView')) {
       return false;
     }
 
