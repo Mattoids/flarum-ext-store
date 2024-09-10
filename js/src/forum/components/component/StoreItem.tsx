@@ -44,14 +44,19 @@ export default class StoreItem extends Component {
           </div>
         </div>
         <div className="spacing center">
-          <img className="icon-size" src={this.storeData.icon}/>
+          <img className="icon-size" src={this.params.icon()}
+               style={this.params.icon().slice(-5) === '.webm' ? 'display: none' : ''}/>
+          <video autoplay loop muted playsinline className="icon-size"
+                 style={this.params.icon().slice(-5) === '.webm' ? '' : 'display: none'}>
+            <source src={this.params.icon()} type="video/webm"/>
+          </video>
         </div>
       </div>
     )
   }
 
   showDetails(storeData) {
-    if(app.session.user){
+    if (app.session.user) {
       app.modal.show(StoreBox, {storeData});
     }
   }
