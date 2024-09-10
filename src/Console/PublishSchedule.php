@@ -10,7 +10,8 @@ class PublishSchedule
 {
     public function __invoke(Event $event) {
         $settings = resolve(SettingsRepositoryInterface::class);
-        $settingTimezone = $settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai');
+        $storeTimezone = $settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai');
+        $settingTimezone = !!$storeTimezone ? $storeTimezone : 'Asia/Shanghai';
 
         // 设置时间
         $event->everyMinute()->withoutOverlapping()->timezone($settingTimezone);
