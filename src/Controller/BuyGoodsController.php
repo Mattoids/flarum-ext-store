@@ -40,6 +40,8 @@ class BuyGoodsController extends AbstractListController
     protected $events;
     protected $cache;
 
+    private $storeTimezone = 'Asia/Shanghai';
+
 
     public function __construct(SettingsRepositoryInterface $settings, UserRepository $repository, Dispatcher $events, Translator $translator, CacheContract $cache)
     {
@@ -48,6 +50,9 @@ class BuyGoodsController extends AbstractListController
         $this->settings = $settings;
         $this->translator = $translator;
         $this->repository = $repository;
+
+        $storeTimezone = $this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai');
+        $this->storeTimezone = !!$storeTimezone ? $storeTimezone : 'Asia/Shanghai';
     }
 
     protected function data(ServerRequestInterface $request, Document $document) {
@@ -76,7 +81,7 @@ class BuyGoodsController extends AbstractListController
             $storeCart = StoreCartModel::query()->where('user_id', $actor->id)->where('store_id', $store->id)
                 ->where('status', 1)->where(function($where) {
                     $where->where(function($where) {
-                        $where->where('type', 'limit')->where('outtime', '>=', Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai'));
+                        $where->where('type', 'limit')->where('outtime', '>=', Carbon::now()->tz($this->storeTimezone));
                     });
                     $where->orWhere('type', 'permanent');
                 })->first();
@@ -96,7 +101,7 @@ class BuyGoodsController extends AbstractListController
         $price = $store->price;
         // 计算折扣
         $time = time();
-        $endTime = Carbon::parse($store->updated_at)->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai'))->modify('+' . $store->discount_limit . ' ' . $store->discount_limit_unit)->getTimestamp();
+        $endTime = Carbon::parse($store->updated_at)->tz($this->storeTimezone)->modify('+' . $store->discount_limit . ' ' . $store->discount_limit_unit)->getTimestamp();
         if ($store->discount_price > 0 && $store->discount > 0 && $time < $endTime) {
             $price = $store->discount_price;
         }

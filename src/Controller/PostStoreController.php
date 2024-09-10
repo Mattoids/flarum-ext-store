@@ -28,6 +28,7 @@ class PostStoreController extends AbstractCreateController
      * {@inheritdoc}
      */
     public $serializer = DataSerializer::class;
+    private $storeTimezone = 'Asia/Shanghai';
 
     public function __construct(SettingsRepositoryInterface $settings, UserRepository $repository, UrlGenerator $url, Translator $translator)
     {
@@ -35,6 +36,9 @@ class PostStoreController extends AbstractCreateController
         $this->settings = $settings;
         $this->translator = $translator;
         $this->repository = $repository;
+
+        $storeTimezone = $this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai');
+        $this->storeTimezone = !!$storeTimezone ? $storeTimezone : 'Asia/Shanghai';
     }
 
     protected function data(ServerRequestInterface $request, Document $document) {
@@ -64,8 +68,8 @@ class PostStoreController extends AbstractCreateController
         $params = ObjectsUtil::removeEmptySql($parseBody);
         $params['pop_up'] = $goods->pop_up;
         $params['class_name'] = $goods->class_name;
-        $params['created_at'] = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai');
-        $params['updated_at'] = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai');
+        $params['created_at'] = Carbon::now()->tz($this->storeTimezone);
+        $params['updated_at'] = Carbon::now()->tz($this->storeTimezone);
 
         $result = StoreModel::query()->insert($params);
 

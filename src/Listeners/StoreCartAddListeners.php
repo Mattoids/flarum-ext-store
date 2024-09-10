@@ -22,13 +22,17 @@ class StoreCartAddListeners
     private $settings;
     private $translator;
 
+    private $storeTimezone = 'Asia/Shanghai';
+
 
     public function __construct(Dispatcher $events, SettingsRepositoryInterface $settings, Translator $translator)
     {
         $this->events = $events;
         $this->settings = $settings;
         $this->translator = $translator;
-    }
+
+        $storeTimezone = $this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai');
+        $this->storeTimezone = !!$storeTimezone ? $storeTimezone : 'Asia/Shanghai';    }
 
     public function handle(StoreCartAddEvent $event) {
         $actor = $event->user;
@@ -47,11 +51,11 @@ class StoreCartAddListeners
         $cart->type = $store->type;
         $cart->status = 0;
         $cart->enable = 0;
-        $cart->created_at = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai');
-        $cart->updated_at = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai');
+        $cart->created_at = Carbon::now()->tz($this->storeTimezone);
+        $cart->updated_at = Carbon::now()->tz($this->storeTimezone);
 
         if ($store->type == 'limit') {
-            $cart->outtime = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai')->addDays($store->outtime);
+            $cart->outtime = Carbon::now()->tz($this->storeTimezone)->addDays($store->outtime);
         }
 
         $cart->save();

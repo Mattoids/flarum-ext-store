@@ -25,12 +25,16 @@ class StoreUpdateIconController extends AbstractCreateController{
     public $include = ['store'];
     protected $settings;
     protected $translator;
+    private $storeTimezone = 'Asia/Shanghai';
 
     public function __construct(SettingsRepositoryInterface $settings, StoreUploader $uploader, StoreValidator $validator, Translator $translator){
         $this->uploader = $uploader;
         $this->settings = $settings;
         $this->validator = $validator;
         $this->translator = $translator;
+
+        $storeTimezone = $this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai');
+        $this->storeTimezone = !!$storeTimezone ? $storeTimezone : 'Asia/Shanghai';
     }
 
     protected function data(ServerRequestInterface $request, Document $document){
@@ -50,8 +54,8 @@ class StoreUpdateIconController extends AbstractCreateController{
         $icon->increment('count');
 
         $icon->url = $this->uploader->upload($file);;
-        $icon->created_at = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai');
-        $icon->updated_at = Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai');
+        $icon->created_at = Carbon::now()->tz($this->storeTimezone);
+        $icon->updated_at = Carbon::now()->tz($this->storeTimezone);
         $icon->save();
 
         $result['id'] = $icon->id;

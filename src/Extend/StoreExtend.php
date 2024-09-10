@@ -26,13 +26,17 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
     private static $invalidList = [];
     private static $enableList = [];
 
+    private $storeTimezone = 'Asia/Shanghai';
+
 
     public function __construct(string $key = '')
     {
         $this->key = $key;
         $this->settings = resolve(SettingsRepositoryInterface::class);
         $this->translator = resolve(TranslatorInterface::class);
-    }
+
+        $storeTimezone = $this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai');
+        $this->storeTimezone = !!$storeTimezone ? $storeTimezone : 'Asia/Shanghai';    }
 
     /**
      * 注册商品信息
@@ -167,7 +171,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
                 'name' => $goods->name,
                 'class_name' => $goods->className,
                 'pop_up' => json_encode($goods->popUp),
-                'created_at' => Carbon::now()->tz($this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai') ?? 'Asia/Shanghai')
+                'created_at' => Carbon::now()->tz($this->storeTimezone)
             ]);
         }
     }
