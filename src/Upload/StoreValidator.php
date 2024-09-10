@@ -33,7 +33,7 @@ class StoreValidator extends AvatarValidator{
     }
 
     protected function getAllowedTypes(){
-        return ['png','jpeg','jpg'];
+        return ['png','jpeg','jpg', 'webm'];
     }
 
     protected function getMaxSize(){
