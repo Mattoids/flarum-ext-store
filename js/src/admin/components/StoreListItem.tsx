@@ -72,7 +72,12 @@ export default class StoreListItem extends Component {
           </div>
         </div>
         <div className="rightAligned icon-size">
-        <img className="icon-size" src={this.storeData.icon}/>
+        <img className="icon-size" src={this.storeData.icon}
+             style={this.storeData.icon.slice(-5) === '.webm' ? 'display: none' : ''}/>
+        <video autoplay loop muted playsinline className="icon-size"
+               style={this.storeData.icon.slice(-5) === '.webm' ? '' : 'display: none'}>
+          <source src={this.storeData.icon} type="video/webm"/>
+        </video>
         </div>
       </div>
     )

@@ -276,15 +276,21 @@ export default class StoreGoodsDetailModal extends Modal {
                 this.iconList.map((item) => {
                   return (
                     <div className="icon-frame inlineBlock" onclick={() => this.selectIconItem(item.attributes.url)}>
-                      <img className="icon-size" src={item.attributes.url}/>
+                      <img className="icon-size" src={item.attributes.url}
+                           style={item.attributes.url.slice(-5) === '.webm' ? 'display: none' : ''}/>
+                      <video autoplay loop muted playsinline className="icon-size"
+                             style={item.attributes.url.slice(-5) === '.webm' ? '' : 'display: none'}>
+                        <source src={item.attributes.url} type="video/webm"/>
+                      </video>
                     </div>
                   )
                 })
               }
             </div>
-            {!this.loading && this.iconList.length===0 && (
+            {!this.loading && this.iconList.length === 0 && (
               <div>
-                <div style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">{app.translator.trans("mattoid-store.lib.list-empty")}</div>
+                <div
+                  style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">{app.translator.trans("mattoid-store.lib.list-empty")}</div>
               </div>
             )}
 
