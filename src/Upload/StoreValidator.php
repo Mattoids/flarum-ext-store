@@ -28,7 +28,7 @@ class StoreValidator extends AvatarValidator{
         $this->laravelValidator = $this->makeValidator($attributes);
 
         $this->assertFileRequired($attributes['file']);
-        $this->assertFileMimes($attributes['file']);
+//        $this->assertFileMimes($attributes['file']);
         $this->assertFileSize($attributes['file']);
     }
 
