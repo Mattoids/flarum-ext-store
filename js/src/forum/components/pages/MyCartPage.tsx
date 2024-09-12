@@ -80,7 +80,7 @@ export default class MyCartPage extends UserPage {
             />
           </div>
         </div>
-        <div className="frame">
+        <div>
           {
             this.cartList.map((item) => {
               return (
