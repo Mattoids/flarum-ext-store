@@ -8,6 +8,14 @@ export default class StoreItem extends Component {
   oninit(vnode) {
     super.oninit(vnode);
 
+    const shopinvVideo = document.getElementById('logo-video');
+    const shopinvBackImg = document.getElementById('logo-img');
+    shopinvVideo.onerror = function() {
+      shopinvVideo.style.display = 'none';
+      shopinvBackImg.src = 'https://invites.fun/assets/mattoid/store/1726117989_u9m3xRVtpxBiWYMn.png';
+      shopinvBackImg.style.display = 'block';
+    };
+
     this.storeData = this.attrs.item.attributes
     this.storeData.id = this.attrs.item.id
   }
@@ -44,9 +52,10 @@ export default class StoreItem extends Component {
           </div>
         </div>
         <div className="spacing center">
-          <img className="icon-size" src={this.storeData.icon}
+          <img id="logo-img" className="icon-size" src={this.storeData.icon}
                style={this.storeData.icon && this.storeData.icon.slice(-5) === '.webm' ? 'display: none' : ''}/>
-          <video autoplay loop muted playsinline className="icon-size"
+          <video id="logo-video" autoplay loop muted playsinline className="icon-size"
+                 poster="https://invites.fun/assets/mattoid/store/1726117989_u9m3xRVtpxBiWYMn.png"
                  style={this.storeData.icon && this.storeData.icon.slice(-5) === '.webm' ? '' : 'display: none'}>
             <source src={this.storeData.icon} type="video/webm"/>
           </video>
