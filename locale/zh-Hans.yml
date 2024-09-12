@@ -46,7 +46,7 @@ mattoid-store:
     free: 免费
     days: 天
     ckeck-goods-outtime: 检查商品失效时间
-    cart: 购物车
+    cart: 购买记录
 
     error:
       insufficient-inventory: 库存不足
