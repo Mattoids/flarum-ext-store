@@ -8,14 +8,6 @@ export default class StoreItem extends Component {
   oninit(vnode) {
     super.oninit(vnode);
 
-    const shopinvVideo = document.getElementById('logo-video');
-    const shopinvBackImg = document.getElementById('logo-img');
-    shopinvVideo.onerror = function() {
-      shopinvVideo.style.display = 'none';
-      shopinvBackImg.src = 'https://invites.fun/assets/mattoid/store/1726117989_u9m3xRVtpxBiWYMn.png';
-      shopinvBackImg.style.display = 'block';
-    };
-
     this.storeData = this.attrs.item.attributes
     this.storeData.id = this.attrs.item.id
   }
