@@ -9,7 +9,7 @@ import Stream from "flarum/common/utils/Stream";
 export default class MyCartPage extends UserPage {
 
   private type: number = Stream("");
-  private status: number = Stream("-1");
+  private status: number = Stream("1");
   private autoDeduction: number = Stream("-1");
   private cartList: any = []
   private moreResults: boolean = false

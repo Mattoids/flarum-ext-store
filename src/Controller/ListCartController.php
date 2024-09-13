@@ -47,7 +47,7 @@ class ListCartController extends AbstractListController
         if ($type) {
             $filter['type'] = $type;
         }
-        if ($status && $status != '-1') {
+        if ($status !== '' && $status !== null && $status != '-1') {
             $filter['status'] = $status;
         }
         if ($autoDeduction && $autoDeduction != '-1') {
