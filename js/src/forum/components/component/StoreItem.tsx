@@ -18,7 +18,7 @@ export default class StoreItem extends Component {
     const discountPrice = moneyName.replace('[money]', this.storeData.discountPrice);
 
     return (
-      <div id={this.storeData.id} onclick={() => this.showDetails(this.storeData)}>
+      <div id={"goods" + this.storeData.id} onclick={() => this.showDetails(this.storeData)}>
         <div className="itemTitle">
           {this.storeData.title}
         </div>
