@@ -21,7 +21,7 @@ export default class StoreListItem extends Component {
     const LimitUnit = {'days': '天', 'hour': '小时', 'minute': '分钟', 'second': '秒'};
 
     return (
-      <div id={this.storeData.id} className="storeItemContainer">
+      <div id={"goods" + this.storeData.id} className="storeItemContainer">
         <div className="leftAligned">
           <div className="margin">
             <span>
