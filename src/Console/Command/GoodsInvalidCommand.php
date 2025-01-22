@@ -20,8 +20,11 @@ use Mattoid\Store\Model\StoreModel;
  */
 class GoodsInvalidCommand extends AbstractCommand
 {
+    protected $cache;
     protected $events;
     protected $settings;
+    protected $translator;
+
     private $storeTimezone = 'Asia/Shanghai';
 
     public function __construct(SettingsRepositoryInterface $settings, TranslatorInterface $translator, Repository $cache, Dispatcher $events) {
