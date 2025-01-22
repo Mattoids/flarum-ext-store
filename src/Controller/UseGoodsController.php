@@ -23,6 +23,10 @@ use Tobscure\JsonApi\Document;
  */
 class UseGoodsController extends AbstractCreateController
 {
+    protected $url;
+    protected $translator;
+    protected $repository;
+
     /**
      * {@inheritdoc}
      */

@@ -24,6 +24,8 @@ class StoreUpdateIconController extends AbstractCreateController{
     public $serializer = DataSerializer::class;
     public $include = ['store'];
     protected $settings;
+    protected $uploader;
+    protected $validator;
     protected $translator;
     private $storeTimezone = 'Asia/Shanghai';
 

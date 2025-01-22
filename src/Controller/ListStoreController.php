@@ -21,6 +21,10 @@ use Tobscure\JsonApi\Document;
  */
 class ListStoreController extends AbstractListController
 {
+    protected $url;
+    protected $translator;
+    protected $repository;
+
     /**
      * {@inheritdoc}
      */

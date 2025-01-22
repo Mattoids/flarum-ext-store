@@ -22,6 +22,10 @@ use Illuminate\Support\Arr;
 class ListGoodsController extends AbstractListController
 {
 
+    protected $url;
+    protected $translator;
+    protected $repository;
+
     /**
      * {@inheritdoc}
      */

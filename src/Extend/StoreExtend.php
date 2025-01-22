@@ -28,6 +28,9 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
 
     private $storeTimezone = 'Asia/Shanghai';
 
+    protected $settings;
+    protected $translator;
+
 
     public function __construct(string $key = '')
     {

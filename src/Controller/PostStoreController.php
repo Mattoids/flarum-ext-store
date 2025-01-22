@@ -24,6 +24,11 @@ use Tobscure\JsonApi\Document;
  */
 class PostStoreController extends AbstractCreateController
 {
+    protected $url;
+    protected $settings;
+    protected $translator;
+    protected $repository;
+
     /**
      * {@inheritdoc}
      */

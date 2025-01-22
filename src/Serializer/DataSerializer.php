@@ -9,6 +9,7 @@ use Mattoid\Store\Enum\LimitUnitEnum;
 
 class DataSerializer extends AbstractSerializer
 {
+    protected $translator;
 
     public function __construct(Translator $translator)
     {

@@ -19,6 +19,11 @@ use Tobscure\JsonApi\Document;
  */
 class DeleteStoreController extends AbstractCreateController
 {
+
+    protected $url;
+    protected $translator;
+    protected $repository;
+
     /**
      * {@inheritdoc}
      */

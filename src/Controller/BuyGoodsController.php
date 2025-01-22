@@ -35,6 +35,7 @@ class BuyGoodsController extends AbstractListController
 {
     public $serializer = GoodsSerializer::class;
 
+    protected $repository;
     protected $translator;
     protected $settings;
     protected $events;

@@ -20,6 +20,10 @@ use Flarum\User\UserRepository;
 class ListIconController extends AbstractListController
 {
 
+    protected $url;
+    protected $translator;
+    protected $repository;
+
     /**
      * {@inheritdoc}
      */

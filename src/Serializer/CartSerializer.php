@@ -10,6 +10,8 @@ use Mattoid\Store\Enum\LimitUnitEnum;
 class CartSerializer extends AbstractSerializer
 {
 
+    protected $translator;
+
     public function __construct(Translator $translator)
     {
         $this->translator = $translator;
