@@ -107,6 +107,17 @@ export default class MyCartPage extends UserPage {
               </Button>
             </div>
           )}
+
+          {this.loading && (
+            <div class="DiscussionList">
+              <div class="DiscussionList-loadMore">
+                <div aria-label="loading…" role="status" data-size="medium"
+                     class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium">
+                  <div aria-hidden="true" class="LoadingIndicator"></div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -131,6 +142,7 @@ export default class MyCartPage extends UserPage {
   }
 
   loadResults(offset = 0) {
+    this.loading = true;
     const filters = {
       'type': this.type(),
       'status': this.status(),
