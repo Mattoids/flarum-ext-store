@@ -302,7 +302,16 @@ export default class StoreGoodsDetailModal extends Modal {
               </div>
             )}
 
-            {this.loading && <div className="Store-loadMore">{this.loading}</div>}
+            {this.loading && (
+              <div class="DiscussionList">
+                <div class="DiscussionList-loadMore">
+                  <div aria-label="loading…" role="status" data-size="medium"
+                       class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium">
+                    <div aria-hidden="true" class="LoadingIndicator"></div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
