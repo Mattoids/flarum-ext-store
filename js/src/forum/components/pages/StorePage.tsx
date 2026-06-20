@@ -1,21 +1,26 @@
+import app from 'flarum/forum/app';
 import IndexPage from 'flarum/forum/components/IndexPage';
 import { IPageAttrs } from 'flarum/common/components/Page';
 import listItems from 'flarum/common/helpers/listItems';
 import Mithril from 'mithril';
 import Button from 'flarum/common/components/Button';
+import extractText from 'flarum/common/utils/extractText';
 import Stream from 'flarum/common/utils/Stream';
 import StoreItem from '../component/StoreItem';
 
-export interface IIndexPageAttrs extends IPageAttrs {}
+export interface IIndexPageAttrs extends Record<string, any> {}
 
 export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageAttrs> extends IndexPage {
-  private storeList: any = [];
+  private storeList: StoreApiResource[] = [];
   private moreResults: boolean = false;
+  private status: Stream<string> = Stream('1');
+  private type: Stream<string> = Stream('-1');
+  private loading: boolean = false;
 
   oncreate(vnode: Mithril.VnodeDOM<CustomAttrs, this>) {
     super.oncreate(vnode);
 
-    app.setTitle(app.forum.attribute('storeName') || app.translator.trans('mattoid-store.forum.tital'));
+    app.setTitle(app.forum.attribute('storeName') || extractText(app.translator.trans('mattoid-store.forum.tital')));
     app.setTitleCount(0);
 
     this.status = Stream('1');
@@ -35,13 +40,15 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
             <div className="StorePage-results sideNavOffset">
               <h2 class="BadgeOverviewTitle">{app.forum.attribute('storeName') || app.translator.trans('mattoid-store.forum.tital')}</h2>
               <div className="Store-Body">
-                {this.storeList.map((item) => {
+                {this.storeList.map((item: StoreApiResource) => {
                   if (
                     !item.attributes.hide ||
-                    app.session.user.attribute('can' + item.attributes.code.slice(0, 1).toUpperCase() + item.attributes.code.slice(1) + 'View')
+                    (app.session.user &&
+                      app.session.user.attribute('can' + item.attributes.code.slice(0, 1).toUpperCase() + item.attributes.code.slice(1) + 'View'))
                   ) {
                     return <div className="storeItemContainer">{StoreItem.component({ item })}</div>;
                   }
+                  return null;
                 })}
               </div>
 
@@ -91,9 +98,9 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
     this.loadResults(this.storeList.length);
   }
 
-  parseResults(results) {
+  parseResults(results: any) {
     this.moreResults = !!results.payload.links && !!results.payload.links.next;
-    [].push.apply(this.storeList, results.payload.data);
+    this.storeList.push(...results.payload.data);
     this.loading = false;
     m.redraw();
 

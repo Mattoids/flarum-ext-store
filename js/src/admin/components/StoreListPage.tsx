@@ -8,10 +8,12 @@ import Stream from 'flarum/common/utils/Stream';
 import StoreListItem from './StoreListItem';
 
 export default class StoreListPage extends ExtensionPage {
-  private storeList: any = [];
+  private storeList: StoreApiResource[] = [];
   private moreResults: boolean = false;
+  private status: Stream<string> = Stream('-1');
+  private type: Stream<string> = Stream('-1');
 
-  oninit(vnode: Mithril.Vnode) {
+  oninit(vnode: Mithril.Vnode<any, this>) {
     super.oninit(vnode);
 
     this.status = Stream('-1');
@@ -70,7 +72,7 @@ export default class StoreListPage extends ExtensionPage {
                     '0': app.translator.trans('mattoid-store.lib.item-status-down'),
                   }}
                   buttonClassName="Button"
-                  onchange={(e) => {
+                  onchange={(e: string) => {
                     this.status(e);
                     this.storeList = [];
                     this.loadResults();
@@ -87,7 +89,7 @@ export default class StoreListPage extends ExtensionPage {
                     limit: app.translator.trans('mattoid-store.lib.item-type-limit'),
                   }}
                   buttonClassName="Button"
-                  onchange={(e) => {
+                  onchange={(e: string) => {
                     this.type(e);
                     this.storeList = [];
                     this.loadResults();
@@ -96,7 +98,7 @@ export default class StoreListPage extends ExtensionPage {
               </div>
             </div>
             <ul style="padding:0px;list-style-type: none;">
-              {this.storeList.map((item) => {
+              {this.storeList.map((item: StoreApiResource) => {
                 return <li style="margin-top:5px;background: var(--body-bg);">{StoreListItem.component({ item })}</li>;
               })}
             </ul>
@@ -146,9 +148,9 @@ export default class StoreListPage extends ExtensionPage {
     this.loadResults(this.storeList.length);
   }
 
-  parseResults(results) {
+  parseResults(results: any) {
     this.moreResults = !!results.payload.links && !!results.payload.links.next;
-    [].push.apply(this.storeList, results.payload.data);
+    this.storeList.push(...results.payload.data);
     this.loading = false;
     m.redraw();
 

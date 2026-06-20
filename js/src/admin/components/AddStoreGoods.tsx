@@ -1,13 +1,14 @@
 import app from 'flarum/admin/app';
 import Modal, { IInternalModalAttrs } from 'flarum/common/components/Modal';
+import type Mithril from 'mithril';
 import Button from 'flarum/common/components/Button';
 import StoreGoodsDetailModal from './StoreGoodsDetailModal';
 
 export default class AddStoreGoods extends Modal {
-  private goodsList: any = [];
+  private goodsList: GoodsTypeResource[] = [];
   private moreResults: boolean = false;
 
-  oninit(vnode) {
+  oninit(vnode: Mithril.Vnode<IInternalModalAttrs, this>) {
     super.oninit(vnode);
 
     this.loadResults();
@@ -24,7 +25,7 @@ export default class AddStoreGoods extends Modal {
   content() {
     return (
       <div>
-        {this.goodsList.map((item: object, index: number) => (
+        {this.goodsList.map((item: GoodsTypeResource, index: number) => (
           <div className="storeItemContainer" style="margin: 10px">
             <div className="ExtensionPage-body">
               <div className="ExtensionPage-settings FlarumBadgesPage" style="margin-top: 10px">
@@ -92,9 +93,9 @@ export default class AddStoreGoods extends Modal {
     this.loadResults(this.goodsList.length);
   }
 
-  parseResults(results) {
+  parseResults(results: any) {
     this.moreResults = !!results.payload.links && !!results.payload.links.next;
-    [].push.apply(this.goodsList, results.payload.data);
+    this.goodsList.push(...results.payload.data);
     this.loading = false;
     m.redraw();
 

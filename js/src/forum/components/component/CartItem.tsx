@@ -1,9 +1,9 @@
 import app from 'flarum/forum/app';
-import Component, { ComponentAttrs } from 'flarum/common/Component';
+import Component from 'flarum/common/Component';
 import Button from 'flarum/common/components/Button';
 import type Mithril from 'mithril';
 
-interface CartItemAttrs extends ComponentAttrs {
+interface CartItemAttrs extends Record<string, any> {
   item: StoreApiResource;
 }
 
@@ -14,7 +14,7 @@ export default class CartItem extends Component<CartItemAttrs> {
   private params: Record<string, any> = {};
   private loading: boolean = false;
 
-  oninit(vnode: Mithril.Vnode) {
+  oninit(vnode: Mithril.Vnode<CartItemAttrs, this>) {
     super.oninit(vnode);
 
     this.cartData = this.attrs.item.attributes;

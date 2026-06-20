@@ -6,7 +6,7 @@
 // API 资源数据
 // API resource data shape
 interface StoreItemData {
-  id: number;
+  id: number | string;
   code: string;
   title: string;
   desc?: string;
@@ -64,21 +64,3 @@ interface StoreBoxField {
   type?: string;
   options?: Record<string, string>;
 }
-
-declare module 'flarum/forum/app';
-declare module 'flarum/admin/app';
-declare module 'flarum/common/extend';
-declare module 'flarum/common/Component';
-declare module 'flarum/common/components/Button';
-declare module 'flarum/common/components/Modal';
-declare module 'flarum/common/components/Page';
-declare module 'flarum/common/components/Select';
-declare module 'flarum/common/components/Switch';
-declare module 'flarum/common/components/TextEditor';
-declare module 'flarum/common/components/LinkButton';
-declare module 'flarum/common/helpers/listItems';
-declare module 'flarum/common/utils/Stream';
-declare module 'flarum/forum/components/IndexPage';
-declare module 'flarum/forum/components/UserPage';
-declare module 'flarum/admin/components/ExtensionPage';
-declare module 'flarum/Component';

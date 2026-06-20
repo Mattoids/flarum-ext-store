@@ -1,13 +1,18 @@
 import app from 'flarum/admin/app';
 import Component from 'flarum/common/Component';
+import type Mithril from 'mithril';
 import Button from 'flarum/common/components/Button';
 import StoreModal from './StoreModal';
 import StoreGoodsDetailModal from './StoreGoodsDetailModal';
 
-export default class StoreListItem extends Component {
-  private storeData: object = {};
+interface StoreListItemAttrs extends Record<string, any> {
+  item: StoreApiResource;
+}
 
-  oninit(vnode) {
+export default class StoreListItem extends Component<StoreListItemAttrs> {
+  private storeData: StoreItemData = {} as StoreItemData;
+
+  oninit(vnode: Mithril.Vnode<StoreListItemAttrs, this>) {
     super.oninit(vnode);
 
     this.storeData = this.attrs.item.attributes;
@@ -15,7 +20,7 @@ export default class StoreListItem extends Component {
 
   view() {
     const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
-    const price = moneyName.replace('[money]', this.storeData.price);
+    const price = String(moneyName).replace('[money]', String(this.storeData.price));
     const data = this.storeData;
 
     const LimitUnit = { days: '天', hour: '小时', minute: '分钟', second: '秒' };
@@ -74,7 +79,7 @@ export default class StoreListItem extends Component {
             {app.translator.trans('mattoid-store.lib.item-stock')}: {this.storeData.stock == -99 ? '无限' : this.storeData.stock} |&nbsp;
             {app.translator.trans('mattoid-store.lib.item-discount')}: {this.storeData.discount ? this.storeData.discount + ' %' : '无'} |&nbsp;
             {app.translator.trans('mattoid-store.lib.item-discount_limit')}: {this.storeData.discountLimit || 0}&nbsp;
-            {LimitUnit[this.storeData.discountLimitUnit]}
+            {LimitUnit[this.storeData.discountLimitUnit as keyof typeof LimitUnit]}
           </div>
           <div>
             {app.translator.trans('mattoid-store.lib.item-type')}: {app.translator.trans('mattoid-store.lib.item-type-' + this.storeData.type)}{' '}

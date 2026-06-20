@@ -1,4 +1,5 @@
 import app from 'flarum/forum/app';
+import type Mithril from 'mithril';
 
 import UserPage from 'flarum/forum/components/UserPage';
 import CartItem from '../component/CartItem';
@@ -7,13 +8,14 @@ import Select from 'flarum/common/components/Select';
 import Stream from 'flarum/common/utils/Stream';
 
 export default class MyCartPage extends UserPage {
-  private type: number = Stream('');
-  private status: number = Stream('1');
-  private autoDeduction: number = Stream('-1');
-  private cartList: any = [];
+  private type: Stream<string> = Stream('');
+  private status: Stream<string> = Stream('1');
+  private autoDeduction: Stream<string> = Stream('-1');
+  private cartList: StoreApiResource[] = [];
   private moreResults: boolean = false;
+  private loading: boolean = false;
 
-  oninit(vnode) {
+  oninit(vnode: Mithril.Vnode<any, this>) {
     super.oninit(vnode);
 
     this.loadUser(m.route.param('username'));
@@ -37,7 +39,7 @@ export default class MyCartPage extends UserPage {
                 '1': app.translator.trans('mattoid-store.lib.item-cart-status-1'),
                 '2': app.translator.trans('mattoid-store.lib.item-cart-status-2'),
               }}
-              onchange={(e) => {
+              onchange={(e: string) => {
                 this.status(e);
                 this.cartList = [];
                 this.loadResults();
@@ -54,7 +56,7 @@ export default class MyCartPage extends UserPage {
                 permanent: app.translator.trans('mattoid-store.lib.item-cart-type-permanent'),
                 limit: app.translator.trans('mattoid-store.lib.item-cart-type-limit'),
               }}
-              onchange={(e) => {
+              onchange={(e: string) => {
                 this.type(e);
                 this.cartList = [];
                 this.loadResults();
@@ -71,7 +73,7 @@ export default class MyCartPage extends UserPage {
                 '0': app.translator.trans('mattoid-store.lib.item-cart-auto-deduction-0'),
                 '1': app.translator.trans('mattoid-store.lib.item-cart-auto-deduction-1'),
               }}
-              onchange={(e) => {
+              onchange={(e: string) => {
                 this.autoDeduction(e);
                 this.cartList = [];
                 this.loadResults();
@@ -80,7 +82,7 @@ export default class MyCartPage extends UserPage {
           </div>
         </div>
         <div>
-          {this.cartList.map((item) => {
+          {this.cartList.map((item: StoreApiResource) => {
             return <div className="">{CartItem.component({ item })}</div>;
           })}
 
@@ -128,9 +130,9 @@ export default class MyCartPage extends UserPage {
     this.loadResults(this.cartList.length);
   }
 
-  parseResults(results) {
+  parseResults(results: any) {
     this.moreResults = !!results.payload.links && !!results.payload.links.next;
-    [].push.apply(this.cartList, results.payload.data);
+    this.cartList.push(...results.payload.data);
     this.loading = false;
     m.redraw();
 
