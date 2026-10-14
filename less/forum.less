@@ -345,36 +345,33 @@
   margin-right: 4px;
 }
 
-/* 背包条目 */
-.BackpackItem-icon {
-  width: 64px;
-  height: 64px;
+/* 背包条目（商店商品卡片风格） */
+.BackpackItem {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  height: 100%;
+  cursor: default;
+}
+.BackpackItem .itemTitle {
+  height: auto;
+  min-height: 22px;
+  -webkit-line-clamp: 1;
+}
+.BackpackItem-info {
+  font-size: 13px;
+  color: var(--muted-color);
+  line-height: 1.5;
+  min-height: 20px;
+}
+.BackpackItem-info .color-green {
+  color: #7bc17c;
+  font-weight: 600;
+}
+.BackpackItem-meta {
   justify-content: center;
 }
-.BackpackItem-icon img,
-.BackpackItem-icon video {
-  max-width: 64px;
-  max-height: 64px;
-  object-fit: contain;
-  border-radius: 8px;
-}
-.BackpackItem-iconPlaceholder {
-  width: 64px;
-  height: 64px;
-  border-radius: 8px;
-  background: var(--control-bg);
-  color: var(--muted-more-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-}
-.BackpackItem-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+.BackpackItem .StoreItem-side .Button {
+  white-space: nowrap;
 }
 
 /* ============ 通用工具类 ============ */

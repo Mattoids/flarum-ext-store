@@ -1,11 +1,14 @@
 import app from 'flarum/forum/app';
-import Component from "flarum/Component";
+import Component from "flarum/common/Component";
 import Button from "flarum/common/components/Button";
 import Alert from "flarum/common/components/Alert";
 
 /**
- * 背包条目
- * Backpack item
+ * 背包条目（商店商品卡片风格）
+ * Backpack item (store goods card style)
+ *
+ * 与商店页 StoreItem 卡片保持一致的视觉结构：
+ * 标题 / 商品图标 / 类型信息 / 底部操作栏。
  *
  * source=store   useType=permanent：[使用]/[取消使用]
  * source=store   useType=consumable：显示剩余件数，[使用] 消耗一件
@@ -38,26 +41,32 @@ export default class BackpackItem extends Component {
     const isVideo = icon && icon.slice(-5) === '.webm';
 
     return (
-      <div className="frame BackpackItem">
-        <div className="row margin-top-10">
-          <div className="col-md-2 BackpackItem-icon">
-            {icon ? (
-              isVideo
-                ? <video autoplay loop muted playsinline><source src={icon} type="video/webm"/></video>
-                : <img src={icon}/>
-            ) : (
-              <span className="BackpackItem-iconPlaceholder"><i className="fas fa-box"/></span>
-            )}
+      <div className="BackpackItem">
+        <div className="itemTitle">
+          {item.title}
+        </div>
+        <div className="StoreItem-icon">
+          {icon ? (
+            isVideo
+              ? <video autoplay loop muted playsinline><source src={icon} type="video/webm"/></video>
+              : <img src={icon}/>
+          ) : (
+            <span className="BackpackItem-iconPlaceholder"><i className="fas fa-box"/></span>
+          )}
+        </div>
+        <div className="BackpackItem-info">
+          {this.renderSourceDetail(item)}
+          {Panel && <Panel item={item} />}
+        </div>
+        <div className="StoreItem-footer">
+          <div className="StoreItem-priceGroup BackpackItem-meta">
+            <span className="StoreItem-type">
+              {item.source === 'store'
+                ? app.translator.trans('mattoid-store.lib.item-use-type-' + (item.useType || 'permanent'))
+                : app.translator.trans('mattoid-store.lib.item-type-' + (item.type || 'permanent'))}
+            </span>
           </div>
-          <div className="col-md-8">
-            <div>
-              <label className="Cart-Label">{app.translator.trans('mattoid-store.lib.item-cart-title')}: </label>
-              <span className="color-green" style="cursor: pointer;" onclick={() => this.showDetail(item)}>{item.title}</span>
-            </div>
-            {this.renderSourceDetail(item)}
-            {Panel && <Panel item={item} />}
-          </div>
-          <div className="col-md-2 BackpackItem-actions">
+          <div className="StoreItem-side">
             {this.renderActions(item)}
           </div>
         </div>
