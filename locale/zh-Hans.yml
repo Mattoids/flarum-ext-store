@@ -41,8 +41,12 @@ mattoid-store:
       section-goods: 商品管理
       section-price: 价格与折扣
       section-validity: 有效期
+      section-purchase-limit: 限购设置
       section-item: 道具设置
       section-icon: 图标
+      goods-purchase-limit-enable: 开启限购
+      goods-purchase-limit-count: 限购数量
+      goods-purchase-limit-period: 限购周期
       days: 天
 
     error:
@@ -85,6 +89,7 @@ mattoid-store:
       goods-invalid-event-fail: 商品失效事件推送失败【{message}】
       request-processing: 请求处理中，请勿重复提交
       buy-success: 购买成功
+      purchase-limit-exceeded: 已达本周期限购数量，请稍后再购买
       cart-no-use: 该商品没有使用功能
       cart-use-fail: 商品使用失败
 

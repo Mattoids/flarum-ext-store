@@ -108,6 +108,19 @@ class BuyGoodsController extends AbstractListController
             }
         }
 
+        // 限购：开启后统计当前用户在限购周期内购买成功的次数，超限直接拒绝
+        if ($store->purchase_limit_enable) {
+            $periodSeconds = self::periodUnitToSeconds($store->purchase_limit_period_unit) * (int) $store->purchase_limit_period;
+            if ($periodSeconds > 0 && $store->purchase_limit_count > 0) {
+                $bought = StoreCartModel::query()->where('user_id', $actor->id)->where('store_id', $store->id)
+                    ->where('status', 1)->where('created_at', '>=', Carbon::now()->subSeconds($periodSeconds))
+                    ->count();
+                if ($bought >= $store->purchase_limit_count) {
+                    throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.purchase-limit-exceeded')]);
+                }
+            }
+        }
+
         $validate = StoreExtend::getValidate($store->code);
         if ($validate && !$validate->validate($actor, $store, $params)) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.validate-fail')]);
@@ -170,5 +183,14 @@ class BuyGoodsController extends AbstractListController
         $this->events->dispatch(new StoreBuyEvent($actor, $store, $cart, $params));
 
         return $store;
+    }
+
+    /**
+     * 限购周期单位换算为秒（与 LimitUnitEnum 保持一致）
+     */
+    private static function periodUnitToSeconds($unit)
+    {
+        $map = ['days' => 86400, 'hour' => 3600, 'minute' => 60, 'second' => 1];
+        return $map[$unit] ?? 0;
     }
 }

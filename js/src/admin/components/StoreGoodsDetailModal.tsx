@@ -32,6 +32,10 @@ export default class StoreGoodsDetailModal extends Modal {
     useType: Stream('permanent'),
     subtype: Stream(''),
     group: Stream(''),
+    purchaseLimitEnable: Stream(0),
+    purchaseLimitCount: Stream(0),
+    purchaseLimitPeriod: Stream(0),
+    purchaseLimitPeriodUnit: Stream('days'),
   };
 
   oninit(vnode) {
@@ -64,6 +68,10 @@ export default class StoreGoodsDetailModal extends Modal {
       this.params.useType = Stream(this.attrs.storeData.useType || 'permanent');
       this.params.subtype = Stream(this.attrs.storeData.subtype || '');
       this.params.group = Stream(this.attrs.storeData.group || '');
+      this.params.purchaseLimitEnable = Stream(this.attrs.storeData.purchaseLimitEnable || 0);
+      this.params.purchaseLimitCount = Stream(this.attrs.storeData.purchaseLimitCount || 0);
+      this.params.purchaseLimitPeriod = Stream(this.attrs.storeData.purchaseLimitPeriod || 0);
+      this.params.purchaseLimitPeriodUnit = Stream(this.attrs.storeData.purchaseLimitPeriodUnit || 'days');
     }
 
     this.loadPlugins();
@@ -241,6 +249,48 @@ export default class StoreGoodsDetailModal extends Modal {
                       }}
                     >
                     </Switch>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="StoreAdminSection">{app.translator.trans("mattoid-store.admin.settings.section-purchase-limit")}</div>
+            <div className="StoreAdminGrid">
+              <div className="StoreAdminField">
+                <label>{app.translator.trans("mattoid-store.admin.settings.goods-purchase-limit-enable")}</label>
+                <div className="StoreAdminInline">
+                  <Switch
+                    state={!!this.params.purchaseLimitEnable()}
+                    onchange={(val) => {
+                      this.params.purchaseLimitEnable = Stream(Number(val))
+                    }}
+                  >
+                  </Switch>
+                </div>
+              </div>
+              {!!this.params.purchaseLimitEnable() && (
+                <div className="StoreAdminField">
+                  <label>{app.translator.trans("mattoid-store.admin.settings.goods-purchase-limit-count")}</label>
+                  <input required class="FormControl" type="number" step="1" min="1" bidi={this.params.purchaseLimitCount}/>
+                </div>
+              )}
+              {!!this.params.purchaseLimitEnable() && (
+                <div className="StoreAdminField">
+                  <label>{app.translator.trans("mattoid-store.admin.settings.goods-purchase-limit-period")}</label>
+                  <div className="StoreAdminInline">
+                    <input required class="FormControl" type="number" step="1" min="1" bidi={this.params.purchaseLimitPeriod}/>
+                    {Select.component({
+                      options: {
+                        'days': app.translator.trans("mattoid-store.lib.item-limit-unit-days"),
+                        'hour': app.translator.trans("mattoid-store.lib.item-limit-unit-hour"),
+                        'minute': app.translator.trans("mattoid-store.lib.item-limit-unit-minute"),
+                        'second': app.translator.trans("mattoid-store.lib.item-limit-unit-second")
+                      },
+                      value: this.params.purchaseLimitPeriodUnit(),
+                      onchange: (val) => {
+                        this.params.purchaseLimitPeriodUnit = Stream(val)
+                      },
+                    })}
                   </div>
                 </div>
               )}

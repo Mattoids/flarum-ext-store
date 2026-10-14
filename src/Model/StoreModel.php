@@ -22,6 +22,8 @@ class StoreModel extends AbstractModel
         'discount', 'discount_limit', 'discount_limit_unit', 'discount_price', 'discount_start_at',
         'type', 'status', 'outtime', 'icon', 'hide', 'repeat', 'desc', 'pop_up',
         'auto_deduction', 'use_type', 'subtype', 'group',
+        'purchase_limit_enable', 'purchase_limit_count',
+        'purchase_limit_period', 'purchase_limit_period_unit',
     ];
 
     protected $dates = ['discount_start_at'];

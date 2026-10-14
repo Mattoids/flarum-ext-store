@@ -45,8 +45,12 @@ mattoid-store:
       section-goods: Goods Management
       section-price: Price & Discount
       section-validity: Validity
+      section-purchase-limit: Purchase Limit
       section-item: Item Settings
       section-icon: Icon
+      goods-purchase-limit-enable: Enable purchase limit
+      goods-purchase-limit-count: Limit per period
+      goods-purchase-limit-period: Limit period
       days: day
 
     error:
@@ -91,6 +95,7 @@ mattoid-store:
       cart-use-fail: Goods usage failed
       request-processing: Request is being processed, please do not resubmit
       buy-success: Purchase successful
+      purchase-limit-exceeded: Purchase limit reached for this period, please try again later
 
   lib:
     item-status-all: All product statuses

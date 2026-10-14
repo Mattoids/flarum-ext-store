@@ -17,7 +17,8 @@ class StoreParamsUtil
         'code', 'title', 'price', 'stock', 'discount', 'discount_limit',
         'discount_limit_unit', 'type', 'status', 'outtime', 'icon',
         'hide', 'repeat', 'desc', 'auto_deduction', 'use_type', 'subtype',
-        'group',
+        'group', 'purchase_limit_enable', 'purchase_limit_count',
+        'purchase_limit_period', 'purchase_limit_period_unit',
     ];
 
     const ALLOWED_TYPES = ['permanent', 'limit'];
@@ -39,6 +40,10 @@ class StoreParamsUtil
         'desc' => '',
         'auto_deduction' => 0,
         'use_type' => 'permanent',
+        'purchase_limit_enable' => 0,
+        'purchase_limit_count' => 0,
+        'purchase_limit_period' => 0,
+        'purchase_limit_period_unit' => 'days',
     ];
 
     /**
@@ -131,6 +136,23 @@ class StoreParamsUtil
                 $fail();
             }
             $data['group'] = $data['group'] === '' ? null : $data['group'];
+        }
+
+        // 限购：0/1 开关 + 非负整数（数量/周期），周期单位复用折扣时限单位枚举
+        if (array_key_exists('purchase_limit_enable', $data)) {
+            $data['purchase_limit_enable'] = !empty($data['purchase_limit_enable']) ? 1 : 0;
+        }
+        foreach (['purchase_limit_count', 'purchase_limit_period'] as $field) {
+            if (array_key_exists($field, $data)) {
+                if (!is_numeric($data[$field]) || $data[$field] < 0) {
+                    $fail();
+                }
+                $data[$field] = (int) $data[$field];
+            }
+        }
+        if (array_key_exists('purchase_limit_period_unit', $data)
+            && (!is_string($data['purchase_limit_period_unit']) || !array_key_exists($data['purchase_limit_period_unit'], LimitUnitEnum::$LIMIT_UNIT))) {
+            $fail();
         }
 
         if (array_key_exists('status', $data)) {
