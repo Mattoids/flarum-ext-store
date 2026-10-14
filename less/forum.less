@@ -151,7 +151,7 @@
 .StoreItem-descWrap {
   position: relative;
 }
-/* 悬停 1 秒后展示的完整描述浮层 */
+/* 悬停 0.5 秒后展示的完整描述浮层 */
 .StoreItem-descTip {
   position: absolute;
   left: 0;
@@ -160,7 +160,10 @@
   margin-bottom: 6px;
   max-height: 240px;
   overflow-y: auto;
+  overflow-x: hidden;
   white-space: pre-line;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   font-size: 13px;
   line-height: 1.6;
   color: var(--text-color);
