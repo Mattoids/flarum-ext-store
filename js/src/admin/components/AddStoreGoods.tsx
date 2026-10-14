@@ -34,14 +34,14 @@ export default class AddStoreGoods extends Modal {
               <div className="StorePluginCard-icon">
                 {item.attributes.icon
                   ? <img src={item.attributes.icon} alt=""/>
-                  : item.attributes.extIcon && item.attributes.extIcon.name
+                  : item.attributes.extIcon && (item.attributes.extIcon.name || item.attributes.extIcon.backgroundImage)
                     ? <span className="StorePluginCard-extIcon"
                             style={{
                               backgroundColor: item.attributes.extIcon.backgroundColor,
                               color: item.attributes.extIcon.color,
                               backgroundImage: item.attributes.extIcon.backgroundImage
                             }}>
-                        <i className={item.attributes.extIcon.name}/>
+                        {item.attributes.extIcon.name ? <i className={item.attributes.extIcon.name}/> : ''}
                       </span>
                     : <i className="fas fa-puzzle-piece"/>}
               </div>
