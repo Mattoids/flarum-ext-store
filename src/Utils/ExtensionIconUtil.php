@@ -34,7 +34,8 @@ class ExtensionIconUtil
             $extPath = str_replace('\\', '/', $extPath);
             if (strpos($classFile, $extPath . '/') === 0) {
                 $icon = $extension->getIcon();
-                return !empty($icon['name']) ? $icon : null;
+                // font-awesome 名与图片图标（backgroundImage）任一存在即视为有效图标
+                return (!empty($icon['name']) || !empty($icon['backgroundImage'])) ? $icon : null;
             }
         }
         return null;
