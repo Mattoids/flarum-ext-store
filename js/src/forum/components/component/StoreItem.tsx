@@ -5,11 +5,18 @@ import StoreBox from "../modal/StoreBox";
 export default class StoreItem extends Component {
   private storeData: object = {}
 
+  private descTimer: any = null
+  private showDescTip: boolean = false
+
   oninit(vnode) {
     super.oninit(vnode);
 
     this.storeData = this.attrs.item.attributes
     this.storeData.id = this.attrs.item.id
+  }
+
+  onremove() {
+    this.clearDescTimer();
   }
 
   view() {
@@ -35,8 +42,15 @@ export default class StoreItem extends Component {
             <source src={this.storeData.icon} type="video/webm"/>
           </video>
         </div>
-        <div className="StoreItem-desc">
-          {this.storeData.desc}
+        <div className="StoreItem-descWrap" onmouseenter={() => this.onDescEnter()} onmouseleave={() => this.onDescLeave()}>
+          <div className="StoreItem-desc">
+            {this.storeData.desc}
+          </div>
+          {this.showDescTip && this.storeData.desc ? (
+            <div className="StoreItem-descTip">
+              {this.storeData.desc}
+            </div>
+          ) : null}
         </div>
         <div className="StoreItem-footer">
           <div className="StoreItem-priceGroup">
@@ -65,6 +79,35 @@ export default class StoreItem extends Component {
       const registry = (app as any).storeRegistry;
       const CustomModal = registry?.priceModal?.get(storeData.code) || registry?.detail?.get(storeData.code);
       app.modal.show(CustomModal || StoreBox, {storeData, onSuccess: this.attrs.onSuccess});
+    }
+  }
+
+  /**
+   * 鼠标移入商品描述区域：1 秒后浮层展示完整描述
+   */
+  onDescEnter() {
+    this.clearDescTimer();
+    this.descTimer = setTimeout(() => {
+      this.showDescTip = true;
+      m.redraw();
+    }, 1000);
+  }
+
+  /**
+   * 鼠标移出商品描述区域：立即隐藏浮层并取消计时
+   */
+  onDescLeave() {
+    this.clearDescTimer();
+    if (this.showDescTip) {
+      this.showDescTip = false;
+      m.redraw();
+    }
+  }
+
+  clearDescTimer() {
+    if (this.descTimer) {
+      clearTimeout(this.descTimer);
+      this.descTimer = null;
     }
   }
 }
