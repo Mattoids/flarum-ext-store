@@ -21,7 +21,17 @@ class StoreUploader{
 
         $this->uploadDir->put($filename, $stream->getContents());
 
-        return $this->uploadDir->url($filename);
+        /*
+         * 只存根相对路径（/assets/mattoid/store/xxx），不存绝对 URL。
+         * 绝对 URL 由磁盘配置的 url 生成，依赖请求时的 Host/协议头，
+         * 经不同域名或缺少 Host 的请求上传会得到 http:// 之类的坏链并永久入库。
+         */
+        $path = parse_url($this->uploadDir->url($filename), PHP_URL_PATH);
+        if (!$path || strpos($path, '/assets/') !== 0) {
+            $path = '/assets/mattoid/store/'.$filename;
+        }
+
+        return $path;
     }
 
     public function getFileMd5(UploadedFileInterface $file)
