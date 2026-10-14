@@ -83,14 +83,14 @@ export default class StoreItem extends Component {
   }
 
   /**
-   * 鼠标移入商品描述区域：1 秒后浮层展示完整描述
+   * 鼠标移入商品描述区域：0.5 秒后浮层展示完整描述
    */
   onDescEnter() {
     this.clearDescTimer();
     this.descTimer = setTimeout(() => {
       this.showDescTip = true;
       m.redraw();
-    }, 1000);
+    }, 500);
   }
 
   /**
