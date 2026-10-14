@@ -26,15 +26,19 @@ export default class StoreListItem extends Component {
     const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
     const price = data.price > 0 ? moneyName.replace('[money]', data.price) : app.translator.trans('mattoid-store.lib.free');
     const isVideo = icon && icon.slice(-5) === '.webm';
+    // CSS 类名 icon（如用户名颜色 decorationStoreColorText2）不能作为图片地址
+    const isClassIcon = icon && icon.indexOf('/') === -1 && icon.indexOf('.') === -1;
     const statusUp = Number(data.status) === 1;
 
     return (
       <div id={"goods" + data.id} className="StoreAdminItem">
         <div className="StoreAdminItem-icon">
           {icon
-            ? (isVideo
-              ? <video autoplay loop muted playsinline><source src={icon} type="video/webm"/></video>
-              : <img src={icon}/>)
+            ? (isClassIcon
+              ? <span className="StoreIconClassPreview">{icon}</span>
+              : isVideo
+                ? <video autoplay loop muted playsinline><source src={icon} type="video/webm"/></video>
+                : <img src={icon}/>)
             : extIcon
               ? <span className="StoreAdminItem-extIcon"
                       style={{

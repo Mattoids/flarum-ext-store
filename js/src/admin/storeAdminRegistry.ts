@@ -14,6 +14,11 @@ import Component from 'flarum/common/Component';
  *   { hideDefaultDesc: true }  隐藏商店弹窗自带的"商品描述"输入框
  *                              （插件自己管理描述时使用，如 invite 的按权限双描述）
  *
+ * iconPicker 注册表：接管商店弹窗"显示图标"面板（按商品 code），
+ * 商品插件可用自己的素材图库替换默认的上传图片列表：
+ *   app.storeAdminRegistry.iconPicker.register('decoration', MyPicker);
+ * 组件 props: { params: 弹窗的 Stream 参数, onSelect: (url) => void }
+ *
  * 未注册时使用 store 扩展提供的默认组件。
  */
 export interface GoodsFormOptions {
@@ -46,6 +51,7 @@ export interface StoreAdminRegistries {
   priceModal: StoreAdminRegistry;
   goodsForm: StoreAdminRegistry;
   listItem: StoreAdminRegistry;
+  iconPicker: StoreAdminRegistry;
 }
 
 export default function initStoreAdminRegistry(): StoreAdminRegistries {
@@ -53,6 +59,7 @@ export default function initStoreAdminRegistry(): StoreAdminRegistries {
     priceModal: new StoreAdminRegistry(),
     goodsForm: new StoreAdminRegistry(),
     listItem: new StoreAdminRegistry(),
+    iconPicker: new StoreAdminRegistry(),
   };
 
   (app as any).storeAdminRegistry = registries;

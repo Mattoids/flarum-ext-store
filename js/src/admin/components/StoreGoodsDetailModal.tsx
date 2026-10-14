@@ -311,7 +311,11 @@ export default class StoreGoodsDetailModal extends Modal {
 
             <div className="StoreAdminField" style={this.params.icon() ? '' : 'display: none'}>
               <div className="StoreIconPreview">
-                <img src={this.params.icon()} style={this.params.icon() && this.params.icon().slice(-5) === '.webm' ? 'display: none' : ''}/>
+                {this.isImageIcon(this.params.icon()) ? (
+                  <img src={this.params.icon()} style={this.params.icon() && this.params.icon().slice(-5) === '.webm' ? 'display: none' : ''}/>
+                ) : (
+                  <span className="StoreIconClassPreview">{this.params.icon()}</span>
+                )}
                 <video autoplay loop muted playsinline style={this.params.icon() && this.params.icon().slice(-5) === '.webm' ? '' : 'display: none'}>
                   <source src={this.params.icon()} type="video/webm"/>
                 </video>
@@ -331,51 +335,69 @@ export default class StoreGoodsDetailModal extends Modal {
           </div>
 
           <div id="StoreIcon" className="Form-group" style="display: none">
-            <div>
-              {
-                this.iconList.map((item) => {
-                  return (
-                    <div className="icon-frame inlineBlock" onclick={() => this.selectIconItem(item.attributes.url)}>
-                      <img className="icon-size" src={item.attributes.url}
-                           style={item.attributes.url && item.attributes.url.slice(-5) === '.webm' ? 'display: none' : ''}/>
-                      <video autoplay loop muted playsinline className="icon-size"
-                             style={item.attributes.url && item.attributes.url.slice(-5) === '.webm' ? '' : 'display: none'}>
-                        <source src={item.attributes.url} type="video/webm"/>
-                      </video>
-                    </div>
-                  )
-                })
+            {(() => {
+              const IconPicker = (app as any).storeAdminRegistry?.iconPicker?.get(this.params.code());
+              if (IconPicker) {
+                return <IconPicker params={this.params} onSelect={(url) => this.selectIconItem(url)} />;
               }
-            </div>
-            {!this.loading && this.iconList.length === 0 && (
-              <div>
-                <div
-                  style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">{app.translator.trans("mattoid-store.lib.list-empty")}</div>
-              </div>
-            )}
+              return (
+                <div>
+                  {
+                    this.iconList.map((item) => {
+                      return (
+                        <div className="icon-frame inlineBlock" onclick={() => this.selectIconItem(item.attributes.url)}>
+                          <img className="icon-size" src={item.attributes.url}
+                               style={item.attributes.url && item.attributes.url.slice(-5) === '.webm' ? 'display: none' : ''}/>
+                          <video autoplay loop muted playsinline className="icon-size"
+                                 style={item.attributes.url && item.attributes.url.slice(-5) === '.webm' ? '' : 'display: none'}>
+                            <source src={item.attributes.url} type="video/webm"/>
+                          </video>
+                        </div>
+                      )
+                    })
+                  }
+                  {!this.loading && this.iconList.length === 0 && (
+                    <div>
+                      <div
+                        style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">{app.translator.trans("mattoid-store.lib.list-empty")}</div>
+                    </div>
+                  )}
 
-            {!this.loading && this.hasMoreResults() && (
-              <div style="text-align:center;padding:20px">
-                <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading} onclick={() => this.loadMore()}>
-                  {app.translator.trans('mattoid-store.lib.list-load-more')}
-                </Button>
-              </div>
-            )}
+                  {!this.loading && this.hasMoreResults() && (
+                    <div style="text-align:center;padding:20px">
+                      <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading} onclick={() => this.loadMore()}>
+                        {app.translator.trans('mattoid-store.lib.list-load-more')}
+                      </Button>
+                    </div>
+                  )}
 
-            {this.loading && (
-              <div class="DiscussionList">
-                <div class="DiscussionList-loadMore">
-                  <div aria-label="loading…" role="status" data-size="medium"
-                       class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium">
-                    <div aria-hidden="true" class="LoadingIndicator"></div>
-                  </div>
+                  {this.loading && (
+                    <div class="DiscussionList">
+                      <div class="DiscussionList-loadMore">
+                        <div aria-label="loading…" role="status" data-size="medium"
+                             class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium">
+                          <div aria-hidden="true" class="LoadingIndicator"></div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
         </div>
       </div>
     );
+  }
+
+  /**
+   * icon 是否为图片/视频地址；CSS 类名（如用户名颜色 decorationStoreColorText2）
+   * 不含路径分隔符或扩展名，不能作为图片 src 渲染
+   */
+  isImageIcon(icon: string): boolean {
+    if (!icon) { return false; }
+    if (icon.indexOf('/') === -1 && icon.indexOf('.') === -1) { return false; }
+    return icon.slice(-5) !== '.webm';
   }
 
   loadIconList(offset = 0) {
@@ -434,8 +456,12 @@ export default class StoreGoodsDetailModal extends Modal {
     $("#StoreIcon").css("display","block");
     $("#storeCloseIconButton").css("display","block");
     this.pageTitle = app.translator.trans('mattoid-store.admin.settings.show-icon-button');
-    this.iconList = [];
-    this.loadIconList();
+
+    // 商品插件注册了自定义图库（iconPicker）时，不加载默认上传图片列表
+    if (!(app as any).storeAdminRegistry?.iconPicker?.get(this.params.code())) {
+      this.iconList = [];
+      this.loadIconList();
+    }
   }
 
   uploadIcon(event) {
