@@ -16,7 +16,7 @@ export default class StoreItem extends Component {
     // 商品插件可注册自定义商品卡片，未注册时使用默认展示
     const CustomItem = (app as any).storeRegistry?.item?.get(this.attrs.item.attributes.code);
     if (CustomItem) {
-      return <CustomItem item={this.attrs.item} />;
+      return <CustomItem item={this.attrs.item} onSuccess={this.attrs.onSuccess} />;
     }
 
     const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
