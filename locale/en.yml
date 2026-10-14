@@ -47,8 +47,10 @@ mattoid-store:
       section-price: Price & Discount
       section-validity: Validity
       section-purchase-limit: Purchase Limit
+      section-plugin: Plugin Settings
       section-item: Item Settings
       section-icon: Icon
+      goods-icon-hint: Supports an image URL, video URL, or decoration style class (e.g. username color class)
       goods-purchase-limit-enable: Enable purchase limit
       goods-purchase-limit-count: Limit per period
       goods-purchase-limit-period: Limit period

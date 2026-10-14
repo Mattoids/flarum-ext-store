@@ -43,8 +43,10 @@ mattoid-store:
       section-price: 价格与折扣
       section-validity: 有效期
       section-purchase-limit: 限购设置
+      section-plugin: 插件扩展设置
       section-item: 道具设置
       section-icon: 图标
+      goods-icon-hint: 支持图片地址、视频地址或装饰样式类名（如用户名颜色样式类）
       goods-purchase-limit-enable: 开启限购
       goods-purchase-limit-count: 限购数量
       goods-purchase-limit-period: 限购周期

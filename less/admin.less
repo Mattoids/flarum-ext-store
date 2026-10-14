@@ -322,33 +322,67 @@
   border-top: 1px solid var(--control-bg);
 }
 
-/* ============ 添加/编辑商品表单 ============ */
+/* ============ 添加/编辑商品表单（卡片式布局） ============ */
 
-/* 分区标题 */
-.StoreAdminSection {
-  margin: 22px 0 4px;
-  padding-bottom: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--primary-color);
-  border-bottom: 1px solid var(--control-bg);
+.StoreGoodsForm {
+  max-width: 780px;
+  margin: 0 auto;
 }
 
-/* 顶部操作行：状态 / 重复购买 / 隐藏 / 插件 */
+/* 顶部状态栏 */
 .StoreGoodsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 18px;
+  background: var(--control-bg);
+  border-radius: 12px;
+}
+.StoreGoodsHeader-switches {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 22px;
-  padding: 4px 2px 12px;
-  border-bottom: 1px solid var(--control-bg);
 }
 .StoreGoodsHeader-label {
   font-size: 13px;
   font-weight: 600;
+  color: var(--muted-color);
 }
 .StoreGoodsHeader-code {
   margin-left: auto;
+}
+
+/* 卡片分区 */
+.StoreAdminCard {
+  margin-top: 14px;
+  padding: 16px 18px 18px;
+  background: var(--control-bg);
+  border-radius: 12px;
+}
+.StoreAdminCard-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-color);
+}
+.StoreAdminCard-title::before {
+  content: '';
+  width: 3px;
+  height: 14px;
+  border-radius: 2px;
+  background: var(--primary-color);
+}
+.StoreAdminCard--plugin .StoreAdminCard-title::before {
+  background: var(--alert-success-color, #7bc17c);
+}
+.StoreAdminCard-body .StoreAdminField:first-child {
+  margin-top: 0;
 }
 
 /* 响应式字段网格 */
@@ -356,6 +390,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   column-gap: 16px;
+  row-gap: 2px;
 }
 .StoreAdminGrid .Select {
   display: flex;
@@ -393,12 +428,13 @@
 }
 .StoreCodeChip {
   display: inline-block;
-  padding: 3px 12px;
+  padding: 4px 14px;
   border-radius: 999px;
-  background: var(--control-bg);
-  color: var(--muted-color);
-  font-size: 13px;
-  font-weight: 600;
+  background: color-mix(in srgb, var(--primary-color) 13%, transparent);
+  color: var(--primary-color);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
   cursor: pointer;
   border-bottom: none !important;
 }
@@ -436,7 +472,23 @@
   pointer-events: none;
 }
 
-/* 图标输入行：输入框拉伸，按钮不折行 */
+/* 图标区：左侧输入 + 右侧预览 */
+.StoreAdminIconRow {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+.StoreAdminIconRow-main {
+  flex: 1;
+  min-width: 0;
+}
+.StoreAdminIconRow-main .StoreAdminField {
+  margin-top: 0;
+}
+.StoreAdminIconRow-preview {
+  margin-top: 0;
+  flex-shrink: 0;
+}
 .StoreGoodsModal .StoreAdminInline .FormControl {
   flex: 1;
   min-width: 0;
@@ -451,17 +503,18 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 96px;
-  min-height: 96px;
+  width: 110px;
+  height: 110px;
   padding: 10px;
   border: 1px solid var(--control-bg);
   border-radius: 10px;
   background: var(--body-bg);
+  overflow: hidden;
 }
 .StoreIconPreview img,
 .StoreIconPreview video {
-  max-width: 96px;
-  max-height: 96px;
+  max-width: 90px;
+  max-height: 90px;
   object-fit: contain;
 }
 /* CSS 类名图标（如用户名颜色样式类）的效果预览：渲染真实装饰效果 + 类名标注 */
@@ -484,13 +537,15 @@
 
 /* 提交按钮 */
 .StoreGoodsSubmit {
-  margin-top: 22px;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
   padding-top: 16px;
   border-top: 1px solid var(--control-bg);
 }
 .StoreGoodsSubmit .Button--primary {
-  padding-left: 32px;
-  padding-right: 32px;
+  padding: 8px 36px;
+  font-weight: 600;
 }
 
 /* 图标选择网格 */
@@ -505,11 +560,11 @@
   padding: 8px;
   margin: 6px;
   cursor: pointer;
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 .icon-frame:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 16%, transparent);
 }
 .icon-frame img,
 .icon-frame video {
