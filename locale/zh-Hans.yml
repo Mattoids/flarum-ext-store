@@ -30,6 +30,7 @@ mattoid-store:
       goods-item-status-0: 确定要上架该物品吗？
       goods-item-status-1: 确定要下架该物品吗？
       show-icon-button: 图库
+      goods-icon-effect-preview: 样式预览效果
       goods-auto-deduction: 自动扣费
       goods-use-type: 使用方式
       goods-subtype: 道具类型

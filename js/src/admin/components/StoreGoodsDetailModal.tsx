@@ -364,7 +364,10 @@ export default class StoreGoodsDetailModal extends Modal {
                 {this.isImageIcon(this.params.icon()) ? (
                   <img src={this.params.icon()} style={this.params.icon() && this.params.icon().slice(-5) === '.webm' ? 'display: none' : ''}/>
                 ) : (
-                  <span className="StoreIconClassPreview">{this.params.icon()}</span>
+                  <div className="StoreIconEffectPreview">
+                    <div className={this.params.icon()}>{app.translator.trans('mattoid-store.admin.settings.goods-icon-effect-preview')}</div>
+                    <span className="StoreIconEffectClassName">{this.params.icon()}</span>
+                  </div>
                 )}
                 <video autoplay loop muted playsinline style={this.params.icon() && this.params.icon().slice(-5) === '.webm' ? '' : 'display: none'}>
                   <source src={this.params.icon()} type="video/webm"/>

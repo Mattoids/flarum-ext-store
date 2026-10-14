@@ -34,6 +34,7 @@ mattoid-store:
       goods-item-status-0: Are you sure you want to list this item？
       goods-item-status-1: Are you sure you want to remove this item from the shelves？
       show-icon-button: Gallery
+      goods-icon-effect-preview: Style Preview
       goods-auto-deduction: Auto Deduction
       goods-use-type: Use type
       goods-subtype: Item type

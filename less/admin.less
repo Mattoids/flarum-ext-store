@@ -464,20 +464,22 @@
   max-height: 96px;
   object-fit: contain;
 }
-/* CSS 类名图标（如用户名颜色样式类）的文本预览 */
-.StoreIconClassPreview {
-  display: inline-flex;
+/* CSS 类名图标（如用户名颜色样式类）的效果预览：渲染真实装饰效果 + 类名标注 */
+.StoreIconEffectPreview {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-width: 64px;
-  min-height: 40px;
-  padding: 6px 10px;
-  border: 1px dashed var(--muted-more-color);
-  border-radius: 8px;
-  font-size: 12px;
-  color: var(--muted-color);
-  word-break: break-all;
+  gap: 8px;
   text-align: center;
+}
+.StoreIconEffectPreview > div {
+  font-size: 18px;
+  line-height: 1.6;
+}
+.StoreIconEffectClassName {
+  font-size: 12px;
+  color: var(--muted-more-color);
+  word-break: break-all;
 }
 
 /* 提交按钮 */
