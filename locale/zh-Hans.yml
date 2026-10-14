@@ -58,6 +58,12 @@ mattoid-store:
     buy-goods: 购买商品：{title}
     buy-goods-fail: 商品退款：{title}
     auto-deduction: 商品自动扣费：{title}
+
+    # 资金流水文案（huoxin/money-with-history 历史记录通过 source_key 引用）
+    money-history:
+      buy-goods: 购买商品：{title}
+      buy-goods-fail: 商品退款：{title}
+      auto-deduction: 商品自动扣费：{title}
     infinite: 无限
     free: 免费
     days: 天

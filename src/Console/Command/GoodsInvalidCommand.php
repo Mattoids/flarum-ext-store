@@ -14,6 +14,7 @@ use Mattoid\Store\Exception\RenewalLockException;
 use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Model\StoreModel;
+use Mattoid\Store\Service\StoreMoneyManager;
 
 /**
  * 处理失效商品通知逻辑
@@ -23,12 +24,14 @@ class GoodsInvalidCommand extends AbstractCommand
     protected $cache;
     protected $events;
     protected $translator;
+    protected $money;
 
-    public function __construct(Translator $translator, Repository $cache, Dispatcher $events) {
+    public function __construct(Translator $translator, Repository $cache, Dispatcher $events, StoreMoneyManager $money) {
         parent::__construct();
         $this->cache = $cache;
         $this->events = $events;
         $this->translator = $translator;
+        $this->money = $money;
     }
 
     protected function configure()
@@ -111,23 +114,24 @@ class GoodsInvalidCommand extends AbstractCommand
         if (!$user) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.user-balance-low')]);
         }
-        // 原子扣款：仅当余额仍足额时扣减，防止并发透支
-        $affected = User::query()->where('id', $user->id)->where('money', '>=', $cart->price)->decrement('money', $cart->price);
-        if (!$affected) {
+        // 续费扣款交由资金管理器：优先 checkin-with-history 资金体系，未安装时回退原生 SQL
+        $paid = $this->money->pay(
+            $user,
+            $cart->price,
+            'AUTODEDUCTION',
+            'mattoid-store.forum.money-history.auto-deduction',
+            ['title' => $store->title],
+            $this->translator->trans('mattoid-store.forum.auto-deduction', ['title' => $store->title])
+        );
+        if (!$paid) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.user-balance-low')]);
         }
-        $user->money -= $cart->price;
 
         // 刷新过期时间与续费时间（保留原始购买时间 created_at）
         $cart->pay_amt = $cart->price;
         $cart->outtime = Carbon::now()->addDays($store->outtime);
         $cart->renewed_at = Carbon::now();
         $cart->save();
-
-        // 通知资金消费记录插件
-        if (class_exists('Mattoid\MoneyHistory\Event\MoneyHistoryEvent')) {
-            $this->events->dispatch(new \Mattoid\MoneyHistory\Event\MoneyHistoryEvent($user, -$cart->price, 'AUTODEDUCTION', $this->translator->trans("mattoid-store.forum.auto-deduction", ['title' => $store->title]), ''));
-        }
 
         $this->cache->delete($key);
     }

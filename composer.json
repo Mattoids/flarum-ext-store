@@ -9,6 +9,9 @@
     "require": {
         "flarum/core": "^1.2.0"
     },
+    "suggest": {
+        "huoxin/money-with-history": "启用后商店所有资金变动（购买/退款/续费扣款）交由其托管，自动记录资金流水"
+    },
     "authors": [
         {
             "name": "mattoid",

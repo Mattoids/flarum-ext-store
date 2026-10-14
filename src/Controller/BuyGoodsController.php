@@ -21,6 +21,7 @@ use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Model\StoreModel;
 use Mattoid\Store\Serializer\GoodsSerializer;
+use Mattoid\Store\Service\StoreMoneyManager;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Tobscure\JsonApi\Document;
@@ -37,13 +38,15 @@ class BuyGoodsController extends AbstractListController
     protected $events;
     protected $cache;
     protected $log;
+    protected $money;
 
-    public function __construct(Dispatcher $events, Translator $translator, CacheContract $cache, LoggerInterface $log)
+    public function __construct(Dispatcher $events, Translator $translator, CacheContract $cache, LoggerInterface $log, StoreMoneyManager $money)
     {
         $this->events = $events;
         $this->translator = $translator;
         $this->cache = $cache;
         $this->log = $log;
+        $this->money = $money;
     }
 
     protected function data(ServerRequestInterface $request, Document $document) {
@@ -124,19 +127,21 @@ class BuyGoodsController extends AbstractListController
         $carts = $this->events->dispatch(new StoreCartAddEvent($actor, $store, $price));
         $cart = array_shift($carts);
 
-        // 原子扣款：仅当余额仍足额时扣减，防止并发透支
-        $affected = $actor->newQuery()->where('id', $actor->id)->where('money', '>=', $price)->decrement('money', $price);
-        if (!$affected) {
+        // 扣款交由资金管理器：优先 checkin-with-history 资金体系，未安装时回退原生 SQL
+        $paid = $this->money->pay(
+            $actor,
+            $price,
+            'STOREBUYGOODS',
+            'mattoid-store.forum.money-history.buy-goods',
+            ['title' => $store->title],
+            $this->translator->trans('mattoid-store.forum.buy-goods', ['title' => $store->title]),
+            $actor
+        );
+        if (!$paid) {
             // 扣费失败：库存回补 + 移除未扣费的购物车记录（同事务，不会留下半成品）
             $this->events->dispatch(new StoreStockAddEvent($store));
             $cart->delete();
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.user-balance-low')]);
-        }
-        $actor->money -= $price;
-
-        // 通知资金消费记录插件
-        if (class_exists('Mattoid\MoneyHistory\Event\MoneyHistoryEvent')) {
-            $this->events->dispatch(new \Mattoid\MoneyHistory\Event\MoneyHistoryEvent($actor, -$price, 'STOREBUYGOODS', $this->translator->trans("mattoid-store.forum.buy-goods", ['title' => $store->title]), ''));
         }
 
         // 处理商品插件后置事件

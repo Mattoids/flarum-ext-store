@@ -62,6 +62,12 @@ mattoid-store:
     buy-goods: Goods goods：{title}
     buy-goods-fail: Product refund：{title}
     auto-deduction: Automatic deduction of fees for products：{title}
+
+    # Money history labels (referenced by source_key in huoxin/money-with-history records)
+    money-history:
+      buy-goods: Purchase goods：{title}
+      buy-goods-fail: Product refund：{title}
+      auto-deduction: Automatic deduction of fees for products：{title}
     infinite: Infinite
     free: Free
     days: day
