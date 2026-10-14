@@ -164,10 +164,12 @@ export default class StoreGoodsDetailModal extends Modal {
               <label>{app.translator.trans("mattoid-store.admin.settings.goods-title")}</label>
               <input required class="FormControl" type="text" bidi={this.params.title}/>
             </div>
-            <div className="StoreAdminField">
-              <label>{app.translator.trans("mattoid-store.admin.settings.goods-desc")}</label>
-              <textarea class="FormControl" bidi={this.params.desc} rows="3"></textarea>
-            </div>
+            {!(app as any).storeAdminRegistry?.goodsForm?.has(this.params.code()) && (
+              <div className="StoreAdminField">
+                <label>{app.translator.trans("mattoid-store.admin.settings.goods-desc")}</label>
+                <textarea class="FormControl" bidi={this.params.desc} rows="3"></textarea>
+              </div>
+            )}
 
             <div className="StoreAdminSection">{app.translator.trans("mattoid-store.admin.settings.section-price")}</div>
             <div className="StoreAdminGrid">
