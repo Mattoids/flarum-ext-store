@@ -23,11 +23,11 @@ export default class BackpackPage extends UserPage {
     return (
       <div className="Post-body">
         <h2 class="BadgeOverviewTitle">{app.translator.trans('mattoid-store.forum.backpack')}</h2>
-        <div className="Store-Body">
+        <div className="Store-Body Backpack-Body">
           {
             this.items.map((item) => {
               return (
-                <div className="storeItemContainer" key={item.id}>
+                <div className="storeItemContainer backpackItemContainer" key={item.id}>
                   {BackpackItem.component({item: item, onChanged: () => this.loadResults()})}
                 </div>
               );

@@ -374,6 +374,39 @@
   white-space: nowrap;
 }
 
+/* 背包卡片：个人中心内容区较窄，用更紧凑的尺寸让一行能放更多商品 */
+.backpackItemContainer {
+  width: 200px;
+  height: 290px;
+  padding: 12px;
+}
+@media (max-width: 576px) {
+  .backpackItemContainer {
+    width: 46%;
+    max-width: none;
+    height: auto;
+    min-height: 260px;
+  }
+}
+.Backpack-Body {
+  gap: 12px;
+}
+.BackpackItem .StoreItem-icon {
+  height: 100px;
+  margin: 8px 0;
+}
+.BackpackItem .StoreItem-icon img,
+.BackpackItem .StoreItem-icon video {
+  max-width: 90px;
+  max-height: 100px;
+}
+.BackpackItem .StoreItem-footer {
+  padding-top: 8px;
+}
+.BackpackItem-info {
+  font-size: 12px;
+}
+
 /* ============ 通用工具类 ============ */
 .center {
   text-align: center;
