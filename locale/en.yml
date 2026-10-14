@@ -107,6 +107,8 @@ mattoid-store:
     item-status-1: Listing
     item-price: Price
     item-stock: Stock
+    infinite: Infinite
+    free: Free
     item-discount: discount
     item-discount_limit: Discount period
     item-type: Goods type

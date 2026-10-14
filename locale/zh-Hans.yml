@@ -123,6 +123,8 @@ mattoid-store:
     item-status-1: 上架
     item-price: 价格
     item-stock: 库存
+    infinite: 无限
+    free: 免费
     item-discount: 折扣
     item-discount_limit: 折扣期限
     item-type: 购买类型

@@ -24,7 +24,7 @@ export default class StoreListItem extends Component {
     const icon = data.icon || data.pluginIcon;
     const extIcon = data.pluginExtIcon;
     const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
-    const price = data.price > 0 ? moneyName.replace('[money]', data.price) : app.translator.trans('mattoid-store.forum.free');
+    const price = data.price > 0 ? moneyName.replace('[money]', data.price) : app.translator.trans('mattoid-store.lib.free');
     const isVideo = icon && icon.slice(-5) === '.webm';
     const statusUp = Number(data.status) === 1;
 
@@ -57,7 +57,7 @@ export default class StoreListItem extends Component {
           {data.desc && <div className="StoreAdminItem-desc">{data.desc}</div>}
           <div className="StoreAdminItem-meta">
             <span>{app.translator.trans('mattoid-store.lib.item-price')}: <b>{price}</b></span>
-            <span>{app.translator.trans('mattoid-store.lib.item-stock')}: <b>{data.stock == -99 ? app.translator.trans('mattoid-store.forum.infinite') : data.stock}</b></span>
+            <span>{app.translator.trans('mattoid-store.lib.item-stock')}: <b>{data.stock == -99 ? app.translator.trans('mattoid-store.lib.infinite') : data.stock}</b></span>
             {Number(data.discount) > 0 && (
               <span>{app.translator.trans('mattoid-store.lib.item-discount')}: <b>{data.discount}%</b></span>
             )}
