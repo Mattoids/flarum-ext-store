@@ -1,17 +1,13 @@
-import app from 'flarum/forum/app';
 import Component from "flarum/Component";
-import Button from "flarum/common/components/Button";
 
 export default class StoreItem extends Component {
 
   private cartData: any = {};
-  private params: any = {};
 
   oninit(vnode) {
     super.oninit(vnode);
 
     this.cartData = this.attrs.item.attributes;
-    this.params.id = this.attrs.item.id;
   }
 
   view() {
@@ -29,7 +25,7 @@ export default class StoreItem extends Component {
     return (
       <div className="frame">
         <div className="row margin-top-10">
-          <div className="col-md-10">
+          <div className="col-md-12">
             <div>
               <label className="Cart-Label">{app.translator.trans('mattoid-store.lib.item-cart-title')}: </label> <span className="color-green">{this.cartData.title}</span> &nbsp;|&nbsp;
               <label className="Cart-Label">{app.translator.trans('mattoid-store.lib.item-cart-pay-amt')}: </label> <span className="color-red">{payAmt}</span> &nbsp;|&nbsp;
@@ -57,38 +53,8 @@ export default class StoreItem extends Component {
               className="">{this.cartData.createdAt}</span>
             </div>
           </div>
-          <div className="col-md-2 BackpackItem-actions">
-            {
-              this.cartData.enableType == 1 ?
-              Button.component({
-                type: 'submit',
-                className: 'Button Button--primary',
-                loading: this.loading,
-                onclick: (e) => {
-                  this.onsubmit(e)
-                }
-              }, app.translator.trans(this.cartData.enable == 0 ? 'mattoid-store.lib.item-cart-button-use' : 'mattoid-store.lib.item-cart-button-cancel'))
-                : ""
-            }
-          </div>
         </div>
       </div>
     )
-  }
-
-  onsubmit(event: Event) {
-    event.preventDefault();
-    this.loading = true;
-
-    app.request({
-      method: 'POST',
-      url: app.forum.attribute('apiUrl') + '/store/use/goods',
-      body: this.params
-    }).then(
-      () => location.reload(),
-      (result) => {
-        this.loading = false;
-        // this.handleErrors(result);
-      });
   }
 }

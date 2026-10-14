@@ -19,16 +19,11 @@ import Alert from "flarum/common/components/Alert";
  */
 export default class BackpackItem extends Component {
 
-  private item: any = {};
   private loading: boolean = false;
 
-  oninit(vnode) {
-    super.oninit(vnode);
-    this.item = this.attrs.item.attributes || {};
-  }
-
   view() {
-    const item = this.item;
+    // 每次渲染直接读 attrs，避免背包刷新后复用组件实例导致状态过期
+    const item = this.attrs.item.attributes || {};
 
     // 商品插件可整体替换背包条目（props: item / onChanged）
     const CustomItem = (app as any).storeRegistry?.backpackItem?.get(item.code);
@@ -42,8 +37,13 @@ export default class BackpackItem extends Component {
 
     return (
       <div className="BackpackItem">
-        <div className="itemTitle">
-          {item.title}
+        <div className="BackpackItem-titleRow">
+          <div className="itemTitle" title={item.title}>{item.title}</div>
+          <span className="StoreItem-type BackpackItem-typeBadge">
+            {item.source === 'store'
+              ? app.translator.trans('mattoid-store.lib.item-use-type-' + (item.useType || 'permanent'))
+              : app.translator.trans('mattoid-store.lib.item-type-' + (item.type || 'permanent'))}
+          </span>
         </div>
         <div className="StoreItem-icon">
           {icon ? (
@@ -58,17 +58,8 @@ export default class BackpackItem extends Component {
           {this.renderSourceDetail(item)}
           {Panel && <Panel item={item} />}
         </div>
-        <div className="StoreItem-footer">
-          <div className="StoreItem-priceGroup BackpackItem-meta">
-            <span className="StoreItem-type">
-              {item.source === 'store'
-                ? app.translator.trans('mattoid-store.lib.item-use-type-' + (item.useType || 'permanent'))
-                : app.translator.trans('mattoid-store.lib.item-type-' + (item.type || 'permanent'))}
-            </span>
-          </div>
-          <div className="StoreItem-side">
-            {this.renderActions(item)}
-          </div>
+        <div className="BackpackItem-actionsRow">
+          {this.renderActions(item)}
         </div>
       </div>
     );
@@ -111,7 +102,7 @@ export default class BackpackItem extends Component {
           : app.translator.trans('mattoid-store.lib.backpack-use');
 
       return (
-        <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading}
+        <Button className={'Button Button--primary BackpackItem-fullBtn'} disabled={this.loading} loading={this.loading}
                 onclick={() => this.useStoreItem(item)}>
           {label}
         </Button>
@@ -121,7 +112,7 @@ export default class BackpackItem extends Component {
     // decoration：佩戴/卸下，走装饰店原接口
     const equip = !item.itemStatus;
     return (
-      <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading}
+      <Button className={'Button Button--primary BackpackItem-fullBtn'} disabled={this.loading} loading={this.loading}
               onclick={() => this.toggleDecoration(item, equip)}>
         {equip ? app.translator.trans('mattoid-store.lib.backpack-equip') : app.translator.trans('mattoid-store.lib.backpack-unequip')}
       </Button>

@@ -367,10 +367,30 @@
   color: #7bc17c;
   font-weight: 600;
 }
-.BackpackItem-meta {
-  justify-content: center;
+.BackpackItem-titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
 }
-.BackpackItem .StoreItem-side .Button {
+.BackpackItem-titleRow .itemTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.BackpackItem-typeBadge {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.BackpackItem-actionsRow {
+  margin-top: auto;
+  padding-top: 8px;
+}
+.BackpackItem .BackpackItem-fullBtn {
+  width: 100%;
   white-space: nowrap;
 }
 
@@ -399,9 +419,6 @@
 .BackpackItem .StoreItem-icon video {
   max-width: 90px;
   max-height: 100px;
-}
-.BackpackItem .StoreItem-footer {
-  padding-top: 8px;
 }
 .BackpackItem-info {
   font-size: 12px;
