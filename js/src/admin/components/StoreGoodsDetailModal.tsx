@@ -10,7 +10,9 @@ export default class StoreGoodsDetailModal extends Modal {
   private pageTitle: string = ""
   private moreResults: boolean = false
   private iconList: Array = [];
+  private itemTypes: any = [];
   private method: string = 'POST';
+  private static pluginList: any = null;
   private params: object = {
     status: Stream(1),
     code: Stream(),
@@ -27,6 +29,9 @@ export default class StoreGoodsDetailModal extends Modal {
     hide: Stream(0),
     repeat: Stream(1),
     autoDeduction: Stream(0),
+    useType: Stream('permanent'),
+    subtype: Stream(''),
+    group: Stream(''),
   };
 
   oninit(vnode) {
@@ -56,11 +61,45 @@ export default class StoreGoodsDetailModal extends Modal {
       this.params.hide = Stream(this.attrs.storeData.hide);
       this.params.repeat = Stream(this.attrs.storeData.repeat);
       this.params.autoDeduction = Stream(this.attrs.storeData.autoDeduction);
+      this.params.useType = Stream(this.attrs.storeData.useType || 'permanent');
+      this.params.subtype = Stream(this.attrs.storeData.subtype || '');
+      this.params.group = Stream(this.attrs.storeData.group || '');
     }
+
+    this.loadPlugins();
+  }
+
+  /**
+   * 加载已注册商品插件列表（运行时注册表），用于 subtype 下拉选项
+   */
+  loadPlugins() {
+    if (StoreGoodsDetailModal.pluginList) {
+      this.applyItemTypes();
+      return;
+    }
+
+    app.store
+      .find('/store/goods')
+      .then((results) => {
+        StoreGoodsDetailModal.pluginList = results.payload.data || [];
+        this.applyItemTypes();
+        m.redraw();
+      })
+      .catch(() => {
+        StoreGoodsDetailModal.pluginList = [];
+        this.applyItemTypes();
+      });
+  }
+
+  applyItemTypes() {
+    const code = this.params.code ? this.params.code() : (this.attrs.code || '');
+    const plugin = (StoreGoodsDetailModal.pluginList || []).find((p) => p.attributes && p.attributes.code === code);
+    this.itemTypes = plugin && plugin.attributes.itemTypes ? plugin.attributes.itemTypes : [];
+    m.redraw();
   }
 
   className() {
-    return '';
+    return 'Modal--large StoreGoodsModal';
   }
 
   title() {
@@ -87,60 +126,69 @@ export default class StoreGoodsDetailModal extends Modal {
       <div className="Modal-body" oncreate={this.onModalReady.bind(this)}>
         <div className="Form">
           <div id="StoreGoods" className="Form-group">
-            <div style="text-align: left;">
-              <div class="spacing" style="display: flex; align-items: center;">
-                <span>{app.translator.trans("mattoid-store.admin.settings.goods-status")}</span>
-                <span style="margin-left: 15px;">
-                    <Switch state={this.params.status()}
-                            onchange={(val) => {
-                              this.params.status = Stream(Number(val))
-                            }}
-                    > </Switch>
-                </span>
+            {/* 顶部：状态 / 重复购买 / 隐藏 / 插件 */}
+            <div className="StoreGoodsHeader">
+              <div className="StoreAdminInline">
+                <span className="StoreGoodsHeader-label">{app.translator.trans("mattoid-store.admin.settings.goods-status")}</span>
+                <Switch state={this.params.status()}
+                        onchange={(val) => {
+                          this.params.status = Stream(Number(val))
+                        }}
+                > </Switch>
               </div>
-              <div class="spacing" style="display: flex; align-items: center;">
-                <span>{app.translator.trans("mattoid-store.admin.settings.goods-code")}</span>
-                <span
-                  style="font-weight: normal; cursor: pointer; border-bottom: 2px dotted; margin-left: 15px;"> {this.params.code()} </span>
+              <div className="StoreAdminInline">
+                <Switch
+                  state={this.params.repeat()}
+                  onchange={(val) => {
+                    this.params.repeat = Stream(Number(val))
+                  }}
+                >
+                  {app.translator.trans("mattoid-store.admin.settings.goods-repeat")}
+                </Switch>
               </div>
-              <div class="spacing" style="align-items: center;">
-                <div
-                  className="">{app.translator.trans("mattoid-store.admin.settings.goods-title")}
-                </div>
-                <input required class="FormControl" type="text" bidi={this.params.title}/>
+              <div className="StoreAdminInline">
+                <Switch
+                  state={this.params.hide()}
+                  onchange={(val) => {
+                    this.params.hide = Stream(Number(val))
+                  }}
+                >
+                  {app.translator.trans("mattoid-store.admin.settings.goods-hide")}
+                </Switch>
               </div>
-              <div class="spacing" style="align-items: center;">
-                <div
-                  className="">{app.translator.trans("mattoid-store.admin.settings.goods-desc")}
-                </div>
-                <textarea class="FormControl" bidi={this.params.desc}></textarea>
+              <span className="StoreCodeChip StoreGoodsHeader-code"> {this.params.code()} </span>
+            </div>
+
+            <div className="StoreAdminSection">{app.translator.trans("mattoid-store.admin.settings.section-basic")}</div>
+            <div className="StoreAdminField">
+              <label>{app.translator.trans("mattoid-store.admin.settings.goods-title")}</label>
+              <input required class="FormControl" type="text" bidi={this.params.title}/>
+            </div>
+            <div className="StoreAdminField">
+              <label>{app.translator.trans("mattoid-store.admin.settings.goods-desc")}</label>
+              <textarea class="FormControl" bidi={this.params.desc} rows="3"></textarea>
+            </div>
+
+            <div className="StoreAdminSection">{app.translator.trans("mattoid-store.admin.settings.section-price")}</div>
+            <div className="StoreAdminGrid">
+              <div className="StoreAdminField">
+                <label>{app.translator.trans("mattoid-store.admin.settings.goods-price")}</label>
+                <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.price}/>
               </div>
-
-              <div className="spacing">
-                <div
-                  style="width: 60px; display: inline-block;">{app.translator.trans("mattoid-store.admin.settings.goods-price")}</div>
-                <input required class="FormControl" type="number" step="1" min="0"
-                       style="width: 195px; margin-left: 0px; display: inline-block;" bidi={this.params.price}/>
-
-                <div
-                  style="width: 60px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.goods-stock")}</div>
-                <input required class="FormControl" type="number" step="1" min="0"
-                       style="width: 195px; margin-left: 0px; display: inline-block;" bidi={this.params.stock}/>
+              <div className="StoreAdminField">
+                <label>{app.translator.trans("mattoid-store.admin.settings.goods-stock")}</label>
+                <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.stock}/>
               </div>
-
-              <div className="spacing">
-                <div
-                  style="width: 60px; display: inline-block;">{app.translator.trans("mattoid-store.admin.settings.goods-discount")}</div>
-                <input required class="FormControl" type="number" step="1" min="0"
-                       style="width: 100px; margin-left: 0px; display: inline-block;" bidi={this.params.discount}/>
-
-                <div
-                  style="width: 60px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.goods-discount-limit")}</div>
-                <input required class="FormControl" type="number" step="1" min="0"
-                       style="width: 145px; margin-left: 0px; display: inline-block;" bidi={this.params.discountLimit}/>
-
-                <div
-                  style="width: 40px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.goods-discount-limit-unit")}</div>
+              <div className="StoreAdminField">
+                <label>{app.translator.trans("mattoid-store.admin.settings.goods-discount")}</label>
+                <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.discount}/>
+              </div>
+              <div className="StoreAdminField">
+                <label>{app.translator.trans("mattoid-store.admin.settings.goods-discount-limit")}</label>
+                <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.discountLimit}/>
+              </div>
+              <div className="StoreAdminField">
+                <label>{app.translator.trans("mattoid-store.admin.settings.goods-discount-limit-unit")}</label>
                 {Select.component({
                   options: {
                     'days': app.translator.trans("mattoid-store.lib.item-limit-unit-days"),
@@ -154,10 +202,12 @@ export default class StoreGoodsDetailModal extends Modal {
                   },
                 })}
               </div>
+            </div>
 
-              <div className="spacing">
-                <div
-                  style="width: 60px; display: inline-block;">{app.translator.trans("mattoid-store.admin.settings.goods-type")}</div>
+            <div className="StoreAdminSection">{app.translator.trans("mattoid-store.admin.settings.section-validity")}</div>
+            <div className="StoreAdminGrid">
+              <div className="StoreAdminField">
+                <label>{app.translator.trans("mattoid-store.admin.settings.goods-type")}</label>
                 {Select.component({
                   options: {
                     'permanent': app.translator.trans("mattoid-store.lib.item-type-permanent"),
@@ -168,21 +218,20 @@ export default class StoreGoodsDetailModal extends Modal {
                     this.params.type = Stream(val)
                   },
                 })}
-
-                <div style={this.params.type() === 'limit' ? 'display:inline-block' : 'display: none'}>
-                  <div
-                    style="width: 80px; display: inline-block; margin-left: 26px;">{app.translator.trans("mattoid-store.admin.settings.goods-outtime")}</div>
-                  <input required class="FormControl" type="number"
-                         style="width: 200px; margin-left: 0px; display: inline-block;" bidi={this.params.outtime}/>
-                  <span style="margin-left: 10px;">{app.translator.trans("mattoid-store.admin.settings.days")}</span>
-                </div>
-
               </div>
-
-              <div className="spacing" style={this.params.type() === 'limit' ? 'display:inline-block' : 'display: none'}>
-                <div style="width: 200px; display: inline-block;">
-                  <span>{app.translator.trans("mattoid-store.admin.settings.goods-auto-deduction")}</span>
-                  <span style="margin-left: 15px;">
+              {this.params.type() === 'limit' && (
+                <div className="StoreAdminField">
+                  <label>{app.translator.trans("mattoid-store.admin.settings.goods-outtime")}</label>
+                  <div className="StoreAdminInline">
+                    <input required class="FormControl" type="number" bidi={this.params.outtime}/>
+                    <span className="StoreAdminUnit">{app.translator.trans("mattoid-store.admin.settings.days")}</span>
+                  </div>
+                </div>
+              )}
+              {this.params.type() === 'limit' && (
+                <div className="StoreAdminField">
+                  <label>{app.translator.trans("mattoid-store.admin.settings.goods-auto-deduction")}</label>
+                  <div className="StoreAdminInline">
                     <Switch
                       state={this.params.autoDeduction()}
                       onchange={(val) => {
@@ -190,75 +239,84 @@ export default class StoreGoodsDetailModal extends Modal {
                       }}
                     >
                     </Switch>
-                  </span>
-                </div>
-              </div>
-
-              <div className="spacing">
-                <div
-                  className="">{app.translator.trans("mattoid-store.admin.settings.goods-icon")}
-                </div>
-                <div style="position: relative;">
-                  <div>
-                    <input id="icon" required class="FormControl" type="text" bidi={this.params.icon}/>
-                  </div>
-                  <div style="margin-top: 5px; display: inline-block;">
-                    <Button
-                      className="Button Button--primary"
-                      onclick={(e) => {
-                        this.uploadIcon(e)
-                      }}>
-                      {app.translator.trans('mattoid-store.admin.settings.goods-upload-button')}
-                    </Button>
-                  </div>
-                  <div style="margin-top: 5px; display: inline-block; margin-left: 26px;">
-                    <Button
-                      className="Button Button--primary"
-                      onclick={(e) => {
-                        this.showIcon(e);
-                      }}>
-                      {app.translator.trans('mattoid-store.admin.settings.show-icon-button')}
-                    </Button>
                   </div>
                 </div>
-              </div>
+              )}
+            </div>
 
-              <div className="spacing" style={this.params.icon() ? '' : 'display: none'}>
-                <img className="icon-size" src={this.params.icon()} style={this.params.icon() && this.params.icon().slice(-5) === '.webm' ? 'display: none' : ''}/>
-                <video autoplay loop muted playsinline className="icon-size" style={this.params.icon() && this.params.icon().slice(-5) === '.webm' ? '' : 'display: none'}>
-                  <source src={this.params.icon()} type="video/webm"/>
-                </video>
+            <div className="StoreAdminSection">{app.translator.trans("mattoid-store.admin.settings.section-item")}</div>
+            <div className="StoreAdminGrid">
+              <div className="StoreAdminField">
+                <label>{app.translator.trans("mattoid-store.admin.settings.goods-group")}</label>
+                <input class="FormControl" type="text" bidi={this.params.group}
+                       placeholder={app.translator.trans("mattoid-store.admin.settings.goods-group-placeholder")}/>
               </div>
-
-              <div className="spacing">
-                <div style="width: 200px; display: inline-block;">
+              <div className="StoreAdminField">
+                <label>{app.translator.trans("mattoid-store.admin.settings.goods-use-type")}</label>
+                <div className="StoreAdminInline">
                   <Switch
-                    state={this.params.repeat()}
+                    state={this.params.useType() === 'consumable'}
                     onchange={(val) => {
-                      this.params.repeat = Stream(Number(val))
+                      this.params.useType = Stream(val ? 'consumable' : 'permanent')
                     }}
                   >
-                    {app.translator.trans(
-                      "mattoid-store.admin.settings.goods-repeat"
-                    )}
+                    {app.translator.trans("mattoid-store.lib.item-use-type-consumable")}
                   </Switch>
                 </div>
-                <div style="width: 200px; display: inline-block; margin-left: 26px;">
-                  <Switch
-                    state={this.params.hide()}
-                    onchange={(val) => {
-                      this.params.hide = Stream(Number(val))
-                    }}
-                  >
-                    {app.translator.trans(
-                      "mattoid-store.admin.settings.goods-hide"
-                    )}
-                  </Switch>
+              </div>
+              {this.itemTypes.length > 0 && (
+                <div className="StoreAdminField">
+                  <label>{app.translator.trans("mattoid-store.admin.settings.goods-subtype")}</label>
+                  {Select.component({
+                    options: Object.assign(
+                      {'': app.translator.trans("mattoid-store.admin.settings.goods-subtype-none")},
+                      ...this.itemTypes.map((t) => ({[t.key]: app.translator.trans(t.name || t.key)}))
+                    ),
+                    value: this.params.subtype(),
+                    onchange: (val) => {
+                      this.params.subtype = Stream(val)
+                    },
+                  })}
                 </div>
+              )}
+            </div>
+
+            {(() => {
+              const CustomForm = (app as any).storeAdminRegistry?.goodsForm?.get(this.params.code());
+              return CustomForm ? <CustomForm params={this.params} storeData={this.attrs.storeData} /> : null;
+            })()}
+
+            <div className="StoreAdminSection">{app.translator.trans("mattoid-store.admin.settings.section-icon")}</div>
+            <div className="StoreAdminField">
+              <div className="StoreAdminInline">
+                <input id="icon" required class="FormControl" type="text" bidi={this.params.icon}/>
+                <Button
+                  className="Button"
+                  onclick={(e) => {
+                    this.uploadIcon(e)
+                  }}>
+                  {app.translator.trans('mattoid-store.admin.settings.goods-upload-button')}
+                </Button>
+                <Button
+                  className="Button"
+                  onclick={(e) => {
+                    this.showIcon(e);
+                  }}>
+                  {app.translator.trans('mattoid-store.admin.settings.show-icon-button')}
+                </Button>
               </div>
             </div>
 
-            <div className="spacing center">
+            <div className="StoreAdminField" style={this.params.icon() ? '' : 'display: none'}>
+              <div className="StoreIconPreview">
+                <img src={this.params.icon()} style={this.params.icon() && this.params.icon().slice(-5) === '.webm' ? 'display: none' : ''}/>
+                <video autoplay loop muted playsinline style={this.params.icon() && this.params.icon().slice(-5) === '.webm' ? '' : 'display: none'}>
+                  <source src={this.params.icon()} type="video/webm"/>
+                </video>
+              </div>
+            </div>
+
+            <div className="spacing center StoreGoodsSubmit">
               {Button.component(
                 {
                   className: 'Button Button--primary',
@@ -411,9 +469,9 @@ export default class StoreGoodsDetailModal extends Modal {
       body: this.params
     }).then(
       () => location.reload(),
-      (result) => {
+      (error) => {
         this.loading = false;
-        this.handleErrors(result);
+        this.onerror(error);
       });
   }
 }

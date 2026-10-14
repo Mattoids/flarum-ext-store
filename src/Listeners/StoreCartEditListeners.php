@@ -34,6 +34,9 @@ class StoreCartEditListeners
         // 更新购物车状态
         // Update shopping cart status
         $cart = StoreCartModel::query()->where('id', $event->cart->id)->first();
+        if (!$cart) {
+            return null;
+        }
         $cart->status = $event->cart->status;
         $cart->save();
 

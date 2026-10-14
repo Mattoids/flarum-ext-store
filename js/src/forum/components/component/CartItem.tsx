@@ -15,24 +15,14 @@ export default class StoreItem extends Component {
   }
 
   view() {
-    const statusStr = {
-      0: {
-        class: '',
-        value: '未支付'
-      },
-      1: {
-        class: 'color-green',
-        value: '已支付'
-      },
-      2: {
-        class: 'color-red',
-        value: '已失效'
-      },
-      9: {
-        class: 'color-coral',
-        value: '超时失效'
-      }
+    const statusMeta = {
+      0: {class: 'StoreBadge StoreBadge--muted', key: 'mattoid-store.lib.item-cart-status-0'},
+      1: {class: 'StoreBadge StoreBadge--success', key: 'mattoid-store.lib.item-cart-status-1'},
+      2: {class: 'StoreBadge StoreBadge--error', key: 'mattoid-store.lib.item-cart-status-2'},
+      3: {class: 'StoreBadge StoreBadge--info', key: 'mattoid-store.lib.item-cart-status-3'},
+      9: {class: 'StoreBadge StoreBadge--warning', key: 'mattoid-store.lib.item-cart-status-9'},
     }
+    const status = statusMeta[this.cartData.status] || statusMeta[2];
     const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
     const price = this.cartData.price > 0 ? moneyName.replace('[money]', this.cartData.price) : app.translator.trans('mattoid-store.forum.free');
     const payAmt = this.cartData.payAmt > 0 ? moneyName.replace('[money]', this.cartData.payAmt) : app.translator.trans('mattoid-store.forum.free');
@@ -47,10 +37,9 @@ export default class StoreItem extends Component {
             </div>
             <div>
               <label className="Cart-Label">{app.translator.trans('mattoid-store.lib.item-cart-status')}: </label>
-              <span
-                className={statusStr[this.cartData.status].class}>{statusStr[this.cartData.status].value}</span> &nbsp;|&nbsp;
+              <span className={status.class}>{app.translator.trans(status.key)}</span> &nbsp;|&nbsp;
               <label className="Cart-Label">{app.translator.trans('mattoid-store.lib.item-cart-type')}: </label> <span
-              className={this.cartData.type == 'limit' ? '' : ''}>{this.cartData.type == 'limit' ? "限时有效" : "永久有效"}</span> &nbsp;|&nbsp;
+              className="">{app.translator.trans(this.cartData.type == 'limit' ? 'mattoid-store.lib.item-cart-type-limit' : 'mattoid-store.lib.item-cart-type-permanent')}</span> &nbsp;|&nbsp;
               {
                 this.cartData.type == 'limit' ?
                   (<span>
@@ -63,17 +52,17 @@ export default class StoreItem extends Component {
               <label
                 className="Cart-Label">{app.translator.trans('mattoid-store.lib.item-cart-auto-deduction')}: </label>
               <span
-                className={this.cartData.autoDeduction == 0 ? "color-red" : "color-green"}>{this.cartData.autoDeduction == 0 ? "否" : "是"}</span> &nbsp;|&nbsp;
+                className={this.cartData.autoDeduction == 0 ? "color-red" : "color-green"}>{app.translator.trans(this.cartData.autoDeduction == 0 ? 'mattoid-store.lib.item-cart-auto-deduction-0' : 'mattoid-store.lib.item-cart-auto-deduction-1')}</span> &nbsp;|&nbsp;
               <label className="Cart-Label">{app.translator.trans('mattoid-store.lib.item-cart-created')}: </label> <span
               className="">{this.cartData.createdAt}</span>
             </div>
           </div>
-          <div className="col-md-2" style="height: 71px;line-height: 71px;">
+          <div className="col-md-2 BackpackItem-actions">
             {
               this.cartData.enableType == 1 ?
               Button.component({
                 type: 'submit',
-                className: 'Button Button--primary margin-left-30',
+                className: 'Button Button--primary',
                 loading: this.loading,
                 onclick: (e) => {
                   this.onsubmit(e)

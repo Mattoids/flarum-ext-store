@@ -26,9 +26,10 @@
             "title": "Flarum Store",
             "category": "",
             "icon": {
-                "name": "",
-                "color": "",
-                "backgroundColor": ""
+                "name": "fas fa-store",
+                "color": "#ffffff",
+                "backgroundColor": "#19296c",
+                "image": "assets/logo.svg"
             }
         },
         "flarum-cli": {

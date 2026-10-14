@@ -16,8 +16,11 @@ use Flarum\Http\UrlGenerator;
 use Mattoid\Store\Attributes\UserAttributes;
 use Mattoid\Store\Console\Command\GoodsInvalidCommand;
 use Mattoid\Store\Console\PublishSchedule;
+use Mattoid\Store\Controller\BackpackListController;
+use Mattoid\Store\Controller\BackpackUseController;
 use Mattoid\Store\Controller\BuyGoodsController;
 use Mattoid\Store\Controller\DeleteStoreController;
+use Mattoid\Store\Controller\FilterOptionsController;
 use Mattoid\Store\Controller\ListCartController;
 use Mattoid\Store\Controller\ListGoodsController;
 use Mattoid\Store\Controller\ListIconController;
@@ -31,6 +34,7 @@ use Mattoid\Store\Event\StoreCartAddEvent;
 use Mattoid\Store\Event\StoreCartEditEvent;
 use Mattoid\Store\Event\StoreStockAddEvent;
 use Mattoid\Store\Event\StoreStockSubEvent;
+use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Listeners\StoreBuyFailListeners;
 use Mattoid\Store\Listeners\StoreCartAddListeners;
 use Mattoid\Store\Listeners\StoreCartEditListeners;
@@ -42,6 +46,7 @@ return [
         ->js(__DIR__.'/js/dist/forum.js')
         ->css(__DIR__.'/less/forum.less')
         ->route('/u/{username}/cart', 'mattoid-store.u.user.cart')
+        ->route('/u/{username}/backpack', 'mattoid-store.u.user.backpack')
         ->route('/store', 'mattoid-store.forum.tital'),
     (new Extend\Frontend('admin'))
         ->js(__DIR__.'/js/dist/admin.js')
@@ -58,7 +63,10 @@ return [
         ->delete('/store/goods', 'store.goods.delete', DeleteStoreController::class)
         ->post('/store/upload/icon', 'store.upload.icon', StoreUpdateIconController::class)
         ->post('/store/buy/goods', 'store.buy.goods', BuyGoodsController::class)
-        ->post('/store/goods', 'store.goods.post', PostStoreController::class),
+        ->post('/store/goods', 'store.goods.post', PostStoreController::class)
+        ->get('/store/filter/options', 'store.filter.options', FilterOptionsController::class)
+        ->get('/store/backpack/list', 'store.backpack.list', BackpackListController::class)
+        ->post('/store/backpack/use', 'store.backpack.use', BackpackUseController::class),
 
     (new Extend\Settings())
         ->serializeToForum('storeName', 'mattoid-store.storeName'),
@@ -83,4 +91,9 @@ return [
     (new Extend\Console())
         ->command(GoodsInvalidCommand::class)
         ->schedule(GoodsInvalidCommand::class, new PublishSchedule()),
+
+    // 装饰店物品接入背包列表（桥接类内部自带 class_exists 防护）
+    (new StoreExtend())->addBackpackProvider(function (int $userId) {
+        return (new \Mattoid\Store\Backpack\DecorationStoreBridge())($userId);
+    }),
 ];

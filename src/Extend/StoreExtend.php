@@ -2,15 +2,11 @@
 
 namespace Mattoid\Store\Extend;
 
-use Carbon\Carbon;
 use Flarum\Extend\ExtenderInterface;
 use Flarum\Extend\LifecycleInterface;
 use Flarum\Extension\Extension;
-use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Contracts\Container\Container;
-use Mattoid\Store\Model\StoreGoodsModel;
 use Mattoid\Store\Model\StoreModel;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * 商品注册处理类
@@ -25,21 +21,13 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
     private static $validateList = [];
     private static $invalidList = [];
     private static $enableList = [];
-
-    private $storeTimezone = 'Asia/Shanghai';
-
-    protected $settings;
-    protected $translator;
-
+    private static $useList = [];
+    private static $backpackProviderList = [];
 
     public function __construct(string $key = '')
     {
         $this->key = $key;
-        $this->settings = resolve(SettingsRepositoryInterface::class);
-        $this->translator = resolve(TranslatorInterface::class);
-
-        $storeTimezone = $this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai');
-        $this->storeTimezone = !!$storeTimezone ? $storeTimezone : 'Asia/Shanghai';    }
+    }
 
     /**
      * 注册商品信息
@@ -105,6 +93,62 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
         return $this;
     }
 
+    /**
+     * 注册一次性道具（consumable）的使用逻辑
+     * Register consumable goods use logic
+     *
+     * 回调类需实现静态方法：use(User $actor, StoreModel $store, StoreCartModel $cart): bool
+     * 返回 false 视为使用失败，购买记录不会被消耗。
+     *
+     * @param $callback
+     * @return $this
+     */
+    public function addUse($callback): self
+    {
+        StoreExtend::$useList[$this->key] = $callback;
+        return $this;
+    }
+
+    /**
+     * 注册背包条目提供者（ Backpack provider ）
+     *
+     * 提供者签名：function (int $userId): array，返回 BackpackItemSerializer 约定的 stdClass 条目数组。
+     * 用于将其他扩展（如装饰店）的物品接入背包列表，避免硬编码耦合。
+     *
+     * @param callable $provider
+     * @return $this
+     */
+    public function addBackpackProvider(callable $provider): self
+    {
+        StoreExtend::$backpackProviderList[] = $provider;
+        return $this;
+    }
+
+    /**
+     * 获取全部背包条目提供者
+     *
+     * @return callable[]
+     */
+    public static function getBackpackProviders(): array
+    {
+        return self::$backpackProviderList;
+    }
+
+    /**
+     * 获取全部已注册的商品插件（运行时注册表，唯一事实源）
+     * Get all registered goods plugins (runtime registry, single source of truth)
+     *
+     * @return array [code => Goods 实例]
+     */
+    public static function getPlugins(): array
+    {
+        $plugins = [];
+        foreach (array_keys(self::$goodList) as $key) {
+            $plugins[$key] = self::getStoreGoods($key);
+        }
+        return $plugins;
+    }
+
     public static function getStoreGoods(String $key)
     {
         if (array_key_exists($key, StoreExtend::$goodList)) {
@@ -150,6 +194,15 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
         return null;
     }
 
+    public static function getUse(String $key)
+    {
+        if (array_key_exists($key, StoreExtend::$useList)) {
+            $class = StoreExtend::$useList[$key];
+            return new $class;
+        }
+        return null;
+    }
+
     public function extend(Container $container, Extension $extension = null)
     {
     }
@@ -159,24 +212,16 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
      * 开启插件时触发
      * Trigger when opening plugin
      *
+     * 商品插件注册不再写入 store_goods 数据表，注册表（static $goodList）即唯一事实源。
+     * Goods plugin registration no longer writes to the store_goods table;
+     * the runtime registry (static $goodList) is the single source of truth.
+     *
      * @param Container $container
      * @param Extension $extension
      * @return void
      */
     public function onEnable(Container $container, Extension $extension)
     {
-        // 添加商品信息到数据库
-        // Add product information to the database
-        $goods = StoreExtend::getStoreGoods($this->key);
-        if ($goods) {
-            StoreGoodsModel::query()->insert([
-                'code' => $this->key,
-                'name' => $goods->name,
-                'class_name' => $goods->className,
-                'pop_up' => json_encode($goods->popUp),
-                'created_at' => Carbon::now()->tz($this->storeTimezone)
-            ]);
-        }
     }
 
     /**
@@ -191,7 +236,5 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
     {
         // 插件关闭自动下架对应商品
         StoreModel::query()->where('code', $this->key)->update(['status' => 0]);
-        // 插件关闭自动移除可上架商品
-        StoreGoodsModel::query()->where('code', $this->key)->delete();
     }
 }

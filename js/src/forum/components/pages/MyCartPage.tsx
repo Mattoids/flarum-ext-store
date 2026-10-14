@@ -26,7 +26,7 @@ export default class MyCartPage extends UserPage {
     return (
       <div className="Post-body">
         <h2 class="BadgeOverviewTitle">{app.translator.trans('mattoid-store.forum.cart')}</h2>
-        <div>
+        <div className="Store-FilterBar">
           <div className="Invite-Input">
             <Select
               style="width: 150px"
@@ -37,6 +37,7 @@ export default class MyCartPage extends UserPage {
                 '0': app.translator.trans('mattoid-store.lib.item-cart-status-0'),
                 '1': app.translator.trans('mattoid-store.lib.item-cart-status-1'),
                 '2': app.translator.trans('mattoid-store.lib.item-cart-status-2'),
+                '9': app.translator.trans('mattoid-store.lib.item-cart-status-9'),
               }}
               onchange={(e) => {
                 this.status(e)

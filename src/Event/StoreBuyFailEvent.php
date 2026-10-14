@@ -13,7 +13,7 @@ class StoreBuyFailEvent
     public $store;
     public $params;
 
-    public function __construct(User $user = null, StoreModel $store, StoreCartModel $cart, $params)
+    public function __construct(User $user, StoreModel $store, StoreCartModel $cart, $params)
     {
         $this->user = $user;
         $this->cart = $cart;

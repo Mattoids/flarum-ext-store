@@ -4,8 +4,6 @@ namespace Mattoid\Store\Serializer;
 
 use Flarum\Api\Serializer\AbstractSerializer;
 use Flarum\Locale\Translator;
-use Illuminate\Cache\RateLimiting\Limit;
-use Mattoid\Store\Enum\LimitUnitEnum;
 
 class CartSerializer extends AbstractSerializer
 {
@@ -30,6 +28,7 @@ class CartSerializer extends AbstractSerializer
             'status' => $data->status,
             'createdAt' => $data->created_at,
             'updatedAt' => $data->updated_at,
+            'renewedAt' => $data->renewed_at,
             'autoDeduction' => $data->auto_deduction,
             'enableType' => $data->enableType,
             'enable' => $data->enable

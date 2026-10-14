@@ -5,12 +5,12 @@ namespace Mattoid\Store\Console\Command;
 use Carbon\Carbon;
 use Flarum\Console\AbstractCommand;
 use Flarum\Foundation\ValidationException;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Flarum\Settings\SettingsRepositoryInterface;
+use Flarum\Locale\Translator;
 use Flarum\User\User;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Cache\Repository;
 use Mattoid\Store\Event\StoreInvalidEvent;
+use Mattoid\Store\Exception\RenewalLockException;
 use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Model\StoreModel;
@@ -22,20 +22,13 @@ class GoodsInvalidCommand extends AbstractCommand
 {
     protected $cache;
     protected $events;
-    protected $settings;
     protected $translator;
 
-    private $storeTimezone = 'Asia/Shanghai';
-
-    public function __construct(SettingsRepositoryInterface $settings, TranslatorInterface $translator, Repository $cache, Dispatcher $events) {
+    public function __construct(Translator $translator, Repository $cache, Dispatcher $events) {
         parent::__construct();
         $this->cache = $cache;
         $this->events = $events;
-        $this->settings = $settings;
         $this->translator = $translator;
-
-        $storeTimezone = $this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai');
-        $this->storeTimezone = !!$storeTimezone ? $storeTimezone : 'Asia/Shanghai';
     }
 
     protected function configure()
@@ -45,38 +38,42 @@ class GoodsInvalidCommand extends AbstractCommand
 
     protected function fire()
     {
-        $storeMap = [];
-        $dateTime = Carbon::now()->tz($this->storeTimezone);
+        $dateTime = Carbon::now();
         $invalidList = StoreCartModel::query()->where('outtime', '<=', $dateTime)->where('type', 'limit')->where('status', 1)->get();
-        if (!$invalidList) {
-            // 未发现失效商品，跳过处理
+        if ($invalidList->isEmpty()) {
             return;
         }
 
-        $storeIdList = array_column(json_decode($invalidList, true), 'store_id');
-        $storeList = StoreModel::query()->whereIn('id', $storeIdList)->get();
-        foreach ($storeList as $store) {
-            $storeMap[$store->id] = $store;
-        }
+        $storeList = StoreModel::query()->whereIn('id', $invalidList->pluck('store_id')->all())->get();
+        $storeMap = $storeList->keyBy('id');
 
         foreach ($invalidList as $cart) {
             $buyStatus = true;
             // 获取商品信息
-            $store = $storeMap[$cart->store_id];
+            $store = $storeMap->get($cart->store_id);
+            if (!$store) {
+                $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.invalid-product')}");
+                continue;
+            }
+
             try {
                 // 自动扣费，扣费成功
                 $this->autoDeduction($store, $cart);
+            } catch (RenewalLockException $e) {
+                // 防重锁冲突（如手动执行与定时任务重叠）：不是续费失败，跳过等下一分钟重试
+                $this->warn("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.request-processing')}");
+                continue;
             } catch (\Exception $e) {
                 $buyStatus = false;
                 $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.automatic-renewal-fail', ['message' => $e->getMessage()])}");
                 try {
-                    // 超期商品自动失效
+                    // 超期商品自动失效（9-超时失效，区别于 2-购买失败）
                     $invalid = StoreExtend::getInvalid($cart->code);
                     if ($invalid) {
                         $invalid->invalid($store, $cart);
                     }
 
-                    $cart->status = 2;
+                    $cart->status = 9;
                     $cart->save();
                 } catch (\Exception $e) {
                     $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.goods-invalid-fail', ['message' => $e->getMessage()])}");
@@ -103,29 +100,28 @@ class GoodsInvalidCommand extends AbstractCommand
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.invalid-product')]);
         }
 
-        $key = md5("{$cart->store_id}-{$cart->user_id}");
+        // 防重锁冲突不算续费失败（外层捕获后跳过，不触发失效）
+        $key = md5("mattoid-store-renew-{$cart->store_id}-{$cart->user_id}");
         if (!$this->cache->add($key, time(), 5)) {
-            throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.validate-fail')]);
+            throw new RenewalLockException();
         }
 
-        // 续费不参与折扣，且不处理库存
+        // 续费不参与折扣、不处理库存，按商品当前价续费
         $user = User::query()->where('id', $cart->user_id)->first();
-        $money = $user->money;
-        $balance = $money - $cart->price;
-        if ($balance < 0) {
+        if (!$user) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.user-balance-low')]);
         }
-
-        $user->money = $balance;
-        $user->where('money', $money);
-        if (!$user->save()) {
+        // 原子扣款：仅当余额仍足额时扣减，防止并发透支
+        $affected = User::query()->where('id', $user->id)->where('money', '>=', $cart->price)->decrement('money', $cart->price);
+        if (!$affected) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.user-balance-low')]);
         }
+        $user->money -= $cart->price;
 
-        // 刷新过期时间
+        // 刷新过期时间与续费时间（保留原始购买时间 created_at）
         $cart->pay_amt = $cart->price;
-        $cart->outtime = Carbon::now()->tz($this->storeTimezone)->addDays($store->outtime);
-        $cart->created_at = Carbon::now()->tz($this->storeTimezone);
+        $cart->outtime = Carbon::now()->addDays($store->outtime);
+        $cart->renewed_at = Carbon::now();
         $cart->save();
 
         // 通知资金消费记录插件

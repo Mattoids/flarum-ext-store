@@ -18,6 +18,10 @@ class GoodsSerializer extends AbstractSerializer
         return [
             'code' => $data->code,
             'name' => $this->translator->trans($data->name),
+            'popUp' => $data->pop_up ?: [],
+            'itemTypes' => $data->item_types ?: [],
+            'icon' => $data->icon,
+            'extIcon' => $data->ext_icon ?: null,
             'createdAt' => $data->created_at,
         ];
     }

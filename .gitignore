@@ -13,3 +13,6 @@ js/coverage-ts
 js/package-lock.json
 
 package-lock.json
+
+# 运行时翻译缓存
+storage/

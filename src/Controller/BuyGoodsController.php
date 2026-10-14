@@ -5,13 +5,13 @@ namespace Mattoid\Store\Controller;
 use Carbon\Carbon;
 use Flarum\Api\Controller\AbstractListController;
 use Flarum\Foundation\ValidationException;
-use Flarum\Settings\SettingsRepositoryInterface;
-use Illuminate\Contracts\Events\Dispatcher;
 use Flarum\Http\RequestUtil;
 use Flarum\Locale\Translator;
-use Flarum\User\UserRepository;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Cache\Repository as CacheContract;
 use Illuminate\Support\Arr;
-use Flarum\User\User;
+use Illuminate\Support\Facades\DB;
+use Flarum\User\Exception\PermissionDeniedException;
 use Mattoid\Store\Event\StoreBuyFailEvent;
 use Mattoid\Store\Event\StoreCartAddEvent;
 use Mattoid\Store\Event\StoreBuyEvent;
@@ -20,11 +20,9 @@ use Mattoid\Store\Event\StoreStockAddEvent;
 use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Model\StoreModel;
-use Flarum\User\Exception\PermissionDeniedException;
-use Illuminate\Contracts\Cache\Repository as CacheContract;
 use Mattoid\Store\Serializer\GoodsSerializer;
-use Mockery\Exception;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
 use Tobscure\JsonApi\Document;
 
 /**
@@ -35,25 +33,17 @@ class BuyGoodsController extends AbstractListController
 {
     public $serializer = GoodsSerializer::class;
 
-    protected $repository;
     protected $translator;
-    protected $settings;
     protected $events;
     protected $cache;
+    protected $log;
 
-    private $storeTimezone = 'Asia/Shanghai';
-
-
-    public function __construct(SettingsRepositoryInterface $settings, UserRepository $repository, Dispatcher $events, Translator $translator, CacheContract $cache)
+    public function __construct(Dispatcher $events, Translator $translator, CacheContract $cache, LoggerInterface $log)
     {
-        $this->cache = $cache;
         $this->events = $events;
-        $this->settings = $settings;
         $this->translator = $translator;
-        $this->repository = $repository;
-
-        $storeTimezone = $this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai');
-        $this->storeTimezone = !!$storeTimezone ? $storeTimezone : 'Asia/Shanghai';
+        $this->cache = $cache;
+        $this->log = $log;
     }
 
     protected function data(ServerRequestInterface $request, Document $document) {
@@ -65,24 +55,46 @@ class BuyGoodsController extends AbstractListController
         if (!$actor->can('mattoid-store.group-view')) {
             throw new PermissionDeniedException();
         }
-
-        $key = md5("{$params['id']}-{$actor->id}");
-        if (!$this->cache->add($key, time(), 5)) {
+        // 游客无账户余额，不允许走购买流程
+        if ($actor->isGuest()) {
+            throw new PermissionDeniedException();
+        }
+        if (!$id) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.validate-fail')]);
         }
 
+        // 防连击锁：同一用户 5 秒内对同一商品的重复请求直接拒绝
+        $key = md5("mattoid-store-buy-{$id}-{$actor->id}");
+        if (!$this->cache->add($key, time(), 5)) {
+            throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.request-processing')]);
+        }
+
+        try {
+            return DB::transaction(function () use ($actor, $params, $id) {
+                return $this->purchase($actor, $params, $id);
+            });
+        } finally {
+            $this->cache->delete($key);
+        }
+    }
+
+    /**
+     * 购买主流程（在数据库事务内执行，任一步失败整体回滚）
+     */
+    private function purchase($actor, array $params, $id)
+    {
         $store = StoreModel::query()->where('id', $id)->where('status', 1)->first();
         if (!$store) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.store-goods-non-existent')]);
         }
-        if ($store->stock != -99 && $store->stock <= 0) {
+        if ($store->stock != StoreModel::STOCK_UNLIMITED && $store->stock <= 0) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.insufficient-inventory')]);
         }
         if ($store->repeat == 0) {
             $storeCart = StoreCartModel::query()->where('user_id', $actor->id)->where('store_id', $store->id)
                 ->where('status', 1)->where(function($where) {
                     $where->where(function($where) {
-                        $where->where('type', 'limit')->where('outtime', '>=', Carbon::now()->tz($this->storeTimezone));
+                        $where->where('type', 'limit')->where('outtime', '>=', Carbon::now());
                     });
                     $where->orWhere('type', 'permanent');
                 })->first();
@@ -92,56 +104,53 @@ class BuyGoodsController extends AbstractListController
         }
 
         $validate = StoreExtend::getValidate($store->code);
-        // $this->translator, $this->settings, $this->events, $this->cache
         if ($validate && !$validate->validate($actor, $store, $params)) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.validate-fail')]);
         }
 
-        $user = User::query()->where('id', $actor->id)->first();
-        // 开始扣费
+        // 开始扣费：按折扣窗口计算应付金额（窗口起点为 discount_start_at，未设置的老数据回退 updated_at）
         $price = $store->price;
-        // 计算折扣
-        $time = time();
-        $endTime = Carbon::parse($store->updated_at)->tz($this->storeTimezone)->modify('+' . $store->discount_limit . ' ' . $store->discount_limit_unit)->getTimestamp();
-        if ($store->discount_price > 0 && $store->discount > 0 && $time < $endTime) {
+        $startAt = $store->discount_start_at ?: $store->updated_at;
+        $endTime = $startAt ? Carbon::parse($startAt)->add($store->discount_limit, $store->discount_limit_unit)->getTimestamp() : 0;
+        if ($store->discount_price > 0 && $store->discount > 0 && time() < $endTime) {
             $price = $store->discount_price;
         }
 
-        $money = $user->money;
-        $balance = $money - $price;
-        if ($balance < 0) {
+        if ($actor->money < $price) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.user-balance-low')]);
         }
 
         // 加入购物车 购物车会自动扣除库存
-        $carts = $this->events->dispatch(new StoreCartAddEvent($user, $store, $price));
+        $carts = $this->events->dispatch(new StoreCartAddEvent($actor, $store, $price));
         $cart = array_shift($carts);
 
-        $user->money = $balance;
-        $user->where('money', $money);
-        if (!$user->save()) {
-            // 扣费失败则累加库存
-            $carts = $this->events->dispatch(new StoreStockAddEvent($store));
+        // 原子扣款：仅当余额仍足额时扣减，防止并发透支
+        $affected = $actor->newQuery()->where('id', $actor->id)->where('money', '>=', $price)->decrement('money', $price);
+        if (!$affected) {
+            // 扣费失败：库存回补 + 移除未扣费的购物车记录（同事务，不会留下半成品）
+            $this->events->dispatch(new StoreStockAddEvent($store));
+            $cart->delete();
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.user-balance-low')]);
         }
+        $actor->money -= $price;
 
         // 通知资金消费记录插件
         if (class_exists('Mattoid\MoneyHistory\Event\MoneyHistoryEvent')) {
-            $this->events->dispatch(new \Mattoid\MoneyHistory\Event\MoneyHistoryEvent($user, -$price, 'STOREBUYGOODS', $this->translator->trans("mattoid-store.forum.buy-goods", ['title' => $store->title]), ''));
+            $this->events->dispatch(new \Mattoid\MoneyHistory\Event\MoneyHistoryEvent($actor, -$price, 'STOREBUYGOODS', $this->translator->trans("mattoid-store.forum.buy-goods", ['title' => $store->title]), ''));
         }
 
         // 处理商品插件后置事件
         $after = StoreExtend::getAfter($store->code);
         if ($after) {
-            // 商品处理失败，通知购买失败事件进行回滚操作
-            // $this->translator, $this->settings, $this->events, $this->cache
             try {
-                if (!$after->after($actor, $store, $params)) {
-                    $this->events->dispatch(new StoreBuyFailEvent($user, $store, $cart, $params));
-                    throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.buy-goods-fail', ['title' => $store->title])]);
-                }
-            } catch (Exception $e) {
-                $this->events->dispatch(new StoreBuyFailEvent($user, $store, $cart, $params));
+                $afterResult = $after->after($actor, $store, $params);
+            } catch (\Throwable $e) {
+                $this->log->error('[mattoid-store] 商品后置处理失败，执行回滚', ['store' => $store->id, 'user' => $actor->id, 'exception' => $e]);
+                $afterResult = false;
+            }
+            if (!$afterResult) {
+                // 商品处理失败，通知购买失败事件进行回滚操作（退款 + 库存回补）
+                $this->events->dispatch(new StoreBuyFailEvent($actor, $store, $cart, $params));
                 throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.buy-goods-fail', ['title' => $store->title])]);
             }
         }
@@ -151,9 +160,7 @@ class BuyGoodsController extends AbstractListController
         $this->events->dispatch(new StoreCartEditEvent($cart));
 
         // 通知其他插件购买完成
-        $this->events->dispatch(new StoreBuyEvent($user, $store, $cart, $params));
-
-        $this->cache->delete($key);
+        $this->events->dispatch(new StoreBuyEvent($actor, $store, $cart, $params));
 
         return $store;
     }

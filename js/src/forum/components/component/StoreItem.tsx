@@ -13,44 +13,47 @@ export default class StoreItem extends Component {
   }
 
   view() {
+    // 商品插件可注册自定义商品卡片，未注册时使用默认展示
+    const CustomItem = (app as any).storeRegistry?.item?.get(this.attrs.item.attributes.code);
+    if (CustomItem) {
+      return <CustomItem item={this.attrs.item} />;
+    }
+
     const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
     const price = this.storeData.price > 0 ? moneyName.replace('[money]', this.storeData.price) : app.translator.trans('mattoid-store.forum.free');
     const discountPrice = moneyName.replace('[money]', this.storeData.discountPrice);
+    const isVideo = this.storeData.icon && this.storeData.icon.slice(-5) === '.webm';
 
     return (
-      <div id={"goods" + this.storeData.id} onclick={() => this.showDetails(this.storeData)}>
+      <div id={"goods" + this.storeData.id} className="StoreItem" onclick={() => this.showDetails(this.storeData)}>
         <div className="itemTitle">
           {this.storeData.title}
         </div>
-        <div className="price spacing">
-          {this.storeData.discountPrice > 0 ?
-            (
-              <div>
-                <span className="price">{discountPrice}</span>&nbsp;
-                <span className="discount">{price}</span>
-              </div>
-            ) :
-            (<span className="price">{price}</span>)}
-        </div>
-        <div className="spacing">
-          {app.translator.trans('mattoid-store.lib.item-stock')}: {this.storeData.stock == -99 ? app.translator.trans('mattoid-store.forum.infinite') : this.storeData.stock }&nbsp;|&nbsp;
-          {app.translator.trans('mattoid-store.lib.item-type-' + this.storeData.type)}&nbsp;
-          <span style={this.storeData.type === 'limit' ? 'display:inline-block' : 'display: none'}>({this.storeData.outtime}{app.translator.trans('mattoid-store.forum.days')})</span>
-          <span style={this.storeData.type === 'limit' && this.storeData.autoDeduction ? 'display:inline-block' : 'display: none'}>&nbsp;|&nbsp;{app.translator.trans('mattoid-store.lib.item-invalid', {'day' : this.storeData.outtime})}</span>
-        </div>
-        <div className="spacing">
-          <div id="box">
-            {this.storeData.desc}
-          </div>
-        </div>
-        <div className="spacing center">
-          <img id="logo-img" className="icon-size" src={this.storeData.icon}
-               style={this.storeData.icon && this.storeData.icon.slice(-5) === '.webm' ? 'display: none' : ''}/>
-          <video id="logo-video" autoplay loop muted playsinline className="icon-size"
-                 poster="https://invites.fun/assets/mattoid/store/1726117989_u9m3xRVtpxBiWYMn.png"
-                 style={this.storeData.icon && this.storeData.icon.slice(-5) === '.webm' ? '' : 'display: none'}>
+        <div className="StoreItem-icon">
+          <img className="logo-img" src={this.storeData.icon} style={isVideo ? 'display: none' : ''}/>
+          <video className="logo-video" autoplay loop muted playsinline style={isVideo ? '' : 'display: none'}>
             <source src={this.storeData.icon} type="video/webm"/>
           </video>
+        </div>
+        <div className="StoreItem-desc">
+          {this.storeData.desc}
+        </div>
+        <div className="StoreItem-footer">
+          <div className="StoreItem-priceGroup">
+            {this.storeData.discountPrice > 0 && <span className="discount">{price}</span>}
+            <span className="price">
+              {this.storeData.discountPrice > 0 ? discountPrice : price}
+            </span>
+          </div>
+          <div className="StoreItem-side">
+            <span className="StoreItem-stock">
+              {app.translator.trans('mattoid-store.lib.item-stock')}: {this.storeData.stock == -99 ? app.translator.trans('mattoid-store.forum.infinite') : this.storeData.stock}
+            </span>
+            <span className="StoreItem-type">
+              {app.translator.trans('mattoid-store.lib.item-type-' + this.storeData.type)}
+              {this.storeData.type === 'limit' ? ` (${this.storeData.outtime}${app.translator.trans('mattoid-store.forum.days')})` : ''}
+            </span>
+          </div>
         </div>
       </div>
     )
@@ -58,7 +61,10 @@ export default class StoreItem extends Component {
 
   showDetails(storeData) {
     if (app.session.user) {
-      app.modal.show(StoreBox, {storeData});
+      // 商品插件可注册自定义购买/价格弹窗或详情页，未注册时使用默认 StoreBox
+      const registry = (app as any).storeRegistry;
+      const CustomModal = registry?.priceModal?.get(storeData.code) || registry?.detail?.get(storeData.code);
+      app.modal.show(CustomModal || StoreBox, {storeData, onSuccess: this.attrs.onSuccess});
     }
   }
 }

@@ -8,6 +8,7 @@ mattoid-store:
       decorationStoreTimezone: time zone
       decorationStoreTimezone-requirement: Set the time zone. Default to "Asia/Shanghai"
       group-view: Allow user groups to access the store
+      group-moderate: Allow user groups to manage store goods
       add-store-goods: Add goods
       goods-status: Status
       goods-title: Title
@@ -34,15 +35,30 @@ mattoid-store:
       goods-item-status-1: Are you sure you want to remove this item from the shelves？
       show-icon-button: Gallery
       goods-auto-deduction: Auto Deduction
+      goods-use-type: Use type
+      goods-subtype: Item type
+      goods-subtype-none: None
+      goods-group: Goods group
+      goods-group-placeholder: Leave empty to inherit the plugin group
+      section-basic: Basic Info
+      section-settings: Store Settings
+      section-goods: Goods Management
+      section-price: Price & Discount
+      section-validity: Validity
+      section-item: Item Settings
+      section-icon: Icon
       days: day
 
     error:
       invalid-product: Invalid product
+      invalid-params: Invalid request parameters
       validate-fail: Failed to Goods item
 
   forum:
     tital: Store
     button: Buy
+    no-permission-buy: No purchase permission
+    backpack: Backpack
     buy-goods: Goods goods：{title}
     buy-goods-fail: Product refund：{title}
     auto-deduction: Automatic deduction of fees for products：{title}
@@ -67,6 +83,8 @@ mattoid-store:
       goods-invalid-event-fail: Goods failure event push failed [{message}]
       cart-no-use: This Goods does not have any functional use
       cart-use-fail: Goods usage failed
+      request-processing: Request is being processed, please do not resubmit
+      buy-success: Purchase successful
 
   lib:
     item-status-all: All product statuses
@@ -99,6 +117,12 @@ mattoid-store:
 
     item-cart-title: Goods Title
     item-cart-status: payment status
+    item-cart-status-all: All payment status
+    item-cart-status-0: Unpaid
+    item-cart-status-1: Paid
+    item-cart-status-2: Invalid
+    item-cart-status-3: Used
+    item-cart-status-9: Expired
     item-cart-price: Price
     item-cart-pay-amt: Payment amount
     item-cart-type: Goods Type
@@ -108,3 +132,24 @@ mattoid-store:
 
     item-cart-button-use: Enable
     item-cart-button-cancel: Cancel
+
+    item-use-type-permanent: Permanent item
+    item-use-type-consumable: Consumable item
+    backpack-use: Use
+    backpack-cancel-use: Cancel use
+    backpack-remaining: "{count} remaining"
+    backpack-equip: Equip
+    backpack-unequip: Unequip
+    backpack-in-use: In use
+    backpack-empty: Your backpack is empty
+    backpack-use-fail: Operation failed, please try again later
+
+    filter-all: All
+    filter-group: Group
+    group-default: General
+    filter-code: Goods plugin
+    filter-subtype: Item type
+    filter-type: Validity
+    filter-discount: Discount
+    filter-discount-on: Discounted
+    filter-discount-off: No discount

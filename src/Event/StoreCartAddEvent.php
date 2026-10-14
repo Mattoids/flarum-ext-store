@@ -11,7 +11,7 @@ class StoreCartAddEvent
     public $store;
     public $price;
 
-    public function __construct(User $user = null, StoreModel $store, $price)
+    public function __construct(User $user, StoreModel $store, $price)
     {
         $this->user = $user;
         $this->store = $store;

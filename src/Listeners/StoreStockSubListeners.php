@@ -4,40 +4,31 @@ namespace Mattoid\Store\Listeners;
 
 use Flarum\Foundation\ValidationException;
 use Flarum\Locale\Translator;
-use Flarum\Settings\SettingsRepositoryInterface;
-use Illuminate\Contracts\Events\Dispatcher;
 use Mattoid\Store\Event\StoreStockSubEvent;
 use Mattoid\Store\Model\StoreModel;
 
 /**
  * 减少库存
- * reduce inventory
  */
 class StoreStockSubListeners
 {
-
-    private $events;
-    private $settings;
     private $translator;
 
-
-    public function __construct(Dispatcher $events, SettingsRepositoryInterface $settings, Translator $translator)
+    public function __construct(Translator $translator)
     {
-        $this->events = $events;
-        $this->settings = $settings;
         $this->translator = $translator;
     }
 
     public function handle(StoreStockSubEvent $event) {
         $store = StoreModel::query()->where('id', $event->store->id)->first();
+        if (!$store || $store->stock == StoreModel::STOCK_UNLIMITED) {
+            return;
+        }
 
-        if ($store->stock != -99) {
-            if ($store->stock < 1) {
-                throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.insufficient-inventory')]);
-            }
-
-            $store->decrement('stock');
+        // 原子扣减：仅在库存仍充足时扣减，防止并发超卖
+        $affected = StoreModel::query()->where('id', $store->id)->where('stock', '>', 0)->decrement('stock');
+        if (!$affected) {
+            throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.insufficient-inventory')]);
         }
     }
-
 }

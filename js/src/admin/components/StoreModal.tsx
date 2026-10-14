@@ -10,7 +10,7 @@ export default class StoreModal extends Modal {
   }
 
   className() {
-    return 'Modal--small';
+    return 'Modal--small StoreConfirmModal';
   }
 
   title() {
@@ -18,18 +18,30 @@ export default class StoreModal extends Modal {
   }
 
   content() {
-    //
+    const isDelete = this.type === 'delete';
+
     return (
       <div className="Modal-body">
-        <div className="Form-group" style="text-align: center;">
+        <div className="StoreConfirmBody">
+          <div className={'StoreConfirmIcon' + (isDelete ? ' StoreConfirmIcon--danger' : '')}>
+            <i className={'fas ' + (isDelete ? 'fa-trash-alt' : 'fa-exchange-alt')}/>
+          </div>
+          <div className="StoreConfirmText">
+            <div className="StoreConfirmTitle">{this.storeData.title}</div>
+            <div className="StoreConfirmDesc">
+              {app.translator.trans('mattoid-store.admin.settings.goods-item-' + this.type)}
+            </div>
+          </div>
+        </div>
+        <div className="StoreConfirmActions">
           {Button.component(
             {
-              className: 'Button Button--primary',
+              className: 'Button ' + (isDelete ? 'Button--danger' : 'Button--primary'),
               type: 'submit',
               loading: this.loading,
             },
             app.translator.trans('mattoid-store.lib.confirm')
-          )}&nbsp;
+          )}
           {Button.component(
             {
               className: 'Button storeButton--gray',
@@ -60,10 +72,10 @@ export default class StoreModal extends Modal {
       body: this.storeData
     }).then(
       () => location.reload(),
-      (result) => {
+      (error) => {
         this.loading = false;
         this.storeData.status = status;
-        this.handleErrors(result);
-    });
+        this.onerror(error);
+      });
   }
 }

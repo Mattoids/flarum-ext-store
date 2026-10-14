@@ -61,6 +61,43 @@ abstract class Goods
     protected $popUp = [];
 
     /**
+     * 道具类型声明（可选），用于商店筛选第 2 级与管理端 subtype 下拉。
+     * Item type declaration (optional), used for store filter level 2 and admin subtype dropdown.
+     *
+     * @var Array
+     *
+     * @example
+     * [
+     *   ['key' => 'month', 'name' => 'mattoid-store-vip.admin.item-type-month'],
+     *   ['key' => 'year',  'name' => 'mattoid-store-vip.admin.item-type-year'],
+     * ]
+     *
+     * key 为写入 store.subtype 的值；name 为翻译键，展示时经 translator 转换。
+     */
+    public $itemTypes = [];
+
+    /**
+     * 分组声明（可选），用于商店筛选第 1 级。
+     * Group declaration (optional), used for store filter level 1.
+     *
+     * 值为翻译键（如 'mattoid-store-invite.group-invite'）；留空 = 默认分组。
+     * 商品（store 行）可在后台覆盖分组，未覆盖时继承此处声明。
+     *
+     * @var string
+     */
+    public $group = '';
+
+    /**
+     * 插件 Logo 图标地址（可选），用于管理端添加商品卡片等位置展示。
+     * Plugin logo icon URL (optional), displayed in admin add-goods cards, etc.
+     *
+     * 通常为插件 assets 目录下的图片路径，如 '/assets/extensions/mattoid-store-invite/logo.png'。
+     *
+     * @var string
+     */
+    public $icon = '';
+
+    /**
      * 弹窗样式
      * Pop up Style
      *

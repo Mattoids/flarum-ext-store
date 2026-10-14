@@ -19,34 +19,54 @@ export default class AddStoreGoods extends Modal {
   }
 
   className(): string {
-    return "";
+    return "Modal--large";
   }
 
   content() {
     return (
       <div>
-        {this.goodsList.map((item: object, index: number) => (
-          <div className="storeItemContainer" style="margin: 10px">
-            <div className="ExtensionPage-body">
-              <div className="ExtensionPage-settings FlarumBadgesPage" style="margin-top: 10px">
-                <div className="container">
-                  <span className="leftAligned" style="padding: 8px">{item.attributes.name}</span>
-                  <Button
-                    className="Button rightAligned"
-                    onclick={() => {
-                      app.modal.show(StoreGoodsDetailModal, {
-                        code: item.attributes.code,
-                        title: item.attributes.name
-                      });
-                    }}
-                  >
-                    {app.translator.trans('mattoid-store.admin.settings.add-store-goods')}
-                  </Button>
-                </div>
+        <div className="StorePluginGrid">
+          {this.goodsList.map((item: object, index: number) => (
+            <div className="StorePluginCard">
+              <div className="StorePluginCard-title">
+                {item.attributes.name}
+              </div>
+              <div className="StorePluginCard-icon">
+                {item.attributes.icon
+                  ? <img src={item.attributes.icon} alt=""/>
+                  : item.attributes.extIcon && item.attributes.extIcon.name
+                    ? <span className="StorePluginCard-extIcon"
+                            style={{
+                              backgroundColor: item.attributes.extIcon.backgroundColor,
+                              color: item.attributes.extIcon.color,
+                              backgroundImage: item.attributes.extIcon.backgroundImage
+                            }}>
+                        <i className={item.attributes.extIcon.name}/>
+                      </span>
+                    : <i className="fas fa-puzzle-piece"/>}
+              </div>
+              <div className="StorePluginCard-tags">
+                <span className="StoreCodeChip">{item.attributes.code}</span>
+                {(item.attributes.itemTypes || []).map((t) => (
+                  <span className="StorePluginRow-tag">{app.translator.trans(t.name || t.key)}</span>
+                ))}
+              </div>
+              <div className="StorePluginCard-footer">
+                <Button
+                  className="Button Button--primary"
+                  onclick={() => {
+                    app.modal.show(StoreGoodsDetailModal, {
+                      code: item.attributes.code,
+                      title: item.attributes.name
+                    });
+                  }}
+                >
+                  {app.translator.trans('mattoid-store.admin.settings.add-store-goods')}
+                </Button>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
 
         {!this.loading && this.goodsList.length === 0 && (
           <div>

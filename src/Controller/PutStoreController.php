@@ -4,18 +4,17 @@ namespace Mattoid\Store\Controller;
 
 use Carbon\Carbon;
 use Flarum\Api\Controller\AbstractCreateController;
+use Flarum\Foundation\ValidationException;
 use Flarum\Http\RequestUtil;
-use Flarum\Http\UrlGenerator;
 use Flarum\Locale\Translator;
-use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\Exception\PermissionDeniedException;
 use Flarum\User\UserRepository;
-use Mattoid\Store\Model\StoreGoodsModel;
+use Illuminate\Support\Arr;
+use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreModel;
-use Mattoid\Store\Serializer\DataSerializer;
-use Mattoid\Store\Utils\ObjectsUtil;
+use Mattoid\Store\Serializer\StoreSerializer;
+use Mattoid\Store\Utils\StoreParamsUtil;
 use Psr\Http\Message\ServerRequestInterface;
-use Flarum\Foundation\ValidationException;
 use Tobscure\JsonApi\Document;
 
 /**
@@ -24,58 +23,64 @@ use Tobscure\JsonApi\Document;
  */
 class PutStoreController extends AbstractCreateController
 {
-    protected $url;
-    protected $settings;
     protected $translator;
-    protected $repository;
 
     /**
      * {@inheritdoc}
      */
-    public $serializer = DataSerializer::class;
-    private $storeTimezone = 'Asia/Shanghai';
+    public $serializer = StoreSerializer::class;
 
-    public function __construct(SettingsRepositoryInterface $settings, UserRepository $repository, UrlGenerator $url, Translator $translator)
+    public function __construct(UserRepository $repository, Translator $translator)
     {
-        $this->url = $url;
-        $this->settings = $settings;
         $this->translator = $translator;
-        $this->repository = $repository;
-
-        $storeTimezone = $this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai');
-        $this->storeTimezone = !!$storeTimezone ? $storeTimezone : 'Asia/Shanghai';    }
+    }
 
     protected function data(ServerRequestInterface $request, Document $document) {
         $actor = RequestUtil::getActor($request);
         $parseBody = $request->getParsedBody();
-        $params = [];
 
         if (!$actor->can('mattoid-store.group-moderate')) {
             throw new PermissionDeniedException();
         }
 
-        $goods = StoreGoodsModel::query()->where('code', $parseBody['code'])->first();
-        if (!$goods && $parseBody['status'] == 1) {
+        $id = Arr::get($parseBody, 'id');
+        if (!$id) {
+            throw new ValidationException(['message' => $this->translator->trans('mattoid-store.admin.error.invalid-params')]);
+        }
+
+        $store = StoreModel::query()->find($id);
+        if (!$store) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.admin.error.invalid-product')]);
         }
 
-        // 修改时库存为0则按照无限制逻辑处理
-        if ($parseBody['stock'] == 0 || $parseBody['stock'] == -99) {
-            $parseBody['stock'] = -99;
+        $status = (int) Arr::get($parseBody, 'status', 1);
+        $code = Arr::get($parseBody, 'code');
+        // 插件校验以运行时注册表为准；下架操作允许类型已注销（插件停用后商品自动下架，但管理员仍可编辑/下架）
+        $goods = $code ? StoreExtend::getStoreGoods($code) : null;
+        if (!$goods && $status == 1) {
+            throw new ValidationException(['message' => $this->translator->trans('mattoid-store.admin.error.invalid-product')]);
         }
-        if (extension_loaded('bcmath')) {
-            $discountPrice = bcdiv(bcmul($parseBody['price'], $parseBody['discount']) ,100, 2);
-        } else {
-            $discountPrice = round($parseBody['price'] * $parseBody['discount'] / 100, 2);
+
+        // 白名单过滤 + 参数校验（防止批量赋值注入与负价格刷钱）
+        $params = StoreParamsUtil::sanitizeForWrite($parseBody, false);
+        unset($params['code']); // 商品类型不允许变更
+        if ($goods) {
+            $params['pop_up'] = json_encode($goods->popUp);
+            $params['class_name'] = $goods->className;
         }
-        $parseBody['discountPrice'] = $discountPrice;
-        $params = ObjectsUtil::removeEmptySql($parseBody);
-        $params['pop_up'] = $goods->pop_up;
-        $params['class_name'] = $goods->class_name;
-        $params['updated_at'] = Carbon::now()->tz($this->storeTimezone);
 
-        $result = StoreModel::query()->where('id', $parseBody['id'])->update($params);
+        // 价格或折扣任一变化都要重算折扣价，并重启折扣窗口（只改价格/期限不动 discount 时不重启窗口）
+        if (array_key_exists('price', $params) || array_key_exists('discount', $params)) {
+            $price = $params['price'] ?? $store->price;
+            $discount = $params['discount'] ?? $store->discount;
+            $params['discount_price'] = StoreParamsUtil::calcDiscountPrice($price, $discount);
+        }
+        if (array_key_exists('discount', $params)) {
+            $params['discount_start_at'] = $params['discount'] > 0 ? Carbon::now() : null;
+        }
 
-        return $result;
+        $store->update($params);
+
+        return $store->refresh();
     }
 }

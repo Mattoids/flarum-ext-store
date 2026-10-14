@@ -26,109 +26,114 @@ export default class StoreListPage extends ExtensionPage {
       <div className="ExtensionPage-body">
         <div className="ExtensionPage-settings FlarumBadgesPage">
           <div className="container">
-            <form>
-              {this.buildSettingComponent({
-                type: 'string',
-                setting: 'mattoid-store.storeName',
-                label: app.translator.trans('mattoid-store.admin.settings.store-name'),
-                placeholder: app.translator.trans('mattoid-store.admin.settings.store-name'),
-                help: app.translator.trans('mattoid-store.admin.settings.store-name-requirement'),
-              })}
-              {this.buildSettingComponent({
-                type: 'string',
-                setting: 'mattoid-store.storeTimezone',
-                label: app.translator.trans('mattoid-store.admin.settings.store-timezone'),
-                placeholder: 'Asia/Shanghai',
-                help: app.translator.trans('mattoid-store.admin.settings.store-timezone-requirement'),
-              })}
-              {this.submitButton()}
-            </form>
-            <hr/>
-            {this.buildSettingComponent(function () {
-                return m('.Form-group', Button.component({
-                  className: 'Button',
-                  onclick() {
-                    app.modal.show(AddStoreGoods);
-                  },
-                }, app.translator.trans('mattoid-store.admin.settings.add-store-goods')));
-            })}
-          </div>
-          <div className="container">
-            <div className="spacing" style="overflow: auto">
-              <div style="display: inline-block;">
-                <Select
-                  value={this.status()}
-                  disabled={this.loading}
-                  options={{
-                    '-1': app.translator.trans('mattoid-store.lib.item-status-all'),
-                    '1': app.translator.trans('mattoid-store.lib.item-status-up'),
-                    '0': app.translator.trans('mattoid-store.lib.item-status-down')
-                  }}
-                  buttonClassName="Button"
-                  onchange={(e) => {
-                    this.status(e)
-                    this.storeList = []
-                    this.loadResults()
-                  }}
-                />
-              </div>
-              <div style=" display: inline-block; margin-left: 26px;">
-                <Select
-                  value={this.type()}
-                  disabled={this.loading}
-                  options={{
-                    '-1': app.translator.trans('mattoid-store.lib.item-type-all'),
-                    'permanent': app.translator.trans('mattoid-store.lib.item-type-permanent'),
-                    'limit': app.translator.trans('mattoid-store.lib.item-type-limit'),
-                  }}
-                  buttonClassName="Button"
-                  onchange={(e) => {
-                    this.type(e)
-                    this.storeList = []
-                    this.loadResults()
-                  }}
-                />
-              </div>
+            <div className="StoreAdminPanel">
+              <div className="StoreAdminPanel-title">{app.translator.trans('mattoid-store.admin.settings.section-settings')}</div>
+              <form>
+                {this.buildSettingComponent({
+                  type: 'string',
+                  setting: 'mattoid-store.storeName',
+                  label: app.translator.trans('mattoid-store.admin.settings.store-name'),
+                  placeholder: app.translator.trans('mattoid-store.admin.settings.store-name'),
+                  help: app.translator.trans('mattoid-store.admin.settings.store-name-requirement'),
+                })}
+                {this.buildSettingComponent({
+                  type: 'string',
+                  setting: 'mattoid-store.storeTimezone',
+                  label: app.translator.trans('mattoid-store.admin.settings.store-timezone'),
+                  placeholder: 'Asia/Shanghai',
+                  help: app.translator.trans('mattoid-store.admin.settings.store-timezone-requirement'),
+                })}
+                {this.submitButton()}
+              </form>
             </div>
-            <ul style="padding:0px;list-style-type: none;">
-              {
-                this.storeList.map((item) => {
-                  return (
-                    <li style="margin-top:5px;background: var(--body-bg);">
-                      {StoreListItem.component({ item })}
-                    </li>
-                  );
-                })
-              }
-            </ul>
+          </div>
 
-            {!this.loading && this.storeList.length === 0 && (
-              <div>
-                <div style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">
-                  {app.translator.trans('mattoid-store.lib.list-empty')}
-                </div>
-              </div>
-            )}
-
-            {!this.loading && this.hasMoreResults() && (
-              <div style="text-align:center;padding:20px">
-                <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading} onclick={() => this.loadMore()}>
-                  {app.translator.trans('mattoid-store.lib.list-load-more')}
+          <div className="container">
+            <div className="StoreAdminPanel">
+              <div className="StoreAdminPanel-title">
+                {app.translator.trans('mattoid-store.admin.settings.section-goods')}
+                <Button
+                  className="Button Button--primary StoreAdminPanel-add"
+                  onclick={() => app.modal.show(AddStoreGoods)}
+                >
+                  {app.translator.trans('mattoid-store.admin.settings.add-store-goods')}
                 </Button>
               </div>
-            )}
 
-            {this.loading && (
-              <div class="DiscussionList">
-                <div class="DiscussionList-loadMore">
-                  <div aria-label="loading…" role="status" data-size="medium"
-                       class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium">
-                    <div aria-hidden="true" class="LoadingIndicator"></div>
-                  </div>
+              <div className="StoreAdminToolbar">
+                <div>
+                  <Select
+                    value={this.status()}
+                    disabled={this.loading}
+                    options={{
+                      '-1': app.translator.trans('mattoid-store.lib.item-status-all'),
+                      '1': app.translator.trans('mattoid-store.lib.item-status-up'),
+                      '0': app.translator.trans('mattoid-store.lib.item-status-down')
+                    }}
+                    onchange={(e) => {
+                      this.status(e)
+                      this.storeList = []
+                      this.loadResults()
+                    }}
+                  />
+                </div>
+                <div>
+                  <Select
+                    value={this.type()}
+                    disabled={this.loading}
+                    options={{
+                      '-1': app.translator.trans('mattoid-store.lib.item-type-all'),
+                      'permanent': app.translator.trans('mattoid-store.lib.item-type-permanent'),
+                      'limit': app.translator.trans('mattoid-store.lib.item-type-limit'),
+                    }}
+                    onchange={(e) => {
+                      this.type(e)
+                      this.storeList = []
+                      this.loadResults()
+                    }}
+                  />
                 </div>
               </div>
-            )}
 
+              <ul className="StoreAdminList">
+                {
+                  this.storeList.map((item) => {
+                    return (
+                      <li>
+                        {StoreListItem.component({ item })}
+                      </li>
+                    );
+                  })
+                }
+              </ul>
+
+              {!this.loading && this.storeList.length === 0 && (
+                <div>
+                  <div className="StoreAdminEmpty">
+                    {app.translator.trans('mattoid-store.lib.list-empty')}
+                  </div>
+                </div>
+              )}
+
+              {!this.loading && this.hasMoreResults() && (
+                <div style="text-align:center;padding:20px">
+                  <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading} onclick={() => this.loadMore()}>
+                    {app.translator.trans('mattoid-store.lib.list-load-more')}
+                  </Button>
+                </div>
+              )}
+
+              {this.loading && (
+                <div class="DiscussionList">
+                  <div class="DiscussionList-loadMore">
+                    <div aria-label="loading…" role="status" data-size="medium"
+                         class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium">
+                      <div aria-hidden="true" class="LoadingIndicator"></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

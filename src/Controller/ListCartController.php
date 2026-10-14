@@ -75,7 +75,7 @@ class ListCartController extends AbstractListController
             $list->pop();
         }
         $document->addPaginationLinks(
-            $this->url->to('api')->route('store.icon.list'),
+            $this->url->to('api')->route('store.cart.list'),
             $params,
             $offset,
             $limit,

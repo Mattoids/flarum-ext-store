@@ -6,6 +6,7 @@ mattoid-store:
       store-timezone: 时区设置
       store-timezone-requirement: 设置时区。默认为 "Asia/Shanghai"
       group-view: 允许用户组访问商店
+      group-moderate: 允许用户组管理商店商品
       add-store-goods: 添加商品
       edit-store-goods: 修改商品
       goods-status: 商品状态
@@ -30,15 +31,30 @@ mattoid-store:
       goods-item-status-1: 确定要下架该物品吗？
       show-icon-button: 图库
       goods-auto-deduction: 自动扣费
+      goods-use-type: 使用方式
+      goods-subtype: 道具类型
+      goods-subtype-none: 无
+      goods-group: 商品分组
+      goods-group-placeholder: 留空继承插件分组
+      section-basic: 基本信息
+      section-settings: 商店设置
+      section-goods: 商品管理
+      section-price: 价格与折扣
+      section-validity: 有效期
+      section-item: 道具设置
+      section-icon: 图标
       days: 天
 
     error:
       invalid-product: 无效商品
+      invalid-params: 请求参数无效
       validate-fail: 购买物品失败
 
   forum:
     tital: 商店
     button: 购买
+    no-permission-buy: 无购买权限
+    backpack: 背包
     buy-goods: 购买商品：{title}
     buy-goods-fail: 商品退款：{title}
     auto-deduction: 商品自动扣费：{title}
@@ -61,6 +77,8 @@ mattoid-store:
       automatic-renewal-fail: 自动续费失败【{message}】
       goods-invalid-fail: 商品失效逻辑执行失败【{message}】
       goods-invalid-event-fail: 商品失效事件推送失败【{message}】
+      request-processing: 请求处理中，请勿重复提交
+      buy-success: 购买成功
       cart-no-use: 该商品没有使用功能
       cart-use-fail: 商品使用失败
 
@@ -80,6 +98,8 @@ mattoid-store:
     item-cart-status-0: 未支付
     item-cart-status-1: 已支付
     item-cart-status-2: 已失效
+    item-cart-status-3: 已使用
+    item-cart-status-9: 超时失效
 
     item-cart-type-all: 全部购买类型
     item-cart-type-permanent: 永久有效
@@ -118,6 +138,27 @@ mattoid-store:
 
     item-cart-button-use: 使用
     item-cart-button-cancel: 取消
+
+    item-use-type-permanent: 永久道具
+    item-use-type-consumable: 一次性道具
+    backpack-use: 使用
+    backpack-cancel-use: 取消使用
+    backpack-remaining: 剩余 {count} 件
+    backpack-equip: 佩戴
+    backpack-unequip: 卸下
+    backpack-in-use: 使用中
+    backpack-empty: 背包空空如也
+    backpack-use-fail: 操作失败，请稍后重试
+
+    filter-all: 全部
+    filter-group: 分组
+    group-default: 默认
+    filter-code: 商品插件
+    filter-subtype: 道具类型
+    filter-type: 有效期
+    filter-discount: 折扣
+    filter-discount-on: 有折扣
+    filter-discount-off: 无折扣
 
     cancel: 取消
     confirm: 确定

@@ -7,13 +7,15 @@ import Select from "flarum/common/components/Select";
 import TextEditor from 'flarum/common/components/TextEditor'
 
 interface IStoreModalAttrs extends IInternalModalAttrs {
-  storeData: object
+  storeData: object,
+  onSuccess?: (storeData: object) => void
 }
 
 export default class StoreBox extends Modal<IStoreModalAttrs> {
   private storeData: object = {}
   private params: object = {}
   private range: boolean = false
+  private errorText: string = ''
 
   static initAttrs(attrs: IStoreModalAttrs) {
     super.initAttrs(attrs);
@@ -35,17 +37,59 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
   }
 
   content() {
+    let popUp = [];
+    try {
+      const parsed = JSON.parse(this.storeData.popUp);
+      popUp = Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      this.errorText = app.translator.trans('mattoid-store.forum.error.validate-fail');
+    }
+    const canBuy = app.session.user && app.session.user.attribute('canStoreView');
     return m('.Modal-body', [
-      this.getHtml(JSON.parse(this.storeData.popUp)),
+      this.renderSummary(),
+      this.errorText ? m('.Alert.Alert--error', this.errorText) : null,
+      this.getHtml(popUp),
       m('.Form-group .center', [
         Button.component({
           type: 'submit',
           className: 'Button Button--primary',
           loading: this.loading,
-          // disabled: parseFloat(this.amount || '0') <= 0,
-        }, app.translator.trans('mattoid-store.forum.button'))
+          disabled: !canBuy,
+        }, canBuy
+          ? app.translator.trans('mattoid-store.forum.button')
+          : app.translator.trans('mattoid-store.forum.no-permission-buy'))
       ])
     ])
+  }
+
+  renderSummary() {
+    const d = this.storeData;
+    if (!d || !d.id) return null;
+
+    const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
+    const price = d.price > 0 ? moneyName.replace('[money]', d.price) : app.translator.trans('mattoid-store.forum.free');
+    const discountPrice = moneyName.replace('[money]', d.discountPrice);
+    const isVideo = d.icon && d.icon.slice(-5) === '.webm';
+    const stockText = d.stock == -99
+      ? app.translator.trans('mattoid-store.forum.infinite')
+      : d.stock;
+
+    return m('.StoreBox-summary', [
+      d.icon ? (isVideo
+        ? m('video', {autoplay: true, loop: true, muted: true, playsinline: true}, m('source', {src: d.icon, type: 'video/webm'}))
+        : m('img', {src: d.icon})) : null,
+      m('div', [
+        m('.StoreBox-price', [
+          d.discountPrice > 0 ? discountPrice : price,
+          d.discountPrice > 0 ? m('span.discount', price) : null,
+        ]),
+        m('.StoreBox-meta', [
+          app.translator.trans('mattoid-store.lib.item-stock') + ': ' + stockText,
+          ' · ',
+          app.translator.trans('mattoid-store.lib.item-type-' + d.type),
+        ]),
+      ]),
+    ]);
   }
 
   getHtml(popUp) {
@@ -129,17 +173,34 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
 
   onsubmit(event: Event) {
     event.preventDefault();
+    if (!app.session.user || !app.session.user.attribute('canStoreView')) {
+      return;
+    }
     this.loading = true;
+    this.errorText = '';
 
     app.request({
       method: 'POST',
       url: app.forum.attribute('apiUrl') + '/store/buy/goods',
       body: this.params
     }).then(
-      () => location.reload(),
+      () => {
+        // 局部更新余额与商品列表库存，避免整页刷新
+        const user = app.session.user;
+        const paid = this.storeData.discountPrice > 0 ? this.storeData.discountPrice : this.storeData.price;
+        if (user && typeof user.attribute('money') === 'number') {
+          user.pushAttributes({money: user.attribute('money') - paid});
+        }
+        if (this.attrs.onSuccess) {
+          this.attrs.onSuccess(this.storeData);
+        }
+        app.alerts.show({type: 'success'}, app.translator.trans('mattoid-store.forum.error.buy-success'));
+        app.modal.close();
+      },
       (result) => {
         this.loading = false;
-        // this.handleErrors(result);
+        this.errorText = result?.response?.responseJSON?.errors?.[0]?.detail
+          || app.translator.trans('mattoid-store.forum.error.validate-fail');
       });
   }
 }

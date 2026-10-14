@@ -14,70 +14,82 @@ export default class StoreListItem extends Component {
   }
 
   view() {
-    const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
-    const price = moneyName.replace('[money]', this.storeData.price);
-    const data = this.storeData;
+    // 商品插件可注册自定义管理端列表行，未注册时使用默认展示
+    const CustomItem = (app as any).storeAdminRegistry?.listItem?.get(this.attrs.item.attributes.code);
+    if (CustomItem) {
+      return <CustomItem item={this.attrs.item} />;
+    }
 
-    const LimitUnit = {'days': '天', 'hour': '小时', 'minute': '分钟', 'second': '秒'};
+    const data = this.storeData;
+    const icon = data.icon || data.pluginIcon;
+    const extIcon = data.pluginExtIcon;
+    const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
+    const price = data.price > 0 ? moneyName.replace('[money]', data.price) : app.translator.trans('mattoid-store.forum.free');
+    const isVideo = icon && icon.slice(-5) === '.webm';
+    const statusUp = Number(data.status) === 1;
 
     return (
-      <div id={"goods" + this.storeData.id} className="storeItemContainer">
-        <div className="leftAligned">
-          <div className="margin">
-            <span>
-              <Button className={'Button Button--primary'}
-                onclick={() => {
-                  app.modal.show(StoreGoodsDetailModal, {storeData: data});
-                }}
-              >
-                {app.translator.trans('mattoid-store.admin.settings.goods-edit')}
-              </Button>
-            </span>
-            <span className="margin">
-              <Button className={'Button Button--danger'}
-                onclick={() => {
-                  app.modal.show(StoreModal, {storeData: data, title: 'delete'});
-                }}
-              >
-                {app.translator.trans('mattoid-store.admin.settings.goods-delete')}
-              </Button>
-            </span>
-            <span className="margin">
-              <Button className={'Button'}
-                onclick={() => {
-                  app.modal.show(StoreModal, {storeData: data, title: 'status-' + this.storeData.status});
-                }}
-              >
-                {this.storeData.status === 0 ? app.translator.trans('mattoid-store.lib.item-status-1') : app.translator.trans('mattoid-store.lib.item-status-0')}
-              </Button>
+      <div id={"goods" + data.id} className="StoreAdminItem">
+        <div className="StoreAdminItem-icon">
+          {icon
+            ? (isVideo
+              ? <video autoplay loop muted playsinline><source src={icon} type="video/webm"/></video>
+              : <img src={icon}/>)
+            : extIcon
+              ? <span className="StoreAdminItem-extIcon"
+                      style={{
+                        backgroundColor: extIcon.backgroundColor,
+                        color: extIcon.color,
+                        backgroundImage: extIcon.backgroundImage
+                      }}>
+                  <i className={extIcon.name}/>
+                </span>
+              : <i className="fas fa-box StoreAdminItem-iconPlaceholder"/>}
+        </div>
+
+        <div className="StoreAdminItem-main">
+          <div className="StoreAdminItem-head">
+            <span className="StoreAdminItem-title">{data.title}</span>
+            <span className={'StoreBadge StoreBadge--' + (statusUp ? 'success' : 'muted')}>
+              {app.translator.trans('mattoid-store.lib.item-status-' + data.status)}
             </span>
           </div>
-          <div>
-            {app.translator.trans('mattoid-store.lib.item-id')}: {this.storeData.id} | &nbsp;
-            {app.translator.trans('mattoid-store.lib.item-title')}: {this.storeData.title}
-          </div>
-          <div>
-            {app.translator.trans('mattoid-store.lib.item-desc')}: {this.storeData.desc}
-          </div>
-          <div>
-            {app.translator.trans('mattoid-store.lib.item-status')}: <span className={this.storeData.status === 0 ? 'red': 'green'}>{ app.translator.trans('mattoid-store.lib.item-status-' + this.storeData.status) }</span> |&nbsp;
-            {app.translator.trans('mattoid-store.lib.item-price')}: {price} |&nbsp;
-            {app.translator.trans('mattoid-store.lib.item-stock')}: { this.storeData.stock == -99 ? '无限' : this.storeData.stock } |&nbsp;
-            {app.translator.trans('mattoid-store.lib.item-discount')}: {this.storeData.discount ? this.storeData.discount + ' %' : '无'} |&nbsp;
-            {app.translator.trans('mattoid-store.lib.item-discount_limit')}: {this.storeData.discountLimit || 0}&nbsp;{ LimitUnit[this.storeData.discountLimitUnit] }
-          </div>
-          <div>
-            {app.translator.trans('mattoid-store.lib.item-type')}: {app.translator.trans('mattoid-store.lib.item-type-' + this.storeData.type)} |&nbsp;
-            {app.translator.trans('mattoid-store.lib.item-created-at')}: {this.storeData.createdAt}
+          {data.desc && <div className="StoreAdminItem-desc">{data.desc}</div>}
+          <div className="StoreAdminItem-meta">
+            <span>{app.translator.trans('mattoid-store.lib.item-price')}: <b>{price}</b></span>
+            <span>{app.translator.trans('mattoid-store.lib.item-stock')}: <b>{data.stock == -99 ? app.translator.trans('mattoid-store.forum.infinite') : data.stock}</b></span>
+            {Number(data.discount) > 0 && (
+              <span>{app.translator.trans('mattoid-store.lib.item-discount')}: <b>{data.discount}%</b></span>
+            )}
+            <span>{app.translator.trans('mattoid-store.lib.item-type-' + data.type)}</span>
+            <span>{app.translator.trans('mattoid-store.lib.item-use-type-' + (data.useType || 'permanent'))}</span>
+            {data.subtype && <span>{data.subtype}</span>}
+            {data.group && <span>{app.translator.trans('mattoid-store.lib.filter-group')}: {data.group}</span>}
+            <span>{app.translator.trans('mattoid-store.lib.item-created-at')}: {data.createdAt}</span>
           </div>
         </div>
-        <div className="rightAligned icon-size">
-        <img className="icon-size" src={this.storeData.icon}
-             style={this.storeData.icon && this.storeData.icon.slice(-5) === '.webm' ? 'display: none' : ''}/>
-        <video autoplay loop muted playsinline className="icon-size"
-               style={this.storeData.icon && this.storeData.icon.slice(-5) === '.webm' ? '' : 'display: none'}>
-          <source src={this.storeData.icon} type="video/webm"/>
-        </video>
+
+        <div className="StoreAdminItem-actions">
+          <Button
+            className="Button"
+            onclick={() => app.modal.show(StoreGoodsDetailModal, {storeData: data})}
+          >
+            {app.translator.trans('mattoid-store.admin.settings.goods-edit')}
+          </Button>
+          <Button
+            className="Button"
+            onclick={() => app.modal.show(StoreModal, {storeData: data, title: 'status-' + data.status})}
+          >
+            {statusUp
+              ? app.translator.trans('mattoid-store.lib.item-status-down')
+              : app.translator.trans('mattoid-store.lib.item-status-up')}
+          </Button>
+          <Button
+            className="Button Button--danger"
+            onclick={() => app.modal.show(StoreModal, {storeData: data, title: 'delete'})}
+          >
+            {app.translator.trans('mattoid-store.admin.settings.goods-delete')}
+          </Button>
         </div>
       </div>
     )

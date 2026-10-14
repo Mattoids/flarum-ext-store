@@ -4,8 +4,6 @@ namespace Mattoid\Store\Serializer;
 
 use Flarum\Api\Serializer\AbstractSerializer;
 use Flarum\Locale\Translator;
-use Illuminate\Cache\RateLimiting\Limit;
-use Mattoid\Store\Enum\LimitUnitEnum;
 
 class DataSerializer extends AbstractSerializer
 {
@@ -17,6 +15,9 @@ class DataSerializer extends AbstractSerializer
     }
 
     protected function getDefaultAttributes($data) {
-        return $data;
+        if (is_object($data)) {
+            return get_object_vars($data);
+        }
+        return is_array($data) ? $data : [];
     }
 }

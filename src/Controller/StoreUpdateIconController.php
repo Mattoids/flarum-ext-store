@@ -2,7 +2,6 @@
 
 namespace Mattoid\Store\Controller;
 
-use Carbon\Carbon;
 use Flarum\Api\Controller\AbstractCreateController;
 use Flarum\Foundation\ValidationException;
 use Flarum\Locale\Translator;
@@ -27,16 +26,12 @@ class StoreUpdateIconController extends AbstractCreateController{
     protected $uploader;
     protected $validator;
     protected $translator;
-    private $storeTimezone = 'Asia/Shanghai';
 
     public function __construct(SettingsRepositoryInterface $settings, StoreUploader $uploader, StoreValidator $validator, Translator $translator){
         $this->uploader = $uploader;
         $this->settings = $settings;
         $this->validator = $validator;
         $this->translator = $translator;
-
-        $storeTimezone = $this->settings->get('mattoid-store.storeTimezone', 'Asia/Shanghai');
-        $this->storeTimezone = !!$storeTimezone ? $storeTimezone : 'Asia/Shanghai';
     }
 
     protected function data(ServerRequestInterface $request, Document $document){
@@ -55,9 +50,7 @@ class StoreUpdateIconController extends AbstractCreateController{
 
         $icon->increment('count');
 
-        $icon->url = $this->uploader->upload($file);;
-        $icon->created_at = Carbon::now()->tz($this->storeTimezone);
-        $icon->updated_at = Carbon::now()->tz($this->storeTimezone);
+        $icon->url = $this->uploader->upload($file);
         $icon->save();
 
         $result['id'] = $icon->id;

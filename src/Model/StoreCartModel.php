@@ -3,38 +3,23 @@
 namespace Mattoid\Store\Model;
 
 use Flarum\Database\AbstractModel;
-use Flarum\Formatter\Formatter;
 
 class StoreCartModel extends AbstractModel
 {
-
     protected $table = "store_cart";
 
-    /**
-     * The text formatter instance.
-     *
-     * @var \Flarum\Formatter\Formatter
-     */
-    protected static $formatter;
+    /** 开启 Eloquent 自动时间戳（UTC） */
+    public $timestamps = true;
 
-    /**
-     * Get the text formatter instance.
-     *
-     * @return \Flarum\Formatter\Formatter
-     */
-    public static function getFormatter()
-    {
-        return static::$formatter;
-    }
+    protected $fillable = [
+        'user_id', 'store_id', 'code', 'title', 'price', 'pay_amt',
+        'type', 'outtime', 'status', 'enable', 'auto_deduction',
+    ];
 
-    /**
-     * Set the text formatter instance.
-     *
-     * @param \Flarum\Formatter\Formatter $formatter
-     */
-    public static function setFormatter(Formatter $formatter)
-    {
-        static::$formatter = $formatter;
-    }
+    protected $dates = ['outtime', 'renewed_at'];
 
+    protected $casts = [
+        'price' => 'float',
+        'pay_amt' => 'float',
+    ];
 }
