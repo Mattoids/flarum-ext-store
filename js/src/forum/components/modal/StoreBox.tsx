@@ -45,14 +45,14 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
       this.errorText = app.translator.trans('mattoid-store.forum.error.validate-fail');
     }
     const canBuy = app.session.user && app.session.user.attribute('canStoreView');
-    return m('.Modal-body', [
+    return m('.Modal-body.StoreBox-body', [
       this.renderSummary(),
       this.errorText ? m('.Alert.Alert--error', this.errorText) : null,
-      this.getHtml(popUp),
-      m('.Form-group .center', [
+      m('.StoreBox-form', this.getHtml(popUp)),
+      m('.StoreBox-submit', [
         Button.component({
           type: 'submit',
-          className: 'Button Button--primary',
+          className: 'Button Button--primary Button--block',
           loading: this.loading,
           disabled: !canBuy,
         }, canBuy
@@ -73,20 +73,21 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
     const stockText = d.stock == -99
       ? app.translator.trans('mattoid-store.forum.infinite')
       : d.stock;
+    const typeText = app.translator.trans('mattoid-store.lib.item-type-' + d.type)
+      + (d.type === 'limit' ? ` (${d.outtime}${app.translator.trans('mattoid-store.forum.days')})` : '');
 
     return m('.StoreBox-summary', [
-      d.icon ? (isVideo
+      d.icon ? m('.StoreBox-summaryIcon', (isVideo
         ? m('video', {autoplay: true, loop: true, muted: true, playsinline: true}, m('source', {src: d.icon, type: 'video/webm'}))
-        : m('img', {src: d.icon})) : null,
-      m('div', [
-        m('.StoreBox-price', [
-          d.discountPrice > 0 ? discountPrice : price,
+        : m('img', {src: d.icon}))) : null,
+      m('.StoreBox-summaryInfo', [
+        m('.StoreBox-priceGroup', [
+          m('span.price', d.discountPrice > 0 ? discountPrice : price),
           d.discountPrice > 0 ? m('span.discount', price) : null,
         ]),
         m('.StoreBox-meta', [
-          app.translator.trans('mattoid-store.lib.item-stock') + ': ' + stockText,
-          ' · ',
-          app.translator.trans('mattoid-store.lib.item-type-' + d.type),
+          m('span.StoreBox-metaItem', app.translator.trans('mattoid-store.lib.item-stock') + ': ' + stockText),
+          m('span.StoreBox-metaItem', typeText),
         ]),
       ]),
     ]);

@@ -220,36 +220,76 @@
 }
 
 /* ============ 购买弹窗（StoreBox） ============ */
-.StoreBox-summary {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding-bottom: 14px;
-  margin-bottom: 14px;
-  border-bottom: 1px solid var(--control-bg);
-}
-.StoreBox-summary img,
-.StoreBox-summary video {
-  width: 64px;
-  height: 64px;
-  object-fit: contain;
-  border-radius: 8px;
-  flex-shrink: 0;
-}
-.StoreBox-price {
-  font-size: 20px;
-  font-weight: 700;
-  color: #e7564f;
-}
-.StoreBox-price .discount {
-  font-size: 13px;
-  font-weight: 400;
-  margin-left: 6px;
-}
-.StoreBox-meta {
-  font-size: 12px;
-  color: var(--muted-color);
-  margin-top: 2px;
+.StoreBox-body {
+  .StoreBox-summary {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    margin-bottom: 16px;
+    background: var(--control-bg);
+    border: 1px solid var(--control-bg);
+    border-radius: 10px;
+  }
+  .StoreBox-summaryIcon {
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .StoreBox-summaryIcon img,
+  .StoreBox-summaryIcon video {
+    max-width: 64px;
+    max-height: 64px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+  .StoreBox-summaryInfo {
+    min-width: 0;
+  }
+  .StoreBox-priceGroup {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .StoreBox-priceGroup .price {
+    color: #e7564f;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .StoreBox-priceGroup .discount {
+    font-size: 13px;
+    font-weight: 400;
+  }
+  .StoreBox-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    font-size: 12px;
+    color: var(--muted-color);
+    margin-top: 4px;
+  }
+  .StoreBox-form .Form-group {
+    margin-bottom: 14px;
+  }
+  .StoreBox-form .Form-group:last-child {
+    margin-bottom: 0;
+  }
+  .StoreBox-submit {
+    margin-top: 18px;
+  }
+  .StoreBox-submit .Button {
+    width: 100%;
+    padding: 10px 0;
+    font-size: 15px;
+  }
 }
 
 /* ============ 状态徽章 ============ */
