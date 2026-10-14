@@ -7,10 +7,10 @@ use Flarum\Api\Controller\AbstractListController;
 use Flarum\Foundation\ValidationException;
 use Flarum\Http\RequestUtil;
 use Flarum\Locale\Translator;
-use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Cache\Repository as CacheContract;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use Flarum\User\Exception\PermissionDeniedException;
 use Mattoid\Store\Event\StoreBuyFailEvent;
 use Mattoid\Store\Event\StoreCartAddEvent;
@@ -39,14 +39,16 @@ class BuyGoodsController extends AbstractListController
     protected $cache;
     protected $log;
     protected $money;
+    protected $connection;
 
-    public function __construct(Dispatcher $events, Translator $translator, CacheContract $cache, LoggerInterface $log, StoreMoneyManager $money)
+    public function __construct(Dispatcher $events, Translator $translator, CacheContract $cache, LoggerInterface $log, StoreMoneyManager $money, ConnectionInterface $connection)
     {
         $this->events = $events;
         $this->translator = $translator;
         $this->cache = $cache;
         $this->log = $log;
         $this->money = $money;
+        $this->connection = $connection;
     }
 
     protected function data(ServerRequestInterface $request, Document $document) {
@@ -73,7 +75,7 @@ class BuyGoodsController extends AbstractListController
         }
 
         try {
-            return DB::transaction(function () use ($actor, $params, $id) {
+            return $this->connection->transaction(function () use ($actor, $params, $id) {
                 return $this->purchase($actor, $params, $id);
             });
         } finally {

@@ -8,8 +8,8 @@ use Flarum\Http\RequestUtil;
 use Flarum\Locale\Translator;
 use Flarum\User\Exception\PermissionDeniedException;
 use Illuminate\Contracts\Cache\Repository as CacheContract;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Model\StoreModel;
@@ -24,16 +24,18 @@ class UseGoodsController extends AbstractCreateController
 {
     protected $translator;
     protected $cache;
+    protected $connection;
 
     /**
      * {@inheritdoc}
      */
     public $serializer = DataSerializer::class;
 
-    public function __construct(Translator $translator, CacheContract $cache)
+    public function __construct(Translator $translator, CacheContract $cache, ConnectionInterface $connection)
     {
         $this->translator = $translator;
         $this->cache = $cache;
+        $this->connection = $connection;
     }
 
     protected function data(ServerRequestInterface $request, Document $document) {
@@ -56,7 +58,7 @@ class UseGoodsController extends AbstractCreateController
         }
 
         try {
-            return DB::transaction(function () use ($actor, $id) {
+            return $this->connection->transaction(function () use ($actor, $id) {
                 $cart = StoreCartModel::query()->where('id', $id)->where('user_id', $actor->id)->first();
                 if (!$cart) {
                     throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.cart-use-fail')]);

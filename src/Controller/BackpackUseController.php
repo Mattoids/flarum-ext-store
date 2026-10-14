@@ -8,8 +8,8 @@ use Flarum\Http\RequestUtil;
 use Flarum\Locale\Translator;
 use Flarum\User\Exception\PermissionDeniedException;
 use Illuminate\Contracts\Cache\Repository as CacheContract;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Model\StoreModel;
@@ -30,11 +30,13 @@ class BackpackUseController extends AbstractCreateController
 
     protected $translator;
     protected $cache;
+    protected $connection;
 
-    public function __construct(Translator $translator, CacheContract $cache)
+    public function __construct(Translator $translator, CacheContract $cache, ConnectionInterface $connection)
     {
         $this->translator = $translator;
         $this->cache = $cache;
+        $this->connection = $connection;
     }
 
     protected function data(ServerRequestInterface $request, Document $document)
@@ -70,7 +72,7 @@ class BackpackUseController extends AbstractCreateController
         }
 
         try {
-            return DB::transaction(function () use ($actor, $store, $cart) {
+            return $this->connection->transaction(function () use ($actor, $store, $cart) {
                 if ($store->use_type === 'consumable') {
                     $this->consume($actor, $store, $cart);
                 } else {
