@@ -8,6 +8,7 @@ mattoid-store:
       group-view: 允许用户组访问商店
       group-moderate: 允许用户组管理商店商品
       add-store-goods: 添加商品
+      search-goods-placeholder: 按商品名称搜索
       edit-store-goods: 修改商品
       goods-status: 商品状态
       goods-title: 商品名称
@@ -49,7 +50,7 @@ mattoid-store:
       goods-icon-hint: 支持图片地址、视频地址或装饰样式类名（如用户名颜色样式类）
       goods-purchase-limit-enable: 开启限购
       goods-purchase-limit-count: 限购数量
-      goods-purchase-limit-period: 限购周期
+      goods-purchase-limit-period: 限购周期（0:终身限购）
       days: 天
 
     error:

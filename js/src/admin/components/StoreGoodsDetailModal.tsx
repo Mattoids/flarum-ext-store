@@ -188,7 +188,7 @@ export default class StoreGoodsDetailModal extends Modal {
             <section className="StoreAdminCard">
               <div className="StoreAdminCard-title">{app.translator.trans("mattoid-store.admin.settings.section-price")}</div>
               <div className="StoreAdminCard-body">
-                <div className="StoreAdminGrid">
+                <div className="StoreAdminGrid StoreAdminGrid--price">
               <div className="StoreAdminField">
                 <label>{app.translator.trans("mattoid-store.admin.settings.goods-price")}</label>
                 <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.price}/>
@@ -294,7 +294,7 @@ export default class StoreGoodsDetailModal extends Modal {
                 <div className="StoreAdminField">
                   <label>{app.translator.trans("mattoid-store.admin.settings.goods-purchase-limit-period")}</label>
                   <div className="StoreAdminInline">
-                    <input required class="FormControl" type="number" step="1" min="1" bidi={this.params.purchaseLimitPeriod}/>
+                    <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.purchaseLimitPeriod}/>
                     {Select.component({
                       options: {
                         'days': app.translator.trans("mattoid-store.lib.item-limit-unit-days"),
@@ -317,7 +317,7 @@ export default class StoreGoodsDetailModal extends Modal {
             <section className="StoreAdminCard">
               <div className="StoreAdminCard-title">{app.translator.trans("mattoid-store.admin.settings.section-item")}</div>
               <div className="StoreAdminCard-body">
-                <div className="StoreAdminGrid">
+                <div className="StoreAdminGrid StoreAdminGrid--3col">
               <div className="StoreAdminField">
                 <label>{app.translator.trans("mattoid-store.admin.settings.goods-group")}</label>
                 <input class="FormControl" type="text" bidi={this.params.group}

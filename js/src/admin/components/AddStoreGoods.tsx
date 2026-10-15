@@ -7,6 +7,7 @@ import StoreGoodsDetailModal from "./StoreGoodsDetailModal";
 export default class AddStoreGoods extends Modal {
   private goodsList: any = []
   private moreResults: boolean = false
+  private search: string = ''
 
   oninit(vnode) {
     super.oninit(vnode);
@@ -22,11 +23,38 @@ export default class AddStoreGoods extends Modal {
     return "Modal--large";
   }
 
+  filteredGoodsList() {
+    const keyword = this.search.trim().toLowerCase();
+    if (!keyword) {
+      return this.goodsList;
+    }
+    return this.goodsList.filter((item: any) => {
+      const name = (item.attributes.name || '').toLowerCase();
+      const code = (item.attributes.code || '').toLowerCase();
+      return name.indexOf(keyword) !== -1 || code.indexOf(keyword) !== -1;
+    });
+  }
+
   content() {
+    const goodsList = this.filteredGoodsList();
+
     return (
       <div>
+        <div className="StorePluginSearch">
+          <input
+            className="FormControl"
+            type="text"
+            value={this.search}
+            placeholder={app.translator.trans('mattoid-store.admin.settings.search-goods-placeholder')}
+            oninput={(e: InputEvent) => {
+              this.search = (e.target as HTMLInputElement).value;
+            }}
+          />
+        </div>
+
+        <div className="StorePluginGridScroll">
         <div className="StorePluginGrid">
-          {this.goodsList.map((item: object, index: number) => (
+          {goodsList.map((item: object, index: number) => (
             <div className="StorePluginCard">
               <div className="StorePluginCard-title">
                 {item.attributes.name}
@@ -66,6 +94,14 @@ export default class AddStoreGoods extends Modal {
               </div>
             </div>
           ))}
+        </div>
+
+        {!this.loading && this.goodsList.length > 0 && goodsList.length === 0 && (
+          <div>
+            <div
+              style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">{app.translator.trans("mattoid-store.lib.list-empty")}</div>
+          </div>
+        )}
         </div>
 
         {!this.loading && this.goodsList.length === 0 && (

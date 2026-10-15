@@ -19,12 +19,32 @@ export default class StoreModal extends Modal {
 
   content() {
     const isDelete = this.type === 'delete';
+    const icon = this.storeData.icon || this.storeData.pluginIcon;
+    const extIcon = this.storeData.pluginExtIcon;
+    const isVideo = icon && icon.slice(-5) === '.webm';
+    // CSS 类名 icon（如用户名颜色 decorationStoreColorText2）不能作为图片地址
+    const isClassIcon = icon && icon.indexOf('/') === -1 && icon.indexOf('.') === -1;
 
     return (
       <div className="Modal-body">
         <div className="StoreConfirmBody">
           <div className={'StoreConfirmIcon' + (isDelete ? ' StoreConfirmIcon--danger' : '')}>
-            <i className={'fas ' + (isDelete ? 'fa-trash-alt' : 'fa-exchange-alt')}/>
+            {icon
+              ? (isClassIcon
+                ? <span className={'StoreIconClassPreview ' + icon}>{app.translator.trans('mattoid-store-decoration.lib.item-property-style-text-effect')}</span>
+                : isVideo
+                  ? <video autoplay loop muted playsinline><source src={icon} type="video/webm"/></video>
+                  : <img src={icon}/>)
+              : extIcon && (extIcon.name || extIcon.backgroundImage)
+                ? <span className="StoreAdminItem-extIcon"
+                        style={{
+                          backgroundColor: extIcon.backgroundColor,
+                          color: extIcon.color,
+                          backgroundImage: extIcon.backgroundImage
+                        }}>
+                    {extIcon.name ? <i className={extIcon.name}/> : ''}
+                  </span>
+                : <i className={'fas ' + (isDelete ? 'fa-trash-alt' : 'fa-exchange-alt')}/>}
           </div>
           <div className="StoreConfirmText">
             <div className="StoreConfirmTitle">{this.storeData.title}</div>

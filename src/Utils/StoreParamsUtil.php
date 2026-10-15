@@ -61,9 +61,11 @@ class StoreParamsUtil
         };
 
         // 先将驼峰键统一转为下划线（前端表单发送 camelCase 字段），再按白名单过滤
+        // null 视为「未提供该字段」直接丢弃：序列化回传的属性里大量可空字段为 null
+        // （如 subtype/use_type/outtime），update 只应用提供的字段，不会误清数据
         $normalized = [];
         foreach ($input as $key => $value) {
-            if (is_string($key)) {
+            if (is_string($key) && $value !== null) {
                 $normalized[StringUtil::toUnderScore($key)] = $value;
             }
         }

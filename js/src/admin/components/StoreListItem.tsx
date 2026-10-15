@@ -35,7 +35,7 @@ export default class StoreListItem extends Component {
         <div className="StoreAdminItem-icon">
           {icon
             ? (isClassIcon
-              ? <span className="StoreIconClassPreview">{icon}</span>
+              ? <span className={'StoreIconClassPreview ' + icon}>{app.translator.trans('mattoid-store-decoration.lib.item-property-style-text-effect')}</span>
               : isVideo
                 ? <video autoplay loop muted playsinline><source src={icon} type="video/webm"/></video>
                 : <img src={icon}/>)

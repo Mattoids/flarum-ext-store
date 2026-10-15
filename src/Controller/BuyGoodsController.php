@@ -109,12 +109,16 @@ class BuyGoodsController extends AbstractListController
         }
 
         // 限购：开启后统计当前用户在限购周期内购买成功的次数，超限直接拒绝
+        // 限购周期填 0 表示终身限购：统计历史全部购买次数，不按时间窗口过滤
         if ($store->purchase_limit_enable) {
             $periodSeconds = self::periodUnitToSeconds($store->purchase_limit_period_unit) * (int) $store->purchase_limit_period;
-            if ($periodSeconds > 0 && $store->purchase_limit_count > 0) {
-                $bought = StoreCartModel::query()->where('user_id', $actor->id)->where('store_id', $store->id)
-                    ->where('status', 1)->where('created_at', '>=', Carbon::now()->subSeconds($periodSeconds))
-                    ->count();
+            if ($store->purchase_limit_count > 0) {
+                $boughtQuery = StoreCartModel::query()->where('user_id', $actor->id)->where('store_id', $store->id)
+                    ->where('status', 1);
+                if ($periodSeconds > 0) {
+                    $boughtQuery->where('created_at', '>=', Carbon::now()->subSeconds($periodSeconds));
+                }
+                $bought = $boughtQuery->count();
                 if ($bought >= $store->purchase_limit_count) {
                     throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.purchase-limit-exceeded')]);
                 }

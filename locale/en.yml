@@ -10,6 +10,7 @@ mattoid-store:
       group-view: Allow user groups to access the store
       group-moderate: Allow user groups to manage store goods
       add-store-goods: Add goods
+      search-goods-placeholder: Search goods by name
       goods-status: Status
       goods-title: Title
       goods-code: Code
@@ -53,7 +54,7 @@ mattoid-store:
       goods-icon-hint: Supports an image URL, video URL, or decoration style class (e.g. username color class)
       goods-purchase-limit-enable: Enable purchase limit
       goods-purchase-limit-count: Limit per period
-      goods-purchase-limit-period: Limit period
+      goods-purchase-limit-period: 'Limit period (0: lifetime limit)'
       days: day
 
     error:
