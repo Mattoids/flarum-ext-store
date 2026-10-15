@@ -2,6 +2,7 @@
 
 > 适用版本：flarum-ext-store `fix/security-stability-20261010` 分支之后的版本。
 > 本文档面向**商品插件**开发者，介绍如何基于 store 扩展开发一个商品插件。
+> English version: [goods-plugin-dev_en.md](goods-plugin-dev_en.md)
 
 ---
 
@@ -98,6 +99,18 @@ class MyGoods extends Goods
     // 插件 logo 图片地址（可选）：管理端商品卡片/列表无图标时的回退显示，
     // 如 '/assets/extensions/my-goods/logo.svg'。不填则回退到扩展 composer.json 声明的 icon。
     public $icon = '';
+
+    // 以下为表单默认值声明（全部可选，null = 不预设，用管理端表单默认）：
+    // 有效期天数（对应表单「有效期」）
+    public $outtime = null;
+    // 是否开启限购 0/1（对应表单「开启限购」开关）
+    public $purchaseLimitEnable = null;
+    // 每周期限购数量（对应表单「限购数量」）
+    public $purchaseLimitCount = null;
+    // 限购周期数值，0 = 终身限购（对应表单「限购周期」）
+    public $purchaseLimitPeriod = null;
+    // 限购周期单位：days/hour/minute/second（对应表单「周期单位」）
+    public $purchaseLimitPeriodUnit = null;
 
     // 购买弹窗样式类名（可选）
     public $className = 'store-buy Modal--small';

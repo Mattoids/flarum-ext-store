@@ -55,6 +55,7 @@ mattoid-store:
       goods-purchase-limit-enable: Enable purchase limit
       goods-purchase-limit-count: Limit per period
       goods-purchase-limit-period: 'Limit period (0: lifetime limit)'
+      goods-purchase-limit-period-unit: Period unit
       days: day
 
     error:

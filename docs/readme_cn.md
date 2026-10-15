@@ -124,3 +124,5 @@ php flarum cache:clear
 - [Packagist](https://packagist.org/packages/mattoid/flarum-ext-store)
 - [GitHub](https://github.com/mattoids/flarum-ext-store)
 - [Discuss](https://discuss.flarum.org/d/34793)
+- [商品插件开发指南（中文）](goods-plugin-dev_cn.md)
+- [Product Plugin Development Guide (EN)](goods-plugin-dev_en.md)

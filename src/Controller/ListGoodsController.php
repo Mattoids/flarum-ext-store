@@ -59,6 +59,11 @@ class ListGoodsController extends AbstractListController
             $model->pop_up = $goods->popUp;
             $model->item_types = $goods->itemTypes;
             $model->icon = $goods->icon;
+            $model->outtime = $goods->outtime;
+            $model->purchase_limit_enable = $goods->purchaseLimitEnable;
+            $model->purchase_limit_count = $goods->purchaseLimitCount;
+            $model->purchase_limit_period = $goods->purchaseLimitPeriod;
+            $model->purchase_limit_period_unit = $goods->purchaseLimitPeriodUnit;
             $model->ext_icon = ExtensionIconUtil::resolve($goods, $this->extensions);
             $list[] = $model;
         }

@@ -22,6 +22,11 @@ class GoodsSerializer extends AbstractSerializer
             'itemTypes' => $data->item_types ?: [],
             'icon' => $data->icon,
             'extIcon' => $data->ext_icon ?: null,
+            'outtime' => $data->outtime !== null ? (int) $data->outtime : null,
+            'purchaseLimitEnable' => $data->purchase_limit_enable !== null ? (int) $data->purchase_limit_enable : null,
+            'purchaseLimitCount' => $data->purchase_limit_count !== null ? (int) $data->purchase_limit_count : null,
+            'purchaseLimitPeriod' => $data->purchase_limit_period !== null ? (int) $data->purchase_limit_period : null,
+            'purchaseLimitPeriodUnit' => $data->purchase_limit_period_unit,
             'createdAt' => $data->created_at,
         ];
     }

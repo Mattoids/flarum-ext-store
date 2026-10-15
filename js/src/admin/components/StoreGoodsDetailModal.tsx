@@ -12,6 +12,7 @@ export default class StoreGoodsDetailModal extends Modal {
   private iconList: Array = [];
   private itemTypes: any = [];
   private method: string = 'POST';
+  private defaultsAppliedFor: string = '';
   private static pluginList: any = null;
   private params: object = {
     status: Stream(1),
@@ -103,7 +104,38 @@ export default class StoreGoodsDetailModal extends Modal {
     const code = this.params.code ? this.params.code() : (this.attrs.code || '');
     const plugin = (StoreGoodsDetailModal.pluginList || []).find((p) => p.attributes && p.attributes.code === code);
     this.itemTypes = plugin && plugin.attributes.itemTypes ? plugin.attributes.itemTypes : [];
+    this.applyPluginDefaults(code, plugin);
     m.redraw();
+  }
+
+  /**
+   * 新增商品（无 storeData）时，用商品插件在 Goods 抽象类上声明的
+   * 有效期/限购默认值填充表单；编辑已有商品时不覆盖库中值。
+   * 每个 code 只应用一次，避免异步加载完成后覆盖用户已修改的内容。
+   */
+  applyPluginDefaults(code, plugin) {
+    if (this.attrs.storeData || !plugin) {
+      return;
+    }
+    if (this.defaultsAppliedFor === code) {
+      return;
+    }
+
+    const defaults = plugin.attributes || {};
+    const fields = ['outtime', 'purchaseLimitEnable', 'purchaseLimitCount', 'purchaseLimitPeriod', 'purchaseLimitPeriodUnit'];
+    const hasAny = fields.some((key) => defaults[key] !== null && defaults[key] !== undefined);
+    if (!hasAny) {
+      this.defaultsAppliedFor = code;
+      return;
+    }
+
+    fields.forEach((key) => {
+      if (defaults[key] !== null && defaults[key] !== undefined) {
+        this.params[key] = Stream(key === 'purchaseLimitPeriodUnit' ? String(defaults[key]) : Number(defaults[key]));
+      }
+    });
+
+    this.defaultsAppliedFor = code;
   }
 
   className() {
@@ -271,7 +303,7 @@ export default class StoreGoodsDetailModal extends Modal {
             <section className="StoreAdminCard">
               <div className="StoreAdminCard-title">{app.translator.trans("mattoid-store.admin.settings.section-purchase-limit")}</div>
               <div className="StoreAdminCard-body">
-                <div className="StoreAdminGrid">
+                <div className="StoreAdminGrid StoreAdminGrid--4col">
               <div className="StoreAdminField">
                 <label>{app.translator.trans("mattoid-store.admin.settings.goods-purchase-limit-enable")}</label>
                 <div className="StoreAdminInline">
@@ -293,21 +325,24 @@ export default class StoreGoodsDetailModal extends Modal {
               {!!this.params.purchaseLimitEnable() && (
                 <div className="StoreAdminField">
                   <label>{app.translator.trans("mattoid-store.admin.settings.goods-purchase-limit-period")}</label>
-                  <div className="StoreAdminInline">
-                    <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.purchaseLimitPeriod}/>
-                    {Select.component({
-                      options: {
-                        'days': app.translator.trans("mattoid-store.lib.item-limit-unit-days"),
-                        'hour': app.translator.trans("mattoid-store.lib.item-limit-unit-hour"),
-                        'minute': app.translator.trans("mattoid-store.lib.item-limit-unit-minute"),
-                        'second': app.translator.trans("mattoid-store.lib.item-limit-unit-second")
-                      },
-                      value: this.params.purchaseLimitPeriodUnit(),
-                      onchange: (val) => {
-                        this.params.purchaseLimitPeriodUnit = Stream(val)
-                      },
-                    })}
-                  </div>
+                  <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.purchaseLimitPeriod}/>
+                </div>
+              )}
+              {!!this.params.purchaseLimitEnable() && (
+                <div className="StoreAdminField">
+                  <label>{app.translator.trans("mattoid-store.admin.settings.goods-purchase-limit-period-unit")}</label>
+                  {Select.component({
+                    options: {
+                      'days': app.translator.trans("mattoid-store.lib.item-limit-unit-days"),
+                      'hour': app.translator.trans("mattoid-store.lib.item-limit-unit-hour"),
+                      'minute': app.translator.trans("mattoid-store.lib.item-limit-unit-minute"),
+                      'second': app.translator.trans("mattoid-store.lib.item-limit-unit-second")
+                    },
+                    value: this.params.purchaseLimitPeriodUnit(),
+                    onchange: (val) => {
+                      this.params.purchaseLimitPeriodUnit = Stream(val)
+                    },
+                  })}
                 </div>
               )}
                 </div>

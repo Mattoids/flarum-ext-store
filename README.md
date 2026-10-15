@@ -40,6 +40,9 @@ php flarum cache:clear
   ->addEnable(Enable::class);
 ```
 
+> 📖 **Product Plugin Development Guide**: A complete step-by-step guide for developing store product plugins — project scaffolding, the `Goods` information class (including optional form defaults like validity / purchase limit), the five registration capabilities, admin form extension points, frontend component registration, and i18n conventions:
+> [English](docs/goods-plugin-dev_en.md) · [中文](docs/goods-plugin-dev_cn.md)
+
 ### Product Events Overview
 - Executed before purchase
 
@@ -118,3 +121,6 @@ This event is listened to by the product plugin and is triggered when a product 
 - [Packagist](https://packagist.org/packages/mattoid/flarum-ext-store)
 - [GitHub](https://github.com/mattoids/flarum-ext-store)
 - [Discuss](https://discuss.flarum.org/d/34793)
+- [中文文档](https://github.com/Mattoids/flarum-ext-store/blob/master/docs/readme_cn.md)
+- [Product Plugin Development Guide (EN)](https://github.com/Mattoids/flarum-ext-store/blob/master/docs/goods-plugin-dev_en.md)
+- [商品插件开发指南 (中文)](https://github.com/Mattoids/flarum-ext-store/blob/master/docs/goods-plugin-dev_cn.md)

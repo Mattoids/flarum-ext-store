@@ -98,6 +98,57 @@ abstract class Goods
     public $icon = '';
 
     /**
+     * 有效期天数（可选），添加商品时作为表单默认值。
+     * Validity in days (optional), used as the form default when adding goods.
+     *
+     * null = 不预设，使用表单默认（0）。
+     *
+     * @var int|null
+     */
+    public $outtime = null;
+
+    /**
+     * 是否开启限购（可选），添加商品时作为表单默认值。
+     * Whether purchase limit is enabled (optional), used as the form default when adding goods.
+     *
+     * null = 不预设，使用表单默认（关闭）。
+     *
+     * @var int|null (0/1)
+     */
+    public $purchaseLimitEnable = null;
+
+    /**
+     * 限购数量（可选），添加商品时作为表单默认值。
+     * Purchase limit count per period (optional), used as the form default when adding goods.
+     *
+     * null = 不预设，使用表单默认（0 不限制）。
+     *
+     * @var int|null
+     */
+    public $purchaseLimitCount = null;
+
+    /**
+     * 限购周期数值（可选），添加商品时作为表单默认值；0 表示终身限购。
+     * Purchase limit period value (optional), used as the form default when adding goods; 0 = lifetime limit.
+     *
+     * null = 不预设，使用表单默认（0）。
+     *
+     * @var int|null
+     */
+    public $purchaseLimitPeriod = null;
+
+    /**
+     * 限购周期单位（可选），添加商品时作为表单默认值。
+     * Purchase limit period unit (optional), used as the form default when adding goods.
+     *
+     * 取值与折扣时限单位一致：days/hour/minute/second。
+     * null = 不预设，使用表单默认（days）。
+     *
+     * @var string|null
+     */
+    public $purchaseLimitPeriodUnit = null;
+
+    /**
      * 弹窗样式
      * Pop up Style
      *

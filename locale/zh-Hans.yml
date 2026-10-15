@@ -51,6 +51,7 @@ mattoid-store:
       goods-purchase-limit-enable: 开启限购
       goods-purchase-limit-count: 限购数量
       goods-purchase-limit-period: 限购周期（0:终身限购）
+      goods-purchase-limit-period-unit: 周期单位
       days: 天
 
     error:
