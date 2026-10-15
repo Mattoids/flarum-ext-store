@@ -81,7 +81,7 @@ export default class StoreListItem extends Component {
             {app.translator.trans('mattoid-store.admin.settings.goods-edit')}
           </Button>
           <Button
-            className="Button"
+            className={statusUp ? 'Button Button--danger' : 'Button StoreAdminItem-statusUp'}
             onclick={() => app.modal.show(StoreModal, {storeData: data, title: 'status-' + data.status})}
           >
             {statusUp

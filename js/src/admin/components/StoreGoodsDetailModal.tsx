@@ -354,11 +354,24 @@ export default class StoreGoodsDetailModal extends Modal {
             <section className="StoreAdminCard">
               <div className="StoreAdminCard-title">{app.translator.trans("mattoid-store.admin.settings.section-item")}</div>
               <div className="StoreAdminCard-body">
-                <div className="StoreAdminGrid StoreAdminGrid--3col">
+                <div className="StoreAdminGrid StoreAdminGrid--4col">
               <div className="StoreAdminField">
                 <label>{app.translator.trans("mattoid-store.admin.settings.goods-group")}</label>
                 <input class="FormControl" type="text" bidi={this.params.group}
                        placeholder={app.translator.trans("mattoid-store.admin.settings.goods-group-placeholder")}/>
+              </div>
+              <div className="StoreAdminField">
+                <label>{app.translator.trans("mattoid-store.admin.settings.goods-usable")}</label>
+                <div className="StoreAdminInline">
+                  <Switch
+                    state={!!this.params.usable()}
+                    onchange={(val) => {
+                      this.params.usable = Stream(Number(val))
+                    }}
+                  >
+                    {app.translator.trans("mattoid-store.admin.settings.goods-usable")}
+                  </Switch>
+                </div>
               </div>
               <div className="StoreAdminField">
                 <label>{app.translator.trans("mattoid-store.admin.settings.goods-use-type")}</label>
@@ -370,20 +383,6 @@ export default class StoreGoodsDetailModal extends Modal {
                     }}
                   >
                     {app.translator.trans("mattoid-store.lib.item-use-type-consumable")}
-                  </Switch>
-                </div>
-              </div>
-              <div className="StoreAdminField">
-                <label>{app.translator.trans("mattoid-store.admin.settings.goods-usable")}</label>
-                <div className="helpText">{app.translator.trans("mattoid-store.admin.settings.goods-usable-help")}</div>
-                <div className="StoreAdminInline">
-                  <Switch
-                    state={!!this.params.usable()}
-                    onchange={(val) => {
-                      this.params.usable = Stream(Number(val))
-                    }}
-                  >
-                    {app.translator.trans("mattoid-store.admin.settings.goods-usable")}
                   </Switch>
                 </div>
               </div>
