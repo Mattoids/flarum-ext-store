@@ -120,7 +120,20 @@ class BuyGoodsController extends AbstractListController
                 }
                 $bought = $boughtQuery->count();
                 if ($bought >= $store->purchase_limit_count) {
-                    throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.purchase-limit-exceeded')]);
+                    if ($periodSeconds > 0) {
+                        // 周期限购：按窗口内最早一笔购买时间推算下次可购买时间
+                        $oldest = (clone $boughtQuery)->min('created_at');
+                        $retryAt = $oldest ? Carbon::parse($oldest)->addSeconds($periodSeconds) : null;
+                        throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.purchase-limit-exceeded-period', [
+                            'count' => $store->purchase_limit_count,
+                            'period' => (int) $store->purchase_limit_period,
+                            'unit' => $this->translator->trans('mattoid-store.lib.item-limit-unit-'.$store->purchase_limit_period_unit),
+                            'time' => $retryAt ? $retryAt->format('Y-m-d H:i') : '',
+                        ])]);
+                    }
+                    throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.purchase-limit-exceeded-lifetime', [
+                        'count' => $store->purchase_limit_count,
+                    ])]);
                 }
             }
         }

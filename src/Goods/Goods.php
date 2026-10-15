@@ -149,6 +149,17 @@ abstract class Goods
     public $purchaseLimitPeriodUnit = null;
 
     /**
+     * 商品是否允许被使用（默认不允许）。
+     * Whether the product is allowed to be used (default: not allowed).
+     *
+     * 只有声明为允许使用（true）的商品才会出现在用户背包中；
+     * 不允许使用的商品购买后直接生效，不进背包、无使用/取消使用入口。
+     *
+     * @var bool
+     */
+    public $usable = false;
+
+    /**
      * 弹窗样式
      * Pop up Style
      *

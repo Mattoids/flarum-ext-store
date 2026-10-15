@@ -112,6 +112,11 @@ class MyGoods extends Goods
     // Purchase limit period unit: days/hour/minute/second (maps to the form's "Period unit")
     public $purchaseLimitPeriodUnit = null;
 
+    // Whether the product is allowed to be used (optional; default false = not allowed):
+    // only products declared as true appear in the user's backpack (equippable/usable);
+    // false means the product takes effect immediately after purchase and never enters the backpack.
+    public $usable = false;
+
     // Purchase popup style class name (optional)
     public $className = 'store-buy Modal--small';
 }
@@ -340,10 +345,11 @@ Events are not transaction-managed; they only notify before/after a flow ends. P
 4. `After::after()` returning false or throwing triggers an automatic refund and stock restore — do not handle it twice.
 5. When `Use::use()` returns false, the purchase record is **not** consumed — you can validate safely and return true afterwards.
 6. Consumable vs. permanent items are configured by the administrator via `use_type`; the plugin's `addUse` / `addEnable` must match the product type, otherwise the corresponding buttons won't show in the admin panel.
-7. Do not read or write the `store_goods` table (deprecated); do not rely on writing data to the database when the plugin is enabled.
-8. Frontend component registration keys must match the backend registration keys.
-9. Timezone handling uses the admin-configured `mattoid-store.storeTimezone` (default Asia/Shanghai); pay attention when computing validity periods.
-10. Products are taken off the shelf automatically when the plugin is disabled; after re-enabling, they must be manually put back on the shelf in the admin panel.
+7. For a product to appear in the user's backpack, its Goods class must declare `public $usable = true;` (the base class defaults to false: no backpack entry).
+8. Do not read or write the `store_goods` table (deprecated); do not rely on writing data to the database when the plugin is enabled.
+9. Frontend component registration keys must match the backend registration keys.
+10. Timezone handling uses the admin-configured `mattoid-store.storeTimezone` (default Asia/Shanghai); pay attention when computing validity periods.
+11. Products are taken off the shelf automatically when the plugin is disabled; after re-enabling, they must be manually put back on the shelf in the admin panel.
 
 ---
 

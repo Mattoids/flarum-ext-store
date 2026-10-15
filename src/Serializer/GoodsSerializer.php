@@ -27,6 +27,7 @@ class GoodsSerializer extends AbstractSerializer
             'purchaseLimitCount' => $data->purchase_limit_count !== null ? (int) $data->purchase_limit_count : null,
             'purchaseLimitPeriod' => $data->purchase_limit_period !== null ? (int) $data->purchase_limit_period : null,
             'purchaseLimitPeriodUnit' => $data->purchase_limit_period_unit,
+            'usable' => $data->usable !== null ? (int) $data->usable : null,
             'createdAt' => $data->created_at,
         ];
     }

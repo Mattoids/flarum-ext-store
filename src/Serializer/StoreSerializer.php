@@ -50,6 +50,7 @@ class StoreSerializer extends AbstractSerializer
             'purchaseLimitCount' => (int) $data->purchase_limit_count,
             'purchaseLimitPeriod' => (int) $data->purchase_limit_period,
             'purchaseLimitPeriodUnit' => $data->purchase_limit_period_unit,
+            'usable' => (int) $data->usable,
             'pluginIcon' => $plugin ? $plugin->icon : '',
             'pluginExtIcon' => $extIcon,
             'createdAt' => $data->created_at,

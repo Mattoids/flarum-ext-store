@@ -37,6 +37,7 @@ export default class StoreGoodsDetailModal extends Modal {
     purchaseLimitCount: Stream(0),
     purchaseLimitPeriod: Stream(0),
     purchaseLimitPeriodUnit: Stream('days'),
+    usable: Stream(0),
   };
 
   oninit(vnode) {
@@ -73,6 +74,7 @@ export default class StoreGoodsDetailModal extends Modal {
       this.params.purchaseLimitCount = Stream(this.attrs.storeData.purchaseLimitCount || 0);
       this.params.purchaseLimitPeriod = Stream(this.attrs.storeData.purchaseLimitPeriod || 0);
       this.params.purchaseLimitPeriodUnit = Stream(this.attrs.storeData.purchaseLimitPeriodUnit || 'days');
+      this.params.usable = Stream(this.attrs.storeData.usable || 0);
     }
 
     this.loadPlugins();
@@ -122,7 +124,7 @@ export default class StoreGoodsDetailModal extends Modal {
     }
 
     const defaults = plugin.attributes || {};
-    const fields = ['outtime', 'purchaseLimitEnable', 'purchaseLimitCount', 'purchaseLimitPeriod', 'purchaseLimitPeriodUnit'];
+    const fields = ['outtime', 'purchaseLimitEnable', 'purchaseLimitCount', 'purchaseLimitPeriod', 'purchaseLimitPeriodUnit', 'usable'];
     const hasAny = fields.some((key) => defaults[key] !== null && defaults[key] !== undefined);
     if (!hasAny) {
       this.defaultsAppliedFor = code;
@@ -368,6 +370,20 @@ export default class StoreGoodsDetailModal extends Modal {
                     }}
                   >
                     {app.translator.trans("mattoid-store.lib.item-use-type-consumable")}
+                  </Switch>
+                </div>
+              </div>
+              <div className="StoreAdminField">
+                <label>{app.translator.trans("mattoid-store.admin.settings.goods-usable")}</label>
+                <div className="helpText">{app.translator.trans("mattoid-store.admin.settings.goods-usable-help")}</div>
+                <div className="StoreAdminInline">
+                  <Switch
+                    state={!!this.params.usable()}
+                    onchange={(val) => {
+                      this.params.usable = Stream(Number(val))
+                    }}
+                  >
+                    {app.translator.trans("mattoid-store.admin.settings.goods-usable")}
                   </Switch>
                 </div>
               </div>

@@ -18,7 +18,7 @@ class StoreParamsUtil
         'discount_limit_unit', 'type', 'status', 'outtime', 'icon',
         'hide', 'repeat', 'desc', 'auto_deduction', 'use_type', 'subtype',
         'group', 'purchase_limit_enable', 'purchase_limit_count',
-        'purchase_limit_period', 'purchase_limit_period_unit',
+        'purchase_limit_period', 'purchase_limit_period_unit', 'usable',
     ];
 
     const ALLOWED_TYPES = ['permanent', 'limit'];
@@ -44,6 +44,7 @@ class StoreParamsUtil
         'purchase_limit_count' => 0,
         'purchase_limit_period' => 0,
         'purchase_limit_period_unit' => 'days',
+        'usable' => 0,
     ];
 
     /**
@@ -172,7 +173,7 @@ class StoreParamsUtil
         }
 
         // 0/1 开关字段
-        foreach (['hide', 'repeat', 'auto_deduction'] as $field) {
+        foreach (['hide', 'repeat', 'auto_deduction', 'usable'] as $field) {
             if (array_key_exists($field, $data)) {
                 $data[$field] = !empty($data[$field]) ? 1 : 0;
             }

@@ -37,6 +37,8 @@ mattoid-store:
       show-icon-button: Gallery
       goods-icon-effect-preview: Style Preview
       goods-auto-deduction: Auto Deduction
+      goods-usable: Allow use (backpack)
+      goods-usable-help: Only usable products appear in the user's backpack (equip/use); non-usable products take effect immediately after purchase
       goods-use-type: Use type
       goods-subtype: Item type
       goods-subtype-none: None
@@ -101,6 +103,8 @@ mattoid-store:
       request-processing: Request is being processed, please do not resubmit
       buy-success: Purchase successful
       purchase-limit-exceeded: Purchase limit reached for this period, please try again later
+      purchase-limit-exceeded-period: Purchase limit reached (max {count} per {period} {unit}). You can buy again after {time}
+      purchase-limit-exceeded-lifetime: This product is limited to {count} lifetime purchases and you have reached the limit
 
   lib:
     item-status-all: All product statuses

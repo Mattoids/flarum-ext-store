@@ -64,6 +64,7 @@ class ListGoodsController extends AbstractListController
             $model->purchase_limit_count = $goods->purchaseLimitCount;
             $model->purchase_limit_period = $goods->purchaseLimitPeriod;
             $model->purchase_limit_period_unit = $goods->purchaseLimitPeriodUnit;
+            $model->usable = $goods->usable ? 1 : 0;
             $model->ext_icon = ExtensionIconUtil::resolve($goods, $this->extensions);
             $list[] = $model;
         }

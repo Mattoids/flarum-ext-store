@@ -112,6 +112,11 @@ class MyGoods extends Goods
     // 限购周期单位：days/hour/minute/second（对应表单「周期单位」）
     public $purchaseLimitPeriodUnit = null;
 
+    // 商品是否允许被使用（可选，默认 false = 不允许）：
+    // 只有声明为 true 的商品才会出现在用户背包中（可装备/使用）；
+    // false 的商品购买后直接生效，不进背包。
+    public $usable = false;
+
     // 购买弹窗样式类名（可选）
     public $className = 'store-buy Modal--small';
 }
@@ -340,10 +345,11 @@ app.initializers.add('my-goods-admin', () => {
 4. `After::after()` 返回 false 或抛异常会自动退款回补库存，不要重复处理。
 5. `Use::use()` 返回 false 时购买记录**不会**被消耗，可安全校验后再返回 true。
 6. 一次性（consumable）与永久（permanent）道具由管理员在后台配置 use_type，插件的 `addUse` / `addEnable` 应与商品类型匹配；注册后管理端才会显示对应按钮。
-7. 不要读写 `store_goods` 表（已废弃）；不要依赖插件启用时往数据库写数据。
-8. 前端注册组件时 key 必须与后端注册 key 一致。
-9. 时区统一使用后台配置的 `mattoid-store.storeTimezone`（默认 Asia/Shanghai），处理有效期计算时注意。
-10. 插件禁用后对应商品自动下架；重新启用后需在管理端手动重新上架。
+7. 商品要出现在用户背包中，必须在 Goods 类声明 `public $usable = true;`（基类默认 false 不进背包）。
+8. 不要读写 `store_goods` 表（已废弃）；不要依赖插件启用时往数据库写数据。
+9. 前端注册组件时 key 必须与后端注册 key 一致。
+10. 时区统一使用后台配置的 `mattoid-store.storeTimezone`（默认 Asia/Shanghai），处理有效期计算时注意。
+11. 插件禁用后对应商品自动下架；重新启用后需在管理端手动重新上架。
 
 ---
 

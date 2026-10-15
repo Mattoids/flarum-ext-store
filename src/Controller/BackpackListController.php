@@ -63,10 +63,21 @@ class BackpackListController extends AbstractListController
                 ->get()
                 ->keyBy('id');
 
+            // 只有商品行标记「允许使用」（store.usable = 1）的商品才进背包；
+            // 不允许使用的商品购买后直接生效，不在背包展示。
+            // 新增商品时 usable 的表单默认值来自商品插件 Goods 抽象类的 $usable 声明。
+            $usableStoreIds = $stores->filter(function ($store) {
+                return (int) $store->usable === 1;
+            })->keys()->all();
+            $carts = $carts->filter(function ($cart) use ($usableStoreIds) {
+                return in_array($cart->store_id, $usableStoreIds, true);
+            })->values();
+
             // 每个商品的剩余件数（status=1 的购买记录数）
             $remaining = StoreCartModel::query()
                 ->where('user_id', $userId)
                 ->where('status', 1)
+                ->whereIn('store_id', $usableStoreIds)
                 ->select('store_id')
                 ->selectRaw('count(*) as cnt')
                 ->groupBy('store_id')
