@@ -21,6 +21,8 @@ use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Model\StoreModel;
 use Mattoid\Store\Serializer\GoodsSerializer;
+use Mattoid\Store\Service\PricingService;
+use Mattoid\Store\Service\PurchaseLimiter;
 use Mattoid\Store\Service\StoreMoneyManager;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
@@ -40,8 +42,10 @@ class BuyGoodsController extends AbstractListController
     protected $log;
     protected $money;
     protected $connection;
+    protected $pricing;
+    protected $purchaseLimiter;
 
-    public function __construct(Dispatcher $events, Translator $translator, CacheContract $cache, LoggerInterface $log, StoreMoneyManager $money, ConnectionInterface $connection)
+    public function __construct(Dispatcher $events, Translator $translator, CacheContract $cache, LoggerInterface $log, StoreMoneyManager $money, ConnectionInterface $connection, PricingService $pricing, PurchaseLimiter $purchaseLimiter)
     {
         $this->events = $events;
         $this->translator = $translator;
@@ -49,6 +53,8 @@ class BuyGoodsController extends AbstractListController
         $this->log = $log;
         $this->money = $money;
         $this->connection = $connection;
+        $this->pricing = $pricing;
+        $this->purchaseLimiter = $purchaseLimiter;
     }
 
     protected function data(ServerRequestInterface $request, Document $document) {
@@ -109,34 +115,7 @@ class BuyGoodsController extends AbstractListController
         }
 
         // 限购：开启后统计当前用户在限购周期内购买成功的次数，超限直接拒绝
-        // 限购周期填 0 表示终身限购：统计历史全部购买次数，不按时间窗口过滤
-        if ($store->purchase_limit_enable) {
-            $periodSeconds = self::periodUnitToSeconds($store->purchase_limit_period_unit) * (int) $store->purchase_limit_period;
-            if ($store->purchase_limit_count > 0) {
-                $boughtQuery = StoreCartModel::query()->where('user_id', $actor->id)->where('store_id', $store->id)
-                    ->where('status', 1);
-                if ($periodSeconds > 0) {
-                    $boughtQuery->where('created_at', '>=', Carbon::now()->subSeconds($periodSeconds));
-                }
-                $bought = $boughtQuery->count();
-                if ($bought >= $store->purchase_limit_count) {
-                    if ($periodSeconds > 0) {
-                        // 周期限购：按窗口内最早一笔购买时间推算下次可购买时间
-                        $oldest = (clone $boughtQuery)->min('created_at');
-                        $retryAt = $oldest ? Carbon::parse($oldest)->addSeconds($periodSeconds) : null;
-                        throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.purchase-limit-exceeded-period', [
-                            'count' => $store->purchase_limit_count,
-                            'period' => (int) $store->purchase_limit_period,
-                            'unit' => $this->translator->trans('mattoid-store.lib.item-limit-unit-'.$store->purchase_limit_period_unit),
-                            'time' => $retryAt ? $retryAt->format('Y-m-d H:i') : '',
-                        ])]);
-                    }
-                    throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.purchase-limit-exceeded-lifetime', [
-                        'count' => $store->purchase_limit_count,
-                    ])]);
-                }
-            }
-        }
+        $this->purchaseLimiter->check($actor, $store);
 
         $validate = StoreExtend::getValidate($store->code);
         if ($validate && !$validate->validate($actor, $store, $params)) {
@@ -144,12 +123,7 @@ class BuyGoodsController extends AbstractListController
         }
 
         // 开始扣费：按折扣窗口计算应付金额（窗口起点为 discount_start_at，未设置的老数据回退 updated_at）
-        $price = $store->price;
-        $startAt = $store->discount_start_at ?: $store->updated_at;
-        $endTime = $startAt ? Carbon::parse($startAt)->add($store->discount_limit, $store->discount_limit_unit)->getTimestamp() : 0;
-        if ($store->discount_price > 0 && $store->discount > 0 && time() < $endTime) {
-            $price = $store->discount_price;
-        }
+        $price = $this->pricing->payablePrice($store);
 
         if ($actor->money < $price) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.user-balance-low')]);
@@ -196,18 +170,12 @@ class BuyGoodsController extends AbstractListController
         $cart->status = 1;
         $this->events->dispatch(new StoreCartEditEvent($cart));
 
+        // 限购复查：status=1 落库后在同一事务内重新统计，超限则回滚整笔购买
+        $this->purchaseLimiter->assertNotExceeded($actor, $store);
+
         // 通知其他插件购买完成
         $this->events->dispatch(new StoreBuyEvent($actor, $store, $cart, $params));
 
         return $store;
-    }
-
-    /**
-     * 限购周期单位换算为秒（与 LimitUnitEnum 保持一致）
-     */
-    private static function periodUnitToSeconds($unit)
-    {
-        $map = ['days' => 86400, 'hour' => 3600, 'minute' => 60, 'second' => 1];
-        return $map[$unit] ?? 0;
     }
 }

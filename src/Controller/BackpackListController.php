@@ -49,12 +49,23 @@ class BackpackListController extends AbstractListController
 
         $items = [];
 
-        // 主商店：已支付购买记录
+        // 主商店：已支付购买记录（DB 分页，按 id 倒序取一页）
         $carts = StoreCartModel::query()
             ->where('user_id', $userId)
             ->where('status', 1)
+            // 只有商品行标记「允许使用」（store.usable = 1）的商品才进背包；
+            // 不允许使用的商品购买后直接生效，不在背包展示。
+            // 新增商品时 usable 的表单默认值来自商品插件 Goods 抽象类的 $usable 声明。
+            ->whereIn('store_id', StoreModel::withTrashed()->where('usable', 1)->select('id'))
             ->orderByDesc('id')
+            ->skip($offset)
+            ->take($limit > 0 ? $limit + 1 : 100000)
             ->get();
+
+        $cartsHasMore = $limit > 0 && $carts->count() > $limit;
+        if ($cartsHasMore) {
+            $carts = $carts->slice(0, $limit)->values();
+        }
 
         if ($carts->isNotEmpty()) {
             // 包含已软删除商品，保证背包图标/信息仍可展示
@@ -63,21 +74,11 @@ class BackpackListController extends AbstractListController
                 ->get()
                 ->keyBy('id');
 
-            // 只有商品行标记「允许使用」（store.usable = 1）的商品才进背包；
-            // 不允许使用的商品购买后直接生效，不在背包展示。
-            // 新增商品时 usable 的表单默认值来自商品插件 Goods 抽象类的 $usable 声明。
-            $usableStoreIds = $stores->filter(function ($store) {
-                return (int) $store->usable === 1;
-            })->keys()->all();
-            $carts = $carts->filter(function ($cart) use ($usableStoreIds) {
-                return in_array($cart->store_id, $usableStoreIds, true);
-            })->values();
-
             // 每个商品的剩余件数（status=1 的购买记录数）
             $remaining = StoreCartModel::query()
                 ->where('user_id', $userId)
                 ->where('status', 1)
-                ->whereIn('store_id', $usableStoreIds)
+                ->whereIn('store_id', $carts->pluck('store_id')->unique()->all())
                 ->select('store_id')
                 ->selectRaw('count(*) as cnt')
                 ->groupBy('store_id')
@@ -113,16 +114,15 @@ class BackpackListController extends AbstractListController
             }
         }
 
-        // 按获得时间倒序合并后分页
+        // 按获得时间倒序合并后，截取本页（购物车主数据已在 DB 层分页，
+        // 这里只对 一页购物车 + 扩展条目 做内存排序，数据量有界）
         usort($items, function ($a, $b) {
             return strtotime($b->createdAt) <=> strtotime($a->createdAt);
         });
 
-        $total = count($items);
-        $page = array_slice($items, $offset, $limit > 0 ? $limit + 1 : null);
-        $hasMore = $limit > 0 && count($page) > $limit;
-        if ($hasMore) {
-            $page = array_slice($page, 0, $limit);
+        $hasMore = $limit > 0 && ($cartsHasMore || count($items) > $limit);
+        if ($limit > 0) {
+            $items = array_slice($items, 0, $limit);
         }
 
         $document->addPaginationLinks(
@@ -133,6 +133,6 @@ class BackpackListController extends AbstractListController
             $hasMore ? null : 0
         );
 
-        return collect($page);
+        return collect($items);
     }
 }
