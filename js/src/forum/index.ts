@@ -1,4 +1,5 @@
 import app from 'flarum/forum/app';
+import type Mithril from 'mithril';
 import { extend } from 'flarum/common/extend';
 import IndexPage from 'flarum/forum/components/IndexPage';
 import LinkButton from 'flarum/common/components/LinkButton';
@@ -7,6 +8,7 @@ import StorePage from './components/pages/StorePage';
 import MyCartPage from './components/pages/MyCartPage';
 import BackpackPage from './components/pages/BackpackPage';
 import initStoreRegistry from './storeRegistry';
+import ItemList from 'flarum/common/utils/ItemList';
 
 app.initializers.add('mattoid/store', () => {
   initStoreRegistry();
@@ -24,9 +26,10 @@ app.initializers.add('mattoid/store', () => {
     component: BackpackPage,
   };
 
-  extend(UserPage.prototype, 'navItems', function (items) {
-    if (!app.session || !app.session.user || !app.session.user.attribute('canStoreView')) {
-      return false;
+  extend(UserPage.prototype, 'navItems', function (this: UserPage, items: ItemList<Mithril.Children>) {
+    const user = this.user;
+    if (!app.session?.user || !app.session.user.attribute('canStoreView') || !user) {
+      return;
     }
 
     items.add(
@@ -34,7 +37,7 @@ app.initializers.add('mattoid/store', () => {
       LinkButton.component(
         {
           href: app.route('myCartPage', {
-            username: this.user.slug(),
+            username: user.slug(),
           }),
           icon: 'fas fa-shopping-cart',
         },
@@ -44,9 +47,10 @@ app.initializers.add('mattoid/store', () => {
     );
   });
 
-  extend(UserPage.prototype, 'navItems', function (items) {
-    if (!app.session || !app.session.user || this.user.id() !== app.session.user.id()) {
-      return false;
+  extend(UserPage.prototype, 'navItems', function (this: UserPage, items: ItemList<Mithril.Children>) {
+    const user = this.user;
+    if (!app.session?.user || !user || user.id() !== app.session.user.id()) {
+      return;
     }
 
     items.add(
@@ -54,7 +58,7 @@ app.initializers.add('mattoid/store', () => {
       LinkButton.component(
         {
           href: app.route('backpack', {
-            username: this.user.slug(),
+            username: user.slug(),
           }),
           icon: 'fas fa-box',
         },
@@ -64,9 +68,9 @@ app.initializers.add('mattoid/store', () => {
     );
   });
 
-  extend(IndexPage.prototype, 'navItems', function (items) {
-    if (!app.session || !app.session.user || !app.session.user.attribute('canStoreView')) {
-      return false;
+  extend(IndexPage.prototype, 'navItems', function (items: ItemList<Mithril.Children>) {
+    if (!app.session?.user || !app.session.user.attribute('canStoreView')) {
+      return;
     }
 
     items.add(

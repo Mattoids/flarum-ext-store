@@ -1,3 +1,4 @@
+import app from 'flarum/forum/app';
 import Modal, { IInternalModalAttrs } from 'flarum/common/components/Modal';
 import type Mithril from 'mithril';
 import Stream from 'flarum/common/utils/Stream';
@@ -6,16 +7,16 @@ import Switch from 'flarum/common/components/Switch';
 import Select from 'flarum/common/components/Select';
 import TextEditor from 'flarum/common/components/TextEditor';
 
-interface IStoreModalAttrs extends IInternalModalAttrs {
-  storeData: object;
-  onSuccess?: (storeData: object) => void;
+export interface IStoreModalAttrs extends IInternalModalAttrs {
+  storeData: StoreItemData;
+  onSuccess?: (storeData: StoreItemData) => void;
 }
 
 export default class StoreBox extends Modal<IStoreModalAttrs> {
-  private storeData: object = {};
-  private params: object = {};
+  private storeData: StoreItemData = {} as StoreItemData;
+  private params: Record<string, any> = {};
   private range: boolean = false;
-  private errorText: string = '';
+  private errorText: any = '';
 
   static initAttrs(attrs: IStoreModalAttrs) {
     super.initAttrs(attrs);
@@ -28,18 +29,18 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
     this.params.id = this.attrs.storeData.id;
   }
 
-  title() {
+  title(): Mithril.Children {
     return this.storeData.title;
   }
 
   className(): string {
-    return this.storeData.className;
+    return this.storeData.className || '';
   }
 
-  content() {
-    let popUp = [];
+  content(): Mithril.Children {
+    let popUp: StoreBoxField[] = [];
     try {
-      const parsed = JSON.parse(this.storeData.popUp);
+      const parsed = JSON.parse(this.storeData.popUp || '[]');
       popUp = Array.isArray(parsed) ? parsed : [];
     } catch (e) {
       this.errorText = app.translator.trans('mattoid-store.forum.error.validate-fail');
@@ -67,9 +68,9 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
     const d = this.storeData;
     if (!d || !d.id) return null;
 
-    const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
-    const price = d.price > 0 ? moneyName.replace('[money]', d.price) : app.translator.trans('mattoid-store.forum.free');
-    const discountPrice = moneyName.replace('[money]', d.discountPrice);
+    const moneyName = String(app.forum.attribute('antoinefr-money.moneyname') || '[money]');
+    const price = d.price > 0 ? moneyName.replace('[money]', String(d.price)) : app.translator.trans('mattoid-store.forum.free');
+    const discountPrice = moneyName.replace('[money]', String(d.discountPrice));
     const isVideo = d.icon && d.icon.slice(-5) === '.webm';
     const stockText = d.stock == -99 ? app.translator.trans('mattoid-store.forum.infinite') : d.stock;
     const typeText =
@@ -87,8 +88,8 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
         : null,
       m('.StoreBox-summaryInfo', [
         m('.StoreBox-priceGroup', [
-          m('span.price', d.discountPrice > 0 ? discountPrice : price),
-          d.discountPrice > 0 ? m('span.discount', price) : null,
+          m('span.price', (d.discountPrice || 0) > 0 ? discountPrice : price),
+          (d.discountPrice || 0) > 0 ? m('span.discount', price) : null,
         ]),
         m('.StoreBox-meta', [
           m('span.StoreBox-metaItem', app.translator.trans('mattoid-store.lib.item-stock') + ': ' + stockText),
@@ -98,20 +99,20 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
     ]);
   }
 
-  getHtml(popUp) {
-    return popUp.map((item) => {
+  getHtml(popUp: StoreBoxField[]) {
+    return popUp.map((item: StoreBoxField) => {
       return this.getInput(item);
     });
   }
 
-  getInput(column) {
+  getInput(column: StoreBoxField) {
     let input;
 
     switch (column.prop) {
       case 'input':
         input = m('.Form-group', [
-          m('label', app.translator.trans(column.label)),
-          m('.helpText', app.translator.trans(column.helpText)),
+          m('label', app.translator.trans(column.label || '')),
+          m('.helpText', app.translator.trans(column.helpText || '')),
           m('input.FormControl', {
             type: column.type || 'text',
             value: this.params[column.value],
@@ -135,21 +136,21 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
               },
               disabled: this.loading,
             },
-            app.translator.trans(column.label)
+            app.translator.trans(column.label || '')
           ),
-          m('.helpText', app.translator.trans(column.helpText)),
+          m('.helpText', app.translator.trans(column.helpText || '')),
         ]);
         break;
       case 'select':
         input = m('.Form-group', [
-          m('label', app.translator.trans(column.label)),
-          m('.helpText', app.translator.trans(column.helpText)),
+          m('label', app.translator.trans(column.label || '')),
+          m('.helpText', app.translator.trans(column.helpText || '')),
           Select.component({
             value: this.params[column.value],
             disabled: this.loading,
             options: column.options,
             buttonClassName: 'Button',
-            onchange: (val) => {
+            onchange: (val: string) => {
               this.params[column.value] = val;
             },
           }),
@@ -157,8 +158,8 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
         break;
       case 'textarea':
         input = m('.Form-group', [
-          m('label', app.translator.trans(column.label)),
-          m('.helpText', app.translator.trans(column.helpText)),
+          m('label', app.translator.trans(column.label || '')),
+          m('.helpText', app.translator.trans(column.helpText || '')),
           m('textarea.FormControl', {
             value: this.params[column.value],
             onchange: (event: InputEvent) => {
@@ -190,9 +191,10 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
         () => {
           // 局部更新余额与商品列表库存，避免整页刷新
           const user = app.session.user;
-          const paid = this.storeData.discountPrice > 0 ? this.storeData.discountPrice : this.storeData.price;
-          if (user && typeof user.attribute('money') === 'number') {
-            user.pushAttributes({ money: user.attribute('money') - paid });
+          const paid = (this.storeData.discountPrice || 0) > 0 ? this.storeData.discountPrice : this.storeData.price;
+          const money = user?.attribute<number>('money');
+          if (user && typeof money === 'number') {
+            user.pushAttributes({ money: money - paid });
           }
           if (this.attrs.onSuccess) {
             this.attrs.onSuccess(this.storeData);
@@ -200,7 +202,7 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
           app.alerts.show({ type: 'success' }, app.translator.trans('mattoid-store.forum.error.buy-success'));
           app.modal.close();
         },
-        (result) => {
+        (result: any) => {
           this.loading = false;
           this.errorText = result?.response?.responseJSON?.errors?.[0]?.detail || app.translator.trans('mattoid-store.forum.error.validate-fail');
         }

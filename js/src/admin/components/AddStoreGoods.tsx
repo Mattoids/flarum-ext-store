@@ -1,20 +1,22 @@
 import app from 'flarum/admin/app';
 import Modal, { IInternalModalAttrs } from 'flarum/common/components/Modal';
+import type Mithril from 'mithril';
 import Button from 'flarum/common/components/Button';
+import extractText from 'flarum/common/utils/extractText';
 import StoreGoodsDetailModal from './StoreGoodsDetailModal';
 
 export default class AddStoreGoods extends Modal {
-  private goodsList: any = [];
+  private goodsList: GoodsTypeResource[] = [];
   private moreResults: boolean = false;
   private search: string = '';
 
-  oninit(vnode) {
+  oninit(vnode: Mithril.Vnode<IInternalModalAttrs, this>) {
     super.oninit(vnode);
 
     this.loadResults();
   }
 
-  title() {
+  title(): Mithril.Children {
     return app.translator.trans('mattoid-store.admin.settings.add-store-goods');
   }
 
@@ -27,14 +29,14 @@ export default class AddStoreGoods extends Modal {
     if (!keyword) {
       return this.goodsList;
     }
-    return this.goodsList.filter((item: any) => {
+    return this.goodsList.filter((item: GoodsTypeResource) => {
       const name = (item.attributes.name || '').toLowerCase();
       const code = (item.attributes.code || '').toLowerCase();
       return name.indexOf(keyword) !== -1 || code.indexOf(keyword) !== -1;
     });
   }
 
-  content() {
+  content(): Mithril.Children {
     const goodsList = this.filteredGoodsList();
 
     return (
@@ -44,7 +46,7 @@ export default class AddStoreGoods extends Modal {
             className="FormControl"
             type="text"
             value={this.search}
-            placeholder={app.translator.trans('mattoid-store.admin.settings.search-goods-placeholder')}
+            placeholder={extractText(app.translator.trans('mattoid-store.admin.settings.search-goods-placeholder'))}
             oninput={(e: InputEvent) => {
               this.search = (e.target as HTMLInputElement).value;
             }}
@@ -53,7 +55,7 @@ export default class AddStoreGoods extends Modal {
 
         <div className="StorePluginGridScroll">
           <div className="StorePluginGrid">
-            {goodsList.map((item: object, index: number) => (
+            {goodsList.map((item: GoodsTypeResource, index: number) => (
               <div className="StorePluginCard">
                 <div className="StorePluginCard-title">{item.attributes.name}</div>
                 <div className="StorePluginCard-icon">
@@ -76,7 +78,7 @@ export default class AddStoreGoods extends Modal {
                 </div>
                 <div className="StorePluginCard-tags">
                   <span className="StoreCodeChip">{item.attributes.code}</span>
-                  {(item.attributes.itemTypes || []).map((t) => (
+                  {(item.attributes.itemTypes || []).map((t: any) => (
                     <span className="StorePluginRow-tag">{app.translator.trans(t.name || t.key)}</span>
                   ))}
                 </div>
@@ -149,9 +151,9 @@ export default class AddStoreGoods extends Modal {
     this.loadResults(this.goodsList.length);
   }
 
-  parseResults(results) {
+  parseResults(results: any) {
     this.moreResults = !!results.payload.links && !!results.payload.links.next;
-    [].push.apply(this.goodsList, results.payload.data);
+    this.goodsList.push(...results.payload.data);
     this.loading = false;
     m.redraw();
 

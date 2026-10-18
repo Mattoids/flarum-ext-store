@@ -1,6 +1,5 @@
 import app from 'flarum/admin/app';
 import StoreListPage from './components/StoreListPage';
-import StorePage from './components/StorePage';
 import initStoreAdminRegistry from './storeAdminRegistry';
 
 app.initializers.add('mattoid-store', () => {

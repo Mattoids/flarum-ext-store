@@ -1,19 +1,24 @@
 import app from 'flarum/admin/app';
-import Component from 'flarum/common/Component';
+import Component, { ComponentAttrs } from 'flarum/common/Component';
+import type Mithril from 'mithril';
 import Button from 'flarum/common/components/Button';
 import StoreModal from './StoreModal';
 import StoreGoodsDetailModal from './StoreGoodsDetailModal';
 
-export default class StoreListItem extends Component {
-  private storeData: object = {};
+interface StoreListItemAttrs extends ComponentAttrs {
+  item: StoreApiResource;
+}
 
-  oninit(vnode) {
+export default class StoreListItem extends Component<StoreListItemAttrs> {
+  private storeData: StoreItemData = {} as StoreItemData;
+
+  oninit(vnode: Mithril.Vnode<StoreListItemAttrs, this>) {
     super.oninit(vnode);
 
     this.storeData = this.attrs.item.attributes;
   }
 
-  view() {
+  view(): Mithril.Children {
     // 商品插件可注册自定义管理端列表行，未注册时使用默认展示
     const CustomItem = (app as any).storeAdminRegistry?.listItem?.get(this.attrs.item.attributes.code);
     if (CustomItem) {
@@ -23,8 +28,8 @@ export default class StoreListItem extends Component {
     const data = this.storeData;
     const icon = data.icon || data.pluginIcon;
     const extIcon = data.pluginExtIcon;
-    const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
-    const price = data.price > 0 ? moneyName.replace('[money]', data.price) : app.translator.trans('mattoid-store.lib.free');
+    const moneyName = String(app.forum.attribute('antoinefr-money.moneyname') || '[money]');
+    const price = data.price > 0 ? moneyName.replace('[money]', String(data.price)) : app.translator.trans('mattoid-store.lib.free');
     const isVideo = icon && icon.slice(-5) === '.webm';
     // CSS 类名 icon（如用户名颜色 decorationStoreColorText2）不能作为图片地址
     const isClassIcon = icon && icon.indexOf('/') === -1 && icon.indexOf('.') === -1;

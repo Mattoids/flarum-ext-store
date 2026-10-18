@@ -1,15 +1,21 @@
-import Component from 'flarum/common/Component';
+import app from 'flarum/forum/app';
+import Component, { ComponentAttrs } from 'flarum/common/Component';
+import type Mithril from 'mithril';
 
-export default class StoreItem extends Component {
-  private cartData: any = {};
+interface CartItemAttrs extends ComponentAttrs {
+  item: StoreApiResource;
+}
 
-  oninit(vnode) {
+export default class CartItem extends Component<CartItemAttrs> {
+  private cartData: StoreItemData = {} as StoreItemData;
+
+  oninit(vnode: Mithril.Vnode<CartItemAttrs, this>) {
     super.oninit(vnode);
 
     this.cartData = this.attrs.item.attributes;
   }
 
-  view() {
+  view(): Mithril.Children {
     const statusMeta = {
       0: { class: 'StoreBadge StoreBadge--muted', key: 'mattoid-store.lib.item-cart-status-0' },
       1: { class: 'StoreBadge StoreBadge--success', key: 'mattoid-store.lib.item-cart-status-1' },
@@ -17,10 +23,12 @@ export default class StoreItem extends Component {
       3: { class: 'StoreBadge StoreBadge--info', key: 'mattoid-store.lib.item-cart-status-3' },
       9: { class: 'StoreBadge StoreBadge--warning', key: 'mattoid-store.lib.item-cart-status-9' },
     };
-    const status = statusMeta[this.cartData.status] || statusMeta[2];
-    const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
-    const price = this.cartData.price > 0 ? moneyName.replace('[money]', this.cartData.price) : app.translator.trans('mattoid-store.forum.free');
-    const payAmt = this.cartData.payAmt > 0 ? moneyName.replace('[money]', this.cartData.payAmt) : app.translator.trans('mattoid-store.forum.free');
+    const status = statusMeta[this.cartData.status as keyof typeof statusMeta] || statusMeta[2];
+    const moneyName = String(app.forum.attribute('antoinefr-money.moneyname') || '[money]');
+    const price =
+      this.cartData.price > 0 ? moneyName.replace('[money]', String(this.cartData.price)) : app.translator.trans('mattoid-store.forum.free');
+    const payAmt =
+      (this.cartData.payAmt || 0) > 0 ? moneyName.replace('[money]', String(this.cartData.payAmt)) : app.translator.trans('mattoid-store.forum.free');
     return (
       <div className="frame">
         <div className="row margin-top-10">

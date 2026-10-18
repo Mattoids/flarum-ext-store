@@ -1,14 +1,20 @@
 import app from 'flarum/forum/app';
-import Component from 'flarum/common/Component';
+import Component, { ComponentAttrs } from 'flarum/common/Component';
+import type Mithril from 'mithril';
 import StoreBox from '../modal/StoreBox';
 
-export default class StoreItem extends Component {
-  private storeData: object = {};
+export interface IStoreItemAttrs extends ComponentAttrs {
+  item: StoreApiResource;
+  onSuccess?: (data: any) => void;
+}
+
+export default class StoreItem extends Component<IStoreItemAttrs> {
+  private storeData: StoreItemData = {} as StoreItemData;
 
   private descTimer: any = null;
   private showDescTip: boolean = false;
 
-  oninit(vnode) {
+  oninit(vnode: Mithril.Vnode<IStoreItemAttrs, this>) {
     super.oninit(vnode);
 
     this.storeData = this.attrs.item.attributes;
@@ -19,16 +25,17 @@ export default class StoreItem extends Component {
     this.clearDescTimer();
   }
 
-  view() {
+  view(): Mithril.Children {
     // 商品插件可注册自定义商品卡片，未注册时使用默认展示
     const CustomItem = (app as any).storeRegistry?.item?.get(this.attrs.item.attributes.code);
     if (CustomItem) {
       return <CustomItem item={this.attrs.item} onSuccess={this.attrs.onSuccess} />;
     }
 
-    const moneyName = app.forum.attribute('antoinefr-money.moneyname') || '[money]';
-    const price = this.storeData.price > 0 ? moneyName.replace('[money]', this.storeData.price) : app.translator.trans('mattoid-store.forum.free');
-    const discountPrice = moneyName.replace('[money]', this.storeData.discountPrice);
+    const moneyName = String(app.forum.attribute('antoinefr-money.moneyname') || '[money]');
+    const price =
+      this.storeData.price > 0 ? moneyName.replace('[money]', String(this.storeData.price)) : app.translator.trans('mattoid-store.forum.free');
+    const discountPrice = moneyName.replace('[money]', String(this.storeData.discountPrice));
     const isVideo = this.storeData.icon && this.storeData.icon.slice(-5) === '.webm';
 
     return (
@@ -64,7 +71,7 @@ export default class StoreItem extends Component {
     );
   }
 
-  showDetails(storeData) {
+  showDetails(storeData: StoreItemData) {
     if (app.session.user) {
       // 商品插件可注册自定义购买/价格弹窗或详情页，未注册时使用默认 StoreBox
       const registry = (app as any).storeRegistry;

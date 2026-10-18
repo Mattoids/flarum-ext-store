@@ -1,15 +1,16 @@
 import app from 'flarum/forum/app';
+import type Mithril from 'mithril';
 
 import UserPage from 'flarum/forum/components/UserPage';
 import Button from 'flarum/common/components/Button';
 import BackpackItem from '../component/BackpackItem';
 
 export default class BackpackPage extends UserPage {
-  private items: any = [];
+  private items: StoreApiResource[] = [];
   private loading: boolean = false;
   private moreResults: boolean = false;
 
-  oninit(vnode) {
+  oninit(vnode: Mithril.Vnode<any, this>) {
     super.oninit(vnode);
 
     this.loadUser(m.route.param('username'));
@@ -18,12 +19,12 @@ export default class BackpackPage extends UserPage {
     this.loadResults();
   }
 
-  content() {
+  content(): Mithril.Children {
     return (
       <div className="Post-body">
         <h2 class="BadgeOverviewTitle">{app.translator.trans('mattoid-store.forum.backpack')}</h2>
         <div className="Store-Body Backpack-Body">
-          {this.items.map((item) => {
+          {this.items.map((item: StoreApiResource) => {
             return (
               <div className="storeItemContainer backpackItemContainer" key={item.id}>
                 {BackpackItem.component({ item: item, onChanged: () => this.loadResults() })}
@@ -81,9 +82,11 @@ export default class BackpackPage extends UserPage {
           offset: reset ? 0 : this.items.length,
         },
       })
-      .then((results) => {
-        [].push.apply(this.items, results.payload.data || []);
-        this.moreResults = !!results.payload.links && !!results.payload.links.next;
+      .then((results: any) => {
+        if (results && results.payload && results.payload.data) {
+          this.items.push(...results.payload.data);
+        }
+        this.moreResults = !!results?.payload?.links && !!results.payload.links.next;
         this.loading = false;
         m.redraw();
         return results;

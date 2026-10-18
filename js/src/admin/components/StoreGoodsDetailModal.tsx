@@ -1,19 +1,27 @@
 import app from 'flarum/admin/app';
-import Modal from 'flarum/common/components/Modal';
+import Modal, { IInternalModalAttrs } from 'flarum/common/components/Modal';
+import type Mithril from 'mithril';
 import Button from 'flarum/common/components/Button';
 import Stream from 'flarum/common/utils/Stream';
 import Switch from 'flarum/common/components/Switch';
 import Select from 'flarum/common/components/Select';
+import extractText from 'flarum/common/utils/extractText';
 
-export default class StoreGoodsDetailModal extends Modal {
+export interface IStoreGoodsDetailModalAttrs extends IInternalModalAttrs {
+  storeData?: StoreItemData;
+  code?: string;
+  title?: string;
+}
+
+export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalAttrs> {
   private pageTitle: string = '';
   private moreResults: boolean = false;
-  private iconList: Array = [];
+  private iconList: { attributes: { url: string } }[] = [];
   private itemTypes: any = [];
   private method: string = 'POST';
   private defaultsAppliedFor: string = '';
   private static pluginList: any = null;
-  private params: object = {
+  private params: Record<string, Stream<any>> = {
     status: Stream(1),
     code: Stream(),
     title: Stream(),
@@ -39,14 +47,14 @@ export default class StoreGoodsDetailModal extends Modal {
     usable: Stream(0),
   };
 
-  oninit(vnode) {
+  oninit(vnode: Mithril.Vnode<IStoreGoodsDetailModalAttrs, this>) {
     super.oninit(vnode);
 
     this.method = 'POST';
     this.moreResults = false;
     this.params.code = Stream(this.attrs.code || '');
     this.params.title = Stream(this.attrs.title || '');
-    this.pageTitle = this.attrs.title;
+    this.pageTitle = this.attrs.title || '';
 
     if (this.attrs.storeData) {
       this.method = 'PUT';
@@ -103,7 +111,7 @@ export default class StoreGoodsDetailModal extends Modal {
 
   applyItemTypes() {
     const code = this.params.code ? this.params.code() : this.attrs.code || '';
-    const plugin = (StoreGoodsDetailModal.pluginList || []).find((p) => p.attributes && p.attributes.code === code);
+    const plugin = (StoreGoodsDetailModal.pluginList || []).find((p: any) => p.attributes && p.attributes.code === code);
     this.itemTypes = plugin && plugin.attributes.itemTypes ? plugin.attributes.itemTypes : [];
     this.applyPluginDefaults(code, plugin);
     m.redraw();
@@ -114,7 +122,7 @@ export default class StoreGoodsDetailModal extends Modal {
    * 有效期/限购默认值填充表单；编辑已有商品时不覆盖库中值。
    * 每个 code 只应用一次，避免异步加载完成后覆盖用户已修改的内容。
    */
-  applyPluginDefaults(code, plugin) {
+  applyPluginDefaults(code: string, plugin: any) {
     if (this.attrs.storeData || !plugin) {
       return;
     }
@@ -139,11 +147,11 @@ export default class StoreGoodsDetailModal extends Modal {
     this.defaultsAppliedFor = code;
   }
 
-  className() {
+  className(): string {
     return 'Modal--large StoreGoodsModal';
   }
 
-  title() {
+  title(): Mithril.Children {
     return this.pageTitle;
   }
 
@@ -162,7 +170,7 @@ export default class StoreGoodsDetailModal extends Modal {
     });
   }
 
-  content() {
+  content(): Mithril.Children {
     return (
       <div className="Modal-body" oncreate={this.onModalReady.bind(this)}>
         <div className="Form StoreGoodsForm">
@@ -174,7 +182,7 @@ export default class StoreGoodsDetailModal extends Modal {
                   <span className="StoreGoodsHeader-label">{app.translator.trans('mattoid-store.admin.settings.goods-status')}</span>
                   <Switch
                     state={this.params.status()}
-                    onchange={(val) => {
+                    onchange={(val: boolean) => {
                       this.params.status = Stream(Number(val));
                     }}
                   >
@@ -184,7 +192,7 @@ export default class StoreGoodsDetailModal extends Modal {
                 <div className="StoreAdminInline">
                   <Switch
                     state={this.params.repeat()}
-                    onchange={(val) => {
+                    onchange={(val: boolean) => {
                       this.params.repeat = Stream(Number(val));
                     }}
                   >
@@ -194,7 +202,7 @@ export default class StoreGoodsDetailModal extends Modal {
                 <div className="StoreAdminInline">
                   <Switch
                     state={this.params.hide()}
-                    onchange={(val) => {
+                    onchange={(val: boolean) => {
                       this.params.hide = Stream(Number(val));
                     }}
                   >
@@ -251,7 +259,7 @@ export default class StoreGoodsDetailModal extends Modal {
                         second: app.translator.trans('mattoid-store.lib.item-limit-unit-second'),
                       },
                       value: this.params.discountLimitUnit(),
-                      onchange: (val) => {
+                      onchange: (val: string) => {
                         this.params.discountLimitUnit = Stream(val);
                       },
                     })}
@@ -272,7 +280,7 @@ export default class StoreGoodsDetailModal extends Modal {
                         limit: app.translator.trans('mattoid-store.lib.item-type-limit'),
                       },
                       value: this.params.type(),
-                      onchange: (val) => {
+                      onchange: (val: string) => {
                         this.params.type = Stream(val);
                       },
                     })}
@@ -292,7 +300,7 @@ export default class StoreGoodsDetailModal extends Modal {
                       <div className="StoreAdminInline">
                         <Switch
                           state={this.params.autoDeduction()}
-                          onchange={(val) => {
+                          onchange={(val: boolean) => {
                             this.params.autoDeduction = Stream(Number(val));
                           }}
                         ></Switch>
@@ -312,7 +320,7 @@ export default class StoreGoodsDetailModal extends Modal {
                     <div className="StoreAdminInline">
                       <Switch
                         state={!!this.params.purchaseLimitEnable()}
-                        onchange={(val) => {
+                        onchange={(val: boolean) => {
                           this.params.purchaseLimitEnable = Stream(Number(val));
                         }}
                       ></Switch>
@@ -341,7 +349,7 @@ export default class StoreGoodsDetailModal extends Modal {
                           second: app.translator.trans('mattoid-store.lib.item-limit-unit-second'),
                         },
                         value: this.params.purchaseLimitPeriodUnit(),
-                        onchange: (val) => {
+                        onchange: (val: string) => {
                           this.params.purchaseLimitPeriodUnit = Stream(val);
                         },
                       })}
@@ -369,7 +377,7 @@ export default class StoreGoodsDetailModal extends Modal {
                     <div className="StoreAdminInline">
                       <Switch
                         state={!!this.params.usable()}
-                        onchange={(val) => {
+                        onchange={(val: boolean) => {
                           this.params.usable = Stream(Number(val));
                         }}
                       >
@@ -382,7 +390,7 @@ export default class StoreGoodsDetailModal extends Modal {
                     <div className="StoreAdminInline">
                       <Switch
                         state={this.params.useType() === 'consumable'}
-                        onchange={(val) => {
+                        onchange={(val: boolean) => {
                           this.params.useType = Stream(val ? 'consumable' : 'permanent');
                         }}
                       >
@@ -396,10 +404,10 @@ export default class StoreGoodsDetailModal extends Modal {
                       {Select.component({
                         options: Object.assign(
                           { '': app.translator.trans('mattoid-store.admin.settings.goods-subtype-none') },
-                          ...this.itemTypes.map((t) => ({ [t.key]: app.translator.trans(t.name || t.key) }))
+                          ...this.itemTypes.map((t: any) => ({ [t.key]: app.translator.trans(t.name || t.key) }))
                         ),
                         value: this.params.subtype(),
-                        onchange: (val) => {
+                        onchange: (val: string) => {
                           this.params.subtype = Stream(val);
                         },
                       })}
@@ -431,7 +439,7 @@ export default class StoreGoodsDetailModal extends Modal {
                         <input id="icon" required class="FormControl" type="text" bidi={this.params.icon} />
                         <Button
                           className="Button"
-                          onclick={(e) => {
+                          onclick={(e: Event) => {
                             this.uploadIcon(e);
                           }}
                         >
@@ -439,7 +447,7 @@ export default class StoreGoodsDetailModal extends Modal {
                         </Button>
                         <Button
                           className="Button"
-                          onclick={(e) => {
+                          onclick={(e: Event) => {
                             this.showIcon(e);
                           }}
                         >
@@ -492,11 +500,11 @@ export default class StoreGoodsDetailModal extends Modal {
             {(() => {
               const IconPicker = (app as any).storeAdminRegistry?.iconPicker?.get(this.params.code());
               if (IconPicker) {
-                return <IconPicker params={this.params} onSelect={(url) => this.selectIconItem(url)} />;
+                return <IconPicker params={this.params} onSelect={(url: string) => this.selectIconItem(url)} />;
               }
               return (
                 <div>
-                  {this.iconList.map((item) => {
+                  {this.iconList.map((item: { attributes: { url: string } }) => {
                     return (
                       <div className="icon-frame inlineBlock" onclick={() => this.selectIconItem(item.attributes.url)}>
                         <img
@@ -583,9 +591,9 @@ export default class StoreGoodsDetailModal extends Modal {
       .then(this.parseResults.bind(this));
   }
 
-  parseResults(results) {
+  parseResults(results: any) {
     this.moreResults = !!results.payload.links && !!results.payload.links.next;
-    [].push.apply(this.iconList, results.payload.data);
+    this.iconList.push(...results.payload.data);
     this.loading = false;
     m.redraw();
 
@@ -602,7 +610,7 @@ export default class StoreGoodsDetailModal extends Modal {
   }
 
   closeIcon() {
-    this.pageTitle = this.attrs.title;
+    this.pageTitle = this.attrs.title || '';
     $('#StoreGoods').css('display', 'block');
     $('#storeCloseButton').css('display', 'block');
     $('#StoreIcon').css('display', 'none');
@@ -610,8 +618,8 @@ export default class StoreGoodsDetailModal extends Modal {
     m.redraw();
   }
 
-  selectIconItem(url) {
-    this.pageTitle = this.attrs.title;
+  selectIconItem(url: string) {
+    this.pageTitle = this.attrs.title || '';
     $('#StoreGoods').css('display', 'block');
     $('#storeCloseButton').css('display', 'block');
     $('#StoreIcon').css('display', 'none');
@@ -619,12 +627,12 @@ export default class StoreGoodsDetailModal extends Modal {
     this.params.icon(url);
   }
 
-  showIcon(event) {
+  showIcon(event: Event) {
     $('#StoreGoods').css('display', 'none');
     $('#storeCloseButton').css('display', 'none');
     $('#StoreIcon').css('display', 'block');
     $('#storeCloseIconButton').css('display', 'block');
-    this.pageTitle = app.translator.trans('mattoid-store.admin.settings.show-icon-button');
+    this.pageTitle = extractText(app.translator.trans('mattoid-store.admin.settings.show-icon-button'));
 
     // 商品插件注册了自定义图库（iconPicker）时，不加载默认上传图片列表
     if (!(app as any).storeAdminRegistry?.iconPicker?.get(this.params.code())) {
@@ -633,7 +641,7 @@ export default class StoreGoodsDetailModal extends Modal {
     }
   }
 
-  uploadIcon(event) {
+  uploadIcon(event: Event) {
     event.preventDefault();
 
     const $input = $('<input type="file">');
@@ -642,9 +650,9 @@ export default class StoreGoodsDetailModal extends Modal {
       .appendTo('body')
       .hide()
       .trigger('click')
-      .on('change', (event) => {
+      .on('change', (event: any) => {
         const body = new FormData();
-        body.append('file', event.target.files[0]);
+        body.append('file', (event.target as HTMLInputElement).files![0]);
 
         app
           .request({
@@ -652,7 +660,7 @@ export default class StoreGoodsDetailModal extends Modal {
             method: 'POST',
             body,
           })
-          .then((result) => {
+          .then((result: any) => {
             this.params.icon = Stream(result.data.attributes.path);
             this.loading = false;
             m.redraw();
@@ -660,7 +668,7 @@ export default class StoreGoodsDetailModal extends Modal {
       });
   }
 
-  onsubmit(e) {
+  onsubmit(e: Event) {
     e.preventDefault();
 
     this.loading = true;
@@ -673,7 +681,7 @@ export default class StoreGoodsDetailModal extends Modal {
       })
       .then(
         () => location.reload(),
-        (error) => {
+        (error: any) => {
           this.loading = false;
           this.onerror(error);
         }

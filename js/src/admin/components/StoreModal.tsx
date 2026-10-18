@@ -1,23 +1,32 @@
 import app from 'flarum/admin/app';
-import Modal from 'flarum/common/components/Modal';
+import Modal, { IInternalModalAttrs } from 'flarum/common/components/Modal';
+import type Mithril from 'mithril';
 import Button from 'flarum/common/components/Button';
 
-export default class StoreModal extends Modal {
-  oninit(vnode) {
+export interface IStoreModalAttrs extends IInternalModalAttrs {
+  title: string;
+  storeData: StoreItemData;
+}
+
+export default class StoreModal extends Modal<IStoreModalAttrs> {
+  private type: string = '';
+  private storeData: StoreItemData = {} as StoreItemData;
+
+  oninit(vnode: Mithril.Vnode<IStoreModalAttrs, this>) {
     super.oninit(vnode);
     this.type = this.attrs.title;
     this.storeData = this.attrs.storeData;
   }
 
-  className() {
+  className(): string {
     return 'Modal--small StoreConfirmModal';
   }
 
-  title() {
+  title(): Mithril.Children {
     return app.translator.trans('mattoid-store.admin.settings.goods-item-' + this.type);
   }
 
-  content() {
+  content(): Mithril.Children {
     const isDelete = this.type === 'delete';
     const icon = this.storeData.icon || this.storeData.pluginIcon;
     const extIcon = this.storeData.pluginExtIcon;
@@ -85,13 +94,13 @@ export default class StoreModal extends Modal {
     );
   }
 
-  onsubmit(e) {
+  onsubmit(e: Event) {
     e.preventDefault();
 
     this.loading = true;
 
     const status = this.storeData.status;
-    this.storeData.status = Number(!this.storeData.status);
+    this.storeData.status = this.storeData.status ? 0 : 1;
 
     const method = this.type === 'delete' ? 'DELETE' : 'PUT';
     app
@@ -102,7 +111,7 @@ export default class StoreModal extends Modal {
       })
       .then(
         () => location.reload(),
-        (error) => {
+        (error: any) => {
           this.loading = false;
           this.storeData.status = status;
           this.onerror(error);

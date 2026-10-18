@@ -1,11 +1,11 @@
 import app from 'flarum/forum/app';
-import Component from 'flarum/common/Component';
+import Component, { ComponentAttrs } from 'flarum/common/Component';
+import type Mithril from 'mithril';
 import Button from 'flarum/common/components/Button';
 import Alert from 'flarum/common/components/Alert';
 
 /**
  * 背包条目（商店商品卡片风格）
- * Backpack item (store goods card style)
  *
  * 与商店页 StoreItem 卡片保持一致的视觉结构：
  * 标题 / 商品图标 / 类型信息 / 底部操作栏。
@@ -17,10 +17,15 @@ import Alert from 'flarum/common/components/Alert';
  * 商品插件可通过 app.storeRegistry.backpackPanel.register(code, Panel)
  * 自定义背包中该商品的状态面板（props: item）。
  */
-export default class BackpackItem extends Component {
+interface BackpackItemAttrs extends ComponentAttrs {
+  item: StoreApiResource;
+  onChanged?: () => void;
+}
+
+export default class BackpackItem extends Component<BackpackItemAttrs> {
   private loading: boolean = false;
 
-  view() {
+  view(): Mithril.Children {
     // 每次渲染直接读 attrs，避免背包刷新后复用组件实例导致状态过期
     const item = this.attrs.item.attributes || {};
 
@@ -70,7 +75,7 @@ export default class BackpackItem extends Component {
     );
   }
 
-  renderSourceDetail(item) {
+  renderSourceDetail(item: any) {
     if (item.source === 'store') {
       return (
         <div>
@@ -98,7 +103,7 @@ export default class BackpackItem extends Component {
     );
   }
 
-  renderActions(item) {
+  renderActions(item: any) {
     if (item.source === 'store') {
       const label =
         item.useType === 'consumable'
@@ -136,7 +141,7 @@ export default class BackpackItem extends Component {
   /**
    * 点击商品标题：插件注册了 backpackDetail 则弹自定义详情，否则无操作
    */
-  showDetail(item) {
+  showDetail(item: any) {
     const Detail = (app as any).storeRegistry?.backpackDetail?.get(item.code);
     if (Detail) {
       app.modal.show(Detail, { item });
@@ -146,14 +151,14 @@ export default class BackpackItem extends Component {
   /**
    * 使用/取消使用成功后：插件注册了 backpackUseModal 则弹结果弹窗
    */
-  showUseResult(item, result) {
+  showUseResult(item: any, result: any) {
     const UseModal = (app as any).storeRegistry?.backpackUseModal?.get(item.code);
     if (UseModal) {
       app.modal.show(UseModal, { item, result });
     }
   }
 
-  useStoreItem(item) {
+  useStoreItem(item: any) {
     this.loading = true;
     m.redraw();
 
@@ -164,19 +169,19 @@ export default class BackpackItem extends Component {
         body: { id: item.refId },
       })
       .then(
-        (result) => {
+        (result: any) => {
           this.loading = false;
           this.showUseResult(item, result);
           if (this.attrs.onChanged) this.attrs.onChanged();
         },
-        (error) => {
+        (error: any) => {
           this.loading = false;
           this.showError(error);
         }
       );
   }
 
-  toggleDecoration(item, equip) {
+  toggleDecoration(item: any, equip: boolean) {
     this.loading = true;
     m.redraw();
 
@@ -191,14 +196,14 @@ export default class BackpackItem extends Component {
           this.loading = false;
           if (this.attrs.onChanged) this.attrs.onChanged();
         },
-        (error) => {
+        (error: any) => {
           this.loading = false;
           this.showError(error);
         }
       );
   }
 
-  showError(error) {
+  showError(error: any) {
     const detail =
       error && error.response && error.response.responseJSON && error.response.responseJSON.errors && error.response.responseJSON.errors[0]
         ? error.response.responseJSON.errors[0].detail

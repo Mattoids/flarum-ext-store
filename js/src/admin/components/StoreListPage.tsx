@@ -1,17 +1,19 @@
 import app from 'flarum/admin/app';
 import ExtensionPage from 'flarum/admin/components/ExtensionPage';
 import Button from 'flarum/common/components/Button';
-import Mithril from 'mithril';
+import type Mithril from 'mithril';
 import AddStoreGoods from './AddStoreGoods';
 import Select from 'flarum/common/components/Select';
 import Stream from 'flarum/common/utils/Stream';
 import StoreListItem from './StoreListItem';
 
 export default class StoreListPage extends ExtensionPage {
-  private storeList: any = [];
+  private storeList: StoreApiResource[] = [];
   private moreResults: boolean = false;
+  private status: Stream<string> = Stream('-1');
+  private type: Stream<string> = Stream('-1');
 
-  oninit(vnode: Mithril.Vnode) {
+  oninit(vnode: Mithril.Vnode<any, this>) {
     super.oninit(vnode);
 
     this.status = Stream('-1');
@@ -66,7 +68,7 @@ export default class StoreListPage extends ExtensionPage {
                       '1': app.translator.trans('mattoid-store.lib.item-status-up'),
                       '0': app.translator.trans('mattoid-store.lib.item-status-down'),
                     }}
-                    onchange={(e) => {
+                    onchange={(e: string) => {
                       this.status(e);
                       this.storeList = [];
                       this.loadResults();
@@ -82,7 +84,7 @@ export default class StoreListPage extends ExtensionPage {
                       permanent: app.translator.trans('mattoid-store.lib.item-type-permanent'),
                       limit: app.translator.trans('mattoid-store.lib.item-type-limit'),
                     }}
-                    onchange={(e) => {
+                    onchange={(e: string) => {
                       this.type(e);
                       this.storeList = [];
                       this.loadResults();
@@ -92,7 +94,7 @@ export default class StoreListPage extends ExtensionPage {
               </div>
 
               <ul className="StoreAdminList">
-                {this.storeList.map((item) => {
+                {this.storeList.map((item: StoreApiResource) => {
                   return <li>{StoreListItem.component({ item })}</li>;
                 })}
               </ul>
@@ -141,9 +143,9 @@ export default class StoreListPage extends ExtensionPage {
     this.loadResults(this.storeList.length);
   }
 
-  parseResults(results) {
+  parseResults(results: any) {
     this.moreResults = !!results.payload.links && !!results.payload.links.next;
-    [].push.apply(this.storeList, results.payload.data);
+    this.storeList.push(...results.payload.data);
     this.loading = false;
     m.redraw();
 
