@@ -1205,7 +1205,7 @@
   resolved "https://registry.npmmirror.com/@types/json-schema/-/json-schema-7.0.15.tgz"
   integrity sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==
 
-"@types/mithril@^2.0.11", "@types/mithril@^2.0.7":
+"@types/mithril@^2.0.7":
   version "2.2.6"
   resolved "https://registry.npmjs.org/@types/mithril/-/mithril-2.2.6.tgz"
   integrity sha512-cU142pS/rDHpE0NlC2XJpejD2ihzMQ+jI7R0cOLCVWRQJFxwD9CUxJGdRmWu9DrGLr52G2QjMRCfXs+ew4LD2Q==
