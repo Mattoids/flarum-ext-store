@@ -1,6 +1,6 @@
 import app from 'flarum/admin/app';
-import Component from "flarum/Component";
-import Button from 'flarum/components/Button';
+import Component from "flarum/common/Component";
+import Button from 'flarum/common/components/Button';
 import StoreModal from "./StoreModal";
 import StoreGoodsDetailModal from "./StoreGoodsDetailModal";
 

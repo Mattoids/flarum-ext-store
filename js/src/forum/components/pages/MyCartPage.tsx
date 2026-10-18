@@ -2,7 +2,7 @@ import app from 'flarum/forum/app';
 
 import UserPage from 'flarum/forum/components/UserPage';
 import CartItem from "../component/CartItem";
-import Button from 'flarum/components/Button';
+import Button from 'flarum/common/components/Button';
 import Select from "flarum/common/components/Select";
 import Stream from "flarum/common/utils/Stream";
 
