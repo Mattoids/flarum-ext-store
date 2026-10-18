@@ -1,7 +1,6 @@
 import app from 'flarum/admin/app';
 import Modal, {IInternalModalAttrs} from 'flarum/common/components/Modal';
 import Button from 'flarum/common/components/Button';
-import React from "react";
 import StoreGoodsDetailModal from "./StoreGoodsDetailModal";
 
 export default class AddStoreGoods extends Modal {
