@@ -29,28 +29,36 @@ export default class StoreModal extends Modal {
       <div className="Modal-body">
         <div className="StoreConfirmBody">
           <div className={'StoreConfirmIcon' + (isDelete ? ' StoreConfirmIcon--danger' : '')}>
-            {icon
-              ? (isClassIcon
-                ? <span className={'StoreIconClassPreview ' + icon}>{app.translator.trans('mattoid-store-decoration.lib.item-property-style-text-effect')}</span>
-                : isVideo
-                  ? <video autoplay loop muted playsinline><source src={icon} type="video/webm"/></video>
-                  : <img src={icon}/>)
-              : extIcon && (extIcon.name || extIcon.backgroundImage)
-                ? <span className="StoreAdminItem-extIcon"
-                        style={{
-                          backgroundColor: extIcon.backgroundColor,
-                          color: extIcon.color,
-                          backgroundImage: extIcon.backgroundImage
-                        }}>
-                    {extIcon.name ? <i className={extIcon.name}/> : ''}
-                  </span>
-                : <i className={'fas ' + (isDelete ? 'fa-trash-alt' : 'fa-exchange-alt')}/>}
+            {icon ? (
+              isClassIcon ? (
+                <span className={'StoreIconClassPreview ' + icon}>
+                  {app.translator.trans('mattoid-store-decoration.lib.item-property-style-text-effect')}
+                </span>
+              ) : isVideo ? (
+                <video autoplay loop muted playsinline>
+                  <source src={icon} type="video/webm" />
+                </video>
+              ) : (
+                <img src={icon} />
+              )
+            ) : extIcon && (extIcon.name || extIcon.backgroundImage) ? (
+              <span
+                className="StoreAdminItem-extIcon"
+                style={{
+                  backgroundColor: extIcon.backgroundColor,
+                  color: extIcon.color,
+                  backgroundImage: extIcon.backgroundImage,
+                }}
+              >
+                {extIcon.name ? <i className={extIcon.name} /> : ''}
+              </span>
+            ) : (
+              <i className={'fas ' + (isDelete ? 'fa-trash-alt' : 'fa-exchange-alt')} />
+            )}
           </div>
           <div className="StoreConfirmText">
             <div className="StoreConfirmTitle">{this.storeData.title}</div>
-            <div className="StoreConfirmDesc">
-              {app.translator.trans('mattoid-store.admin.settings.goods-item-' + this.type)}
-            </div>
+            <div className="StoreConfirmDesc">{app.translator.trans('mattoid-store.admin.settings.goods-item-' + this.type)}</div>
           </div>
         </div>
         <div className="StoreConfirmActions">
@@ -68,7 +76,7 @@ export default class StoreModal extends Modal {
               loading: this.loading,
               onclick: () => {
                 this.hide();
-              }
+              },
             },
             app.translator.trans('mattoid-store.lib.cancel')
           )}
@@ -83,19 +91,22 @@ export default class StoreModal extends Modal {
     this.loading = true;
 
     const status = this.storeData.status;
-    this.storeData.status = Number(!this.storeData.status)
+    this.storeData.status = Number(!this.storeData.status);
 
     const method = this.type === 'delete' ? 'DELETE' : 'PUT';
-    app.request({
-      method: method,
-      url: app.forum.attribute('apiUrl') + '/store/goods',
-      body: this.storeData
-    }).then(
-      () => location.reload(),
-      (error) => {
-        this.loading = false;
-        this.storeData.status = status;
-        this.onerror(error);
-      });
+    app
+      .request({
+        method: method,
+        url: app.forum.attribute('apiUrl') + '/store/goods',
+        body: this.storeData,
+      })
+      .then(
+        () => location.reload(),
+        (error) => {
+          this.loading = false;
+          this.storeData.status = status;
+          this.onerror(error);
+        }
+      );
   }
 }

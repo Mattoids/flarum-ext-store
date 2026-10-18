@@ -1,28 +1,27 @@
-import IndexPage from "flarum/forum/components/IndexPage";
+import IndexPage from 'flarum/forum/components/IndexPage';
 import { IPageAttrs } from 'flarum/common/components/Page';
 import listItems from 'flarum/common/helpers/listItems';
 import Mithril from 'mithril';
-import Button from "flarum/common/components/Button";
-import Stream from "flarum/common/utils/Stream";
-import Select from "flarum/common/components/Select";
-import StoreItem from "../component/StoreItem";
+import Button from 'flarum/common/components/Button';
+import Stream from 'flarum/common/utils/Stream';
+import Select from 'flarum/common/components/Select';
+import StoreItem from '../component/StoreItem';
 
 export interface IIndexPageAttrs extends IPageAttrs {}
 
 const FILTER_KEYS = ['code', 'group', 'subtype', 'type', 'discount'];
 
 export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageAttrs> extends IndexPage {
-
-  private storeList: any = []
-  private moreResults: boolean = false
-  private filterValues: any = {group: '-1', code: '-1', subtype: '-1', type: '-1', discount: '-1'}
-  private dimensions: any = []
-  private status: any = Stream('1')
+  private storeList: any = [];
+  private moreResults: boolean = false;
+  private filterValues: any = { group: '-1', code: '-1', subtype: '-1', type: '-1', discount: '-1' };
+  private dimensions: any = [];
+  private status: any = Stream('1');
 
   oninit(vnode: Mithril.Vnode<CustomAttrs, this>) {
     super.oninit(vnode);
 
-    app.setTitle(app.forum.attribute("storeName") || app.translator.trans('mattoid-store.forum.tital'));
+    app.setTitle(app.forum.attribute('storeName') || app.translator.trans('mattoid-store.forum.tital'));
     app.setTitleCount(0);
   }
 
@@ -42,20 +41,18 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
               <ul>{listItems(this.sidebarItems().toArray())}</ul>
             </nav>
             <div className="StorePage-results sideNavOffset">
-              <h2 class="BadgeOverviewTitle">{app.forum.attribute("storeName") || app.translator.trans('mattoid-store.forum.tital')}</h2>
+              <h2 class="BadgeOverviewTitle">{app.forum.attribute('storeName') || app.translator.trans('mattoid-store.forum.tital')}</h2>
               {this.renderFilterBar()}
               <div className="Store-Body">
-                {
-                  this.storeList.map((item) => {
-                    if (this.canViewGoodsItem(item)) {
-                      return (
-                        <div className="storeItemContainer" key={item.id}>
-                          {StoreItem.component({ item, onSuccess: (data) => this.onItemBought(item, data) })}
-                        </div>
-                      );
-                    }
-                  })
-                }
+                {this.storeList.map((item) => {
+                  if (this.canViewGoodsItem(item)) {
+                    return (
+                      <div className="storeItemContainer" key={item.id}>
+                        {StoreItem.component({ item, onSuccess: (data) => this.onItemBought(item, data) })}
+                      </div>
+                    );
+                  }
+                })}
               </div>
 
               {!this.loading && this.storeList.length === 0 && (
@@ -77,8 +74,12 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
               {this.loading && (
                 <div class="DiscussionList">
                   <div class="DiscussionList-loadMore">
-                    <div aria-label="loading…" role="status" data-size="medium"
-                         class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium">
+                    <div
+                      aria-label="loading…"
+                      role="status"
+                      data-size="medium"
+                      class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium"
+                    >
                       <div aria-hidden="true" class="LoadingIndicator"></div>
                     </div>
                   </div>
@@ -88,7 +89,7 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   /**
@@ -127,7 +128,7 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
         {this.dimensions.map((dim) => {
           if (dim.hidden) return null;
 
-          const options = {'-1': app.translator.trans('mattoid-store.lib.filter-all')};
+          const options = { '-1': app.translator.trans('mattoid-store.lib.filter-all') };
           (dim.options || []).forEach((opt) => {
             options[opt.value] = opt.label;
           });
@@ -164,18 +165,21 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
   }
 
   loadOptions() {
-    return app.request({
-      method: 'GET',
-      url: app.forum.attribute('apiUrl') + '/store/filter/options',
-      params: {filter: this.filterValues},
-    }).then((result) => {
-      // JSON:API 响应体：data.attributes.dimensions
-      const attrs = result && result.data ? result.data.attributes : null;
-      this.dimensions = (attrs && attrs.dimensions) || [];
-      m.redraw();
-    }).catch(() => {
-      this.dimensions = [];
-    });
+    return app
+      .request({
+        method: 'GET',
+        url: app.forum.attribute('apiUrl') + '/store/filter/options',
+        params: { filter: this.filterValues },
+      })
+      .then((result) => {
+        // JSON:API 响应体：data.attributes.dimensions
+        const attrs = result && result.data ? result.data.attributes : null;
+        this.dimensions = (attrs && attrs.dimensions) || [];
+        m.redraw();
+      })
+      .catch(() => {
+        this.dimensions = [];
+      });
   }
 
   hasMoreResults() {
@@ -198,12 +202,15 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
 
   loadResults(offset = 0) {
     this.loading = true;
-    const filters = Object.assign({
-      'status': this.status(),
-    }, this.filterValues);
+    const filters = Object.assign(
+      {
+        status: this.status(),
+      },
+      this.filterValues
+    );
 
     return app.store
-      .find("/store/list", {
+      .find('/store/list', {
         filter: filters,
         page: {
           offset,
@@ -212,5 +219,4 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
       .catch(() => {})
       .then(this.parseResults.bind(this));
   }
-
 }

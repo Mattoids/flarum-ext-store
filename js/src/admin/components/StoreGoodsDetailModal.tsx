@@ -1,14 +1,13 @@
 import app from 'flarum/admin/app';
 import Modal from 'flarum/common/components/Modal';
 import Button from 'flarum/common/components/Button';
-import Stream from "flarum/common/utils/Stream";
-import Switch from "flarum/common/components/Switch";
-import Select from "flarum/common/components/Select";
+import Stream from 'flarum/common/utils/Stream';
+import Switch from 'flarum/common/components/Switch';
+import Select from 'flarum/common/components/Select';
 
 export default class StoreGoodsDetailModal extends Modal {
-
-  private pageTitle: string = ""
-  private moreResults: boolean = false
+  private pageTitle: string = '';
+  private moreResults: boolean = false;
   private iconList: Array = [];
   private itemTypes: any = [];
   private method: string = 'POST';
@@ -50,7 +49,7 @@ export default class StoreGoodsDetailModal extends Modal {
     this.pageTitle = this.attrs.title;
 
     if (this.attrs.storeData) {
-      this.method = 'PUT'
+      this.method = 'PUT';
       this.params.id = Stream(this.attrs.storeData.id);
       this.params.status = Stream(this.attrs.storeData.status);
       this.params.code = Stream(this.attrs.storeData.code);
@@ -103,7 +102,7 @@ export default class StoreGoodsDetailModal extends Modal {
   }
 
   applyItemTypes() {
-    const code = this.params.code ? this.params.code() : (this.attrs.code || '');
+    const code = this.params.code ? this.params.code() : this.attrs.code || '';
     const plugin = (StoreGoodsDetailModal.pluginList || []).find((p) => p.attributes && p.attributes.code === code);
     this.itemTypes = plugin && plugin.attributes.itemTypes ? plugin.attributes.itemTypes : [];
     this.applyPluginDefaults(code, plugin);
@@ -150,15 +149,15 @@ export default class StoreGoodsDetailModal extends Modal {
 
   onModalReady() {
     const _this = this;
-    const closeButton = $(".Modal-close .Button");
+    const closeButton = $('.Modal-close .Button');
     $(closeButton).prop('id', 'storeCloseButton');
 
     const closeButtonClone = closeButton.clone();
     $(closeButtonClone).prop('id', 'storeCloseIconButton');
     $(closeButtonClone).css('display', 'none');
-    $(".Modal-close").append(closeButtonClone);
+    $('.Modal-close').append(closeButtonClone);
 
-    $(closeButtonClone).on("click", function(){
+    $(closeButtonClone).on('click', function () {
       _this.closeIcon();
     });
   }
@@ -172,31 +171,34 @@ export default class StoreGoodsDetailModal extends Modal {
             <div className="StoreGoodsHeader">
               <div className="StoreGoodsHeader-switches">
                 <div className="StoreAdminInline">
-                  <span className="StoreGoodsHeader-label">{app.translator.trans("mattoid-store.admin.settings.goods-status")}</span>
-                  <Switch state={this.params.status()}
-                          onchange={(val) => {
-                            this.params.status = Stream(Number(val))
-                          }}
-                  > </Switch>
+                  <span className="StoreGoodsHeader-label">{app.translator.trans('mattoid-store.admin.settings.goods-status')}</span>
+                  <Switch
+                    state={this.params.status()}
+                    onchange={(val) => {
+                      this.params.status = Stream(Number(val));
+                    }}
+                  >
+                    {' '}
+                  </Switch>
                 </div>
                 <div className="StoreAdminInline">
                   <Switch
                     state={this.params.repeat()}
                     onchange={(val) => {
-                      this.params.repeat = Stream(Number(val))
+                      this.params.repeat = Stream(Number(val));
                     }}
                   >
-                    {app.translator.trans("mattoid-store.admin.settings.goods-repeat")}
+                    {app.translator.trans('mattoid-store.admin.settings.goods-repeat')}
                   </Switch>
                 </div>
                 <div className="StoreAdminInline">
                   <Switch
                     state={this.params.hide()}
                     onchange={(val) => {
-                      this.params.hide = Stream(Number(val))
+                      this.params.hide = Stream(Number(val));
                     }}
                   >
-                    {app.translator.trans("mattoid-store.admin.settings.goods-hide")}
+                    {app.translator.trans('mattoid-store.admin.settings.goods-hide')}
                   </Switch>
                 </div>
               </div>
@@ -204,15 +206,15 @@ export default class StoreGoodsDetailModal extends Modal {
             </div>
 
             <section className="StoreAdminCard">
-              <div className="StoreAdminCard-title">{app.translator.trans("mattoid-store.admin.settings.section-basic")}</div>
+              <div className="StoreAdminCard-title">{app.translator.trans('mattoid-store.admin.settings.section-basic')}</div>
               <div className="StoreAdminCard-body">
                 <div className="StoreAdminField">
-                  <label>{app.translator.trans("mattoid-store.admin.settings.goods-title")}</label>
-                  <input required class="FormControl" type="text" bidi={this.params.title}/>
+                  <label>{app.translator.trans('mattoid-store.admin.settings.goods-title')}</label>
+                  <input required class="FormControl" type="text" bidi={this.params.title} />
                 </div>
                 {!(app as any).storeAdminRegistry?.goodsForm?.getOptions(this.params.code()).hideDefaultDesc && (
                   <div className="StoreAdminField">
-                    <label>{app.translator.trans("mattoid-store.admin.settings.goods-desc")}</label>
+                    <label>{app.translator.trans('mattoid-store.admin.settings.goods-desc')}</label>
                     <textarea class="FormControl" bidi={this.params.desc} rows="3"></textarea>
                   </div>
                 )}
@@ -220,187 +222,189 @@ export default class StoreGoodsDetailModal extends Modal {
             </section>
 
             <section className="StoreAdminCard">
-              <div className="StoreAdminCard-title">{app.translator.trans("mattoid-store.admin.settings.section-price")}</div>
+              <div className="StoreAdminCard-title">{app.translator.trans('mattoid-store.admin.settings.section-price')}</div>
               <div className="StoreAdminCard-body">
                 <div className="StoreAdminGrid StoreAdminGrid--price">
-              <div className="StoreAdminField">
-                <label>{app.translator.trans("mattoid-store.admin.settings.goods-price")}</label>
-                <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.price}/>
-              </div>
-              <div className="StoreAdminField">
-                <label>{app.translator.trans("mattoid-store.admin.settings.goods-stock")}</label>
-                <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.stock}/>
-              </div>
-              <div className="StoreAdminField">
-                <label>{app.translator.trans("mattoid-store.admin.settings.goods-discount")}</label>
-                <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.discount}/>
-              </div>
-              <div className="StoreAdminField">
-                <label>{app.translator.trans("mattoid-store.admin.settings.goods-discount-limit")}</label>
-                <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.discountLimit}/>
-              </div>
-              <div className="StoreAdminField">
-                <label>{app.translator.trans("mattoid-store.admin.settings.goods-discount-limit-unit")}</label>
-                {Select.component({
-                  options: {
-                    'days': app.translator.trans("mattoid-store.lib.item-limit-unit-days"),
-                    'hour': app.translator.trans("mattoid-store.lib.item-limit-unit-hour"),
-                    'minute': app.translator.trans("mattoid-store.lib.item-limit-unit-minute"),
-                    'second': app.translator.trans("mattoid-store.lib.item-limit-unit-second")
-                  },
-                  value: this.params.discountLimitUnit(),
-                  onchange: (val) => {
-                    this.params.discountLimitUnit = Stream(val)
-                  },
-                })}
+                  <div className="StoreAdminField">
+                    <label>{app.translator.trans('mattoid-store.admin.settings.goods-price')}</label>
+                    <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.price} />
+                  </div>
+                  <div className="StoreAdminField">
+                    <label>{app.translator.trans('mattoid-store.admin.settings.goods-stock')}</label>
+                    <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.stock} />
+                  </div>
+                  <div className="StoreAdminField">
+                    <label>{app.translator.trans('mattoid-store.admin.settings.goods-discount')}</label>
+                    <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.discount} />
+                  </div>
+                  <div className="StoreAdminField">
+                    <label>{app.translator.trans('mattoid-store.admin.settings.goods-discount-limit')}</label>
+                    <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.discountLimit} />
+                  </div>
+                  <div className="StoreAdminField">
+                    <label>{app.translator.trans('mattoid-store.admin.settings.goods-discount-limit-unit')}</label>
+                    {Select.component({
+                      options: {
+                        days: app.translator.trans('mattoid-store.lib.item-limit-unit-days'),
+                        hour: app.translator.trans('mattoid-store.lib.item-limit-unit-hour'),
+                        minute: app.translator.trans('mattoid-store.lib.item-limit-unit-minute'),
+                        second: app.translator.trans('mattoid-store.lib.item-limit-unit-second'),
+                      },
+                      value: this.params.discountLimitUnit(),
+                      onchange: (val) => {
+                        this.params.discountLimitUnit = Stream(val);
+                      },
+                    })}
+                  </div>
                 </div>
-              </div>
               </div>
             </section>
 
             <section className="StoreAdminCard">
-              <div className="StoreAdminCard-title">{app.translator.trans("mattoid-store.admin.settings.section-validity")}</div>
+              <div className="StoreAdminCard-title">{app.translator.trans('mattoid-store.admin.settings.section-validity')}</div>
               <div className="StoreAdminCard-body">
                 <div className="StoreAdminGrid">
-              <div className="StoreAdminField">
-                <label>{app.translator.trans("mattoid-store.admin.settings.goods-type")}</label>
-                {Select.component({
-                  options: {
-                    'permanent': app.translator.trans("mattoid-store.lib.item-type-permanent"),
-                    'limit': app.translator.trans("mattoid-store.lib.item-type-limit")
-                  },
-                  value: this.params.type(),
-                  onchange: (val) => {
-                    this.params.type = Stream(val)
-                  },
-                })}
-              </div>
-              {this.params.type() === 'limit' && (
-                <div className="StoreAdminField">
-                  <label>{app.translator.trans("mattoid-store.admin.settings.goods-outtime")}</label>
-                  <div className="StoreAdminInline">
-                    <input required class="FormControl" type="number" bidi={this.params.outtime}/>
-                    <span className="StoreAdminUnit">{app.translator.trans("mattoid-store.admin.settings.days")}</span>
+                  <div className="StoreAdminField">
+                    <label>{app.translator.trans('mattoid-store.admin.settings.goods-type')}</label>
+                    {Select.component({
+                      options: {
+                        permanent: app.translator.trans('mattoid-store.lib.item-type-permanent'),
+                        limit: app.translator.trans('mattoid-store.lib.item-type-limit'),
+                      },
+                      value: this.params.type(),
+                      onchange: (val) => {
+                        this.params.type = Stream(val);
+                      },
+                    })}
                   </div>
-                </div>
-              )}
-              {this.params.type() === 'limit' && (
-                <div className="StoreAdminField">
-                  <label>{app.translator.trans("mattoid-store.admin.settings.goods-auto-deduction")}</label>
-                  <div className="StoreAdminInline">
-                    <Switch
-                      state={this.params.autoDeduction()}
-                      onchange={(val) => {
-                        this.params.autoDeduction = Stream(Number(val))
-                      }}
-                    >
-                    </Switch>
-                  </div>
-                </div>
-              )}
+                  {this.params.type() === 'limit' && (
+                    <div className="StoreAdminField">
+                      <label>{app.translator.trans('mattoid-store.admin.settings.goods-outtime')}</label>
+                      <div className="StoreAdminInline">
+                        <input required class="FormControl" type="number" bidi={this.params.outtime} />
+                        <span className="StoreAdminUnit">{app.translator.trans('mattoid-store.admin.settings.days')}</span>
+                      </div>
+                    </div>
+                  )}
+                  {this.params.type() === 'limit' && (
+                    <div className="StoreAdminField">
+                      <label>{app.translator.trans('mattoid-store.admin.settings.goods-auto-deduction')}</label>
+                      <div className="StoreAdminInline">
+                        <Switch
+                          state={this.params.autoDeduction()}
+                          onchange={(val) => {
+                            this.params.autoDeduction = Stream(Number(val));
+                          }}
+                        ></Switch>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </section>
 
             <section className="StoreAdminCard">
-              <div className="StoreAdminCard-title">{app.translator.trans("mattoid-store.admin.settings.section-purchase-limit")}</div>
+              <div className="StoreAdminCard-title">{app.translator.trans('mattoid-store.admin.settings.section-purchase-limit')}</div>
               <div className="StoreAdminCard-body">
                 <div className="StoreAdminGrid StoreAdminGrid--4col">
-              <div className="StoreAdminField">
-                <label>{app.translator.trans("mattoid-store.admin.settings.goods-purchase-limit-enable")}</label>
-                <div className="StoreAdminInline">
-                  <Switch
-                    state={!!this.params.purchaseLimitEnable()}
-                    onchange={(val) => {
-                      this.params.purchaseLimitEnable = Stream(Number(val))
-                    }}
-                  >
-                  </Switch>
-                </div>
-              </div>
-              {!!this.params.purchaseLimitEnable() && (
-                <div className="StoreAdminField">
-                  <label>{app.translator.trans("mattoid-store.admin.settings.goods-purchase-limit-count")}</label>
-                  <input required class="FormControl" type="number" step="1" min="1" bidi={this.params.purchaseLimitCount}/>
-                </div>
-              )}
-              {!!this.params.purchaseLimitEnable() && (
-                <div className="StoreAdminField">
-                  <label>{app.translator.trans("mattoid-store.admin.settings.goods-purchase-limit-period")}</label>
-                  <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.purchaseLimitPeriod}/>
-                </div>
-              )}
-              {!!this.params.purchaseLimitEnable() && (
-                <div className="StoreAdminField">
-                  <label>{app.translator.trans("mattoid-store.admin.settings.goods-purchase-limit-period-unit")}</label>
-                  {Select.component({
-                    options: {
-                      'days': app.translator.trans("mattoid-store.lib.item-limit-unit-days"),
-                      'hour': app.translator.trans("mattoid-store.lib.item-limit-unit-hour"),
-                      'minute': app.translator.trans("mattoid-store.lib.item-limit-unit-minute"),
-                      'second': app.translator.trans("mattoid-store.lib.item-limit-unit-second")
-                    },
-                    value: this.params.purchaseLimitPeriodUnit(),
-                    onchange: (val) => {
-                      this.params.purchaseLimitPeriodUnit = Stream(val)
-                    },
-                  })}
-                </div>
-              )}
+                  <div className="StoreAdminField">
+                    <label>{app.translator.trans('mattoid-store.admin.settings.goods-purchase-limit-enable')}</label>
+                    <div className="StoreAdminInline">
+                      <Switch
+                        state={!!this.params.purchaseLimitEnable()}
+                        onchange={(val) => {
+                          this.params.purchaseLimitEnable = Stream(Number(val));
+                        }}
+                      ></Switch>
+                    </div>
+                  </div>
+                  {!!this.params.purchaseLimitEnable() && (
+                    <div className="StoreAdminField">
+                      <label>{app.translator.trans('mattoid-store.admin.settings.goods-purchase-limit-count')}</label>
+                      <input required class="FormControl" type="number" step="1" min="1" bidi={this.params.purchaseLimitCount} />
+                    </div>
+                  )}
+                  {!!this.params.purchaseLimitEnable() && (
+                    <div className="StoreAdminField">
+                      <label>{app.translator.trans('mattoid-store.admin.settings.goods-purchase-limit-period')}</label>
+                      <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.purchaseLimitPeriod} />
+                    </div>
+                  )}
+                  {!!this.params.purchaseLimitEnable() && (
+                    <div className="StoreAdminField">
+                      <label>{app.translator.trans('mattoid-store.admin.settings.goods-purchase-limit-period-unit')}</label>
+                      {Select.component({
+                        options: {
+                          days: app.translator.trans('mattoid-store.lib.item-limit-unit-days'),
+                          hour: app.translator.trans('mattoid-store.lib.item-limit-unit-hour'),
+                          minute: app.translator.trans('mattoid-store.lib.item-limit-unit-minute'),
+                          second: app.translator.trans('mattoid-store.lib.item-limit-unit-second'),
+                        },
+                        value: this.params.purchaseLimitPeriodUnit(),
+                        onchange: (val) => {
+                          this.params.purchaseLimitPeriodUnit = Stream(val);
+                        },
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             </section>
 
             <section className="StoreAdminCard">
-              <div className="StoreAdminCard-title">{app.translator.trans("mattoid-store.admin.settings.section-item")}</div>
+              <div className="StoreAdminCard-title">{app.translator.trans('mattoid-store.admin.settings.section-item')}</div>
               <div className="StoreAdminCard-body">
                 <div className="StoreAdminGrid StoreAdminGrid--4col">
-              <div className="StoreAdminField">
-                <label>{app.translator.trans("mattoid-store.admin.settings.goods-group")}</label>
-                <input class="FormControl" type="text" bidi={this.params.group}
-                       placeholder={app.translator.trans("mattoid-store.admin.settings.goods-group-placeholder")}/>
-              </div>
-              <div className="StoreAdminField">
-                <label>{app.translator.trans("mattoid-store.admin.settings.goods-usable")}</label>
-                <div className="StoreAdminInline">
-                  <Switch
-                    state={!!this.params.usable()}
-                    onchange={(val) => {
-                      this.params.usable = Stream(Number(val))
-                    }}
-                  >
-                    {app.translator.trans("mattoid-store.admin.settings.goods-usable")}
-                  </Switch>
-                </div>
-              </div>
-              <div className="StoreAdminField">
-                <label>{app.translator.trans("mattoid-store.admin.settings.goods-use-type")}</label>
-                <div className="StoreAdminInline">
-                  <Switch
-                    state={this.params.useType() === 'consumable'}
-                    onchange={(val) => {
-                      this.params.useType = Stream(val ? 'consumable' : 'permanent')
-                    }}
-                  >
-                    {app.translator.trans("mattoid-store.lib.item-use-type-consumable")}
-                  </Switch>
-                </div>
-              </div>
-              {this.itemTypes.length > 0 && (
-                <div className="StoreAdminField">
-                  <label>{app.translator.trans("mattoid-store.admin.settings.goods-subtype")}</label>
-                  {Select.component({
-                    options: Object.assign(
-                      {'': app.translator.trans("mattoid-store.admin.settings.goods-subtype-none")},
-                      ...this.itemTypes.map((t) => ({[t.key]: app.translator.trans(t.name || t.key)}))
-                    ),
-                    value: this.params.subtype(),
-                    onchange: (val) => {
-                      this.params.subtype = Stream(val)
-                    },
-                  })}
-                </div>
-              )}
+                  <div className="StoreAdminField">
+                    <label>{app.translator.trans('mattoid-store.admin.settings.goods-group')}</label>
+                    <input
+                      class="FormControl"
+                      type="text"
+                      bidi={this.params.group}
+                      placeholder={app.translator.trans('mattoid-store.admin.settings.goods-group-placeholder')}
+                    />
+                  </div>
+                  <div className="StoreAdminField">
+                    <label>{app.translator.trans('mattoid-store.admin.settings.goods-usable')}</label>
+                    <div className="StoreAdminInline">
+                      <Switch
+                        state={!!this.params.usable()}
+                        onchange={(val) => {
+                          this.params.usable = Stream(Number(val));
+                        }}
+                      >
+                        {app.translator.trans('mattoid-store.admin.settings.goods-usable')}
+                      </Switch>
+                    </div>
+                  </div>
+                  <div className="StoreAdminField">
+                    <label>{app.translator.trans('mattoid-store.admin.settings.goods-use-type')}</label>
+                    <div className="StoreAdminInline">
+                      <Switch
+                        state={this.params.useType() === 'consumable'}
+                        onchange={(val) => {
+                          this.params.useType = Stream(val ? 'consumable' : 'permanent');
+                        }}
+                      >
+                        {app.translator.trans('mattoid-store.lib.item-use-type-consumable')}
+                      </Switch>
+                    </div>
+                  </div>
+                  {this.itemTypes.length > 0 && (
+                    <div className="StoreAdminField">
+                      <label>{app.translator.trans('mattoid-store.admin.settings.goods-subtype')}</label>
+                      {Select.component({
+                        options: Object.assign(
+                          { '': app.translator.trans('mattoid-store.admin.settings.goods-subtype-none') },
+                          ...this.itemTypes.map((t) => ({ [t.key]: app.translator.trans(t.name || t.key) }))
+                        ),
+                        value: this.params.subtype(),
+                        onchange: (val) => {
+                          this.params.subtype = Stream(val);
+                        },
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             </section>
@@ -409,7 +413,7 @@ export default class StoreGoodsDetailModal extends Modal {
               const CustomForm = (app as any).storeAdminRegistry?.goodsForm?.get(this.params.code());
               return CustomForm ? (
                 <section className="StoreAdminCard StoreAdminCard--plugin">
-                  <div className="StoreAdminCard-title">{app.translator.trans("mattoid-store.admin.settings.section-plugin")}</div>
+                  <div className="StoreAdminCard-title">{app.translator.trans('mattoid-store.admin.settings.section-plugin')}</div>
                   <div className="StoreAdminCard-body">
                     <CustomForm params={this.params} storeData={this.attrs.storeData} />
                   </div>
@@ -418,25 +422,27 @@ export default class StoreGoodsDetailModal extends Modal {
             })()}
 
             <section className="StoreAdminCard">
-              <div className="StoreAdminCard-title">{app.translator.trans("mattoid-store.admin.settings.section-icon")}</div>
+              <div className="StoreAdminCard-title">{app.translator.trans('mattoid-store.admin.settings.section-icon')}</div>
               <div className="StoreAdminCard-body">
                 <div className="StoreAdminIconRow">
                   <div className="StoreAdminIconRow-main">
                     <div className="StoreAdminField">
                       <div className="StoreAdminInline">
-                        <input id="icon" required class="FormControl" type="text" bidi={this.params.icon}/>
+                        <input id="icon" required class="FormControl" type="text" bidi={this.params.icon} />
                         <Button
                           className="Button"
                           onclick={(e) => {
-                            this.uploadIcon(e)
-                          }}>
+                            this.uploadIcon(e);
+                          }}
+                        >
                           {app.translator.trans('mattoid-store.admin.settings.goods-upload-button')}
                         </Button>
                         <Button
                           className="Button"
                           onclick={(e) => {
                             this.showIcon(e);
-                          }}>
+                          }}
+                        >
                           {app.translator.trans('mattoid-store.admin.settings.show-icon-button')}
                         </Button>
                       </div>
@@ -446,15 +452,21 @@ export default class StoreGoodsDetailModal extends Modal {
                   <div className="StoreAdminField StoreAdminIconRow-preview" style={this.params.icon() ? '' : 'display: none'}>
                     <div className="StoreIconPreview">
                       {this.isImageIcon(this.params.icon()) ? (
-                        <img src={this.params.icon()} style={this.params.icon() && this.params.icon().slice(-5) === '.webm' ? 'display: none' : ''}/>
+                        <img src={this.params.icon()} style={this.params.icon() && this.params.icon().slice(-5) === '.webm' ? 'display: none' : ''} />
                       ) : (
                         <div className="StoreIconEffectPreview">
                           <div className={this.params.icon()}>{app.translator.trans('mattoid-store.admin.settings.goods-icon-effect-preview')}</div>
                           <span className="StoreIconEffectClassName">{this.params.icon()}</span>
                         </div>
                       )}
-                      <video autoplay loop muted playsinline style={this.params.icon() && this.params.icon().slice(-5) === '.webm' ? '' : 'display: none'}>
-                        <source src={this.params.icon()} type="video/webm"/>
+                      <video
+                        autoplay
+                        loop
+                        muted
+                        playsinline
+                        style={this.params.icon() && this.params.icon().slice(-5) === '.webm' ? '' : 'display: none'}
+                      >
+                        <source src={this.params.icon()} type="video/webm" />
                       </video>
                     </div>
                   </div>
@@ -469,7 +481,9 @@ export default class StoreGoodsDetailModal extends Modal {
                   type: 'submit',
                   loading: this.loading,
                 },
-                this.params.id ? app.translator.trans('mattoid-store.admin.settings.edit-store-goods') : app.translator.trans('mattoid-store.admin.settings.add-store-goods')
+                this.params.id
+                  ? app.translator.trans('mattoid-store.admin.settings.edit-store-goods')
+                  : app.translator.trans('mattoid-store.admin.settings.add-store-goods')
               )}
             </div>
           </div>
@@ -482,24 +496,32 @@ export default class StoreGoodsDetailModal extends Modal {
               }
               return (
                 <div>
-                  {
-                    this.iconList.map((item) => {
-                      return (
-                        <div className="icon-frame inlineBlock" onclick={() => this.selectIconItem(item.attributes.url)}>
-                          <img className="icon-size" src={item.attributes.url}
-                               style={item.attributes.url && item.attributes.url.slice(-5) === '.webm' ? 'display: none' : ''}/>
-                          <video autoplay loop muted playsinline className="icon-size"
-                                 style={item.attributes.url && item.attributes.url.slice(-5) === '.webm' ? '' : 'display: none'}>
-                            <source src={item.attributes.url} type="video/webm"/>
-                          </video>
-                        </div>
-                      )
-                    })
-                  }
+                  {this.iconList.map((item) => {
+                    return (
+                      <div className="icon-frame inlineBlock" onclick={() => this.selectIconItem(item.attributes.url)}>
+                        <img
+                          className="icon-size"
+                          src={item.attributes.url}
+                          style={item.attributes.url && item.attributes.url.slice(-5) === '.webm' ? 'display: none' : ''}
+                        />
+                        <video
+                          autoplay
+                          loop
+                          muted
+                          playsinline
+                          className="icon-size"
+                          style={item.attributes.url && item.attributes.url.slice(-5) === '.webm' ? '' : 'display: none'}
+                        >
+                          <source src={item.attributes.url} type="video/webm" />
+                        </video>
+                      </div>
+                    );
+                  })}
                   {!this.loading && this.iconList.length === 0 && (
                     <div>
-                      <div
-                        style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">{app.translator.trans("mattoid-store.lib.list-empty")}</div>
+                      <div style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">
+                        {app.translator.trans('mattoid-store.lib.list-empty')}
+                      </div>
                     </div>
                   )}
 
@@ -514,8 +536,12 @@ export default class StoreGoodsDetailModal extends Modal {
                   {this.loading && (
                     <div class="DiscussionList">
                       <div class="DiscussionList-loadMore">
-                        <div aria-label="loading…" role="status" data-size="medium"
-                             class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium">
+                        <div
+                          aria-label="loading…"
+                          role="status"
+                          data-size="medium"
+                          class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium"
+                        >
                           <div aria-hidden="true" class="LoadingIndicator"></div>
                         </div>
                       </div>
@@ -535,8 +561,12 @@ export default class StoreGoodsDetailModal extends Modal {
    * 不含路径分隔符或扩展名，不能作为图片 src 渲染
    */
   isImageIcon(icon: string): boolean {
-    if (!icon) { return false; }
-    if (icon.indexOf('/') === -1 && icon.indexOf('.') === -1) { return false; }
+    if (!icon) {
+      return false;
+    }
+    if (icon.indexOf('/') === -1 && icon.indexOf('.') === -1) {
+      return false;
+    }
     return icon.slice(-5) !== '.webm';
   }
 
@@ -544,7 +574,7 @@ export default class StoreGoodsDetailModal extends Modal {
     this.loading = true;
 
     return app.store
-      .find("/store/icon/list", {
+      .find('/store/icon/list', {
         page: {
           offset,
         },
@@ -571,30 +601,29 @@ export default class StoreGoodsDetailModal extends Modal {
     return this.moreResults;
   }
 
-
   closeIcon() {
     this.pageTitle = this.attrs.title;
-    $("#StoreGoods").css("display","block");
-    $("#storeCloseButton").css("display","block");
-    $("#StoreIcon").css("display","none");
-    $("#storeCloseIconButton").css("display","none");
+    $('#StoreGoods').css('display', 'block');
+    $('#storeCloseButton').css('display', 'block');
+    $('#StoreIcon').css('display', 'none');
+    $('#storeCloseIconButton').css('display', 'none');
     m.redraw();
   }
 
-  selectIconItem(url){
+  selectIconItem(url) {
     this.pageTitle = this.attrs.title;
-    $("#StoreGoods").css("display","block");
-    $("#storeCloseButton").css("display","block");
-    $("#StoreIcon").css("display","none");
-    $("#storeCloseIconButton").css("display","none");
+    $('#StoreGoods').css('display', 'block');
+    $('#storeCloseButton').css('display', 'block');
+    $('#StoreIcon').css('display', 'none');
+    $('#storeCloseIconButton').css('display', 'none');
     this.params.icon(url);
   }
 
   showIcon(event) {
-    $("#StoreGoods").css("display","none");
-    $("#storeCloseButton").css("display","none");
-    $("#StoreIcon").css("display","block");
-    $("#storeCloseIconButton").css("display","block");
+    $('#StoreGoods').css('display', 'none');
+    $('#storeCloseButton').css('display', 'none');
+    $('#StoreIcon').css('display', 'block');
+    $('#storeCloseIconButton').css('display', 'block');
     this.pageTitle = app.translator.trans('mattoid-store.admin.settings.show-icon-button');
 
     // 商品插件注册了自定义图库（iconPicker）时，不加载默认上传图片列表
@@ -609,21 +638,26 @@ export default class StoreGoodsDetailModal extends Modal {
 
     const $input = $('<input type="file">');
 
-    $input.appendTo('body').hide().trigger('click').on('change', event => {
-      const body = new FormData();
-      body.append('file', event.target.files[0])
+    $input
+      .appendTo('body')
+      .hide()
+      .trigger('click')
+      .on('change', (event) => {
+        const body = new FormData();
+        body.append('file', event.target.files[0]);
 
-      app.request({
-        url: `${app.forum.attribute('apiUrl')}/store/upload/icon`,
-        method: 'POST',
-        body,
-      }).then((result) => {
-        this.params.icon = Stream(result.data.attributes.path)
-        this.loading = false;
-        m.redraw();
+        app
+          .request({
+            url: `${app.forum.attribute('apiUrl')}/store/upload/icon`,
+            method: 'POST',
+            body,
+          })
+          .then((result) => {
+            this.params.icon = Stream(result.data.attributes.path);
+            this.loading = false;
+            m.redraw();
+          });
       });
-    })
-
   }
 
   onsubmit(e) {
@@ -631,15 +665,18 @@ export default class StoreGoodsDetailModal extends Modal {
 
     this.loading = true;
 
-    app.request({
-      method: this.method,
-      url: app.forum.attribute('apiUrl') + '/store/goods',
-      body: this.params
-    }).then(
-      () => location.reload(),
-      (error) => {
-        this.loading = false;
-        this.onerror(error);
-      });
+    app
+      .request({
+        method: this.method,
+        url: app.forum.attribute('apiUrl') + '/store/goods',
+        body: this.params,
+      })
+      .then(
+        () => location.reload(),
+        (error) => {
+          this.loading = false;
+          this.onerror(error);
+        }
+      );
   }
 }

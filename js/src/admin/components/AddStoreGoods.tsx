@@ -1,17 +1,17 @@
 import app from 'flarum/admin/app';
-import Modal, {IInternalModalAttrs} from 'flarum/common/components/Modal';
+import Modal, { IInternalModalAttrs } from 'flarum/common/components/Modal';
 import Button from 'flarum/common/components/Button';
-import StoreGoodsDetailModal from "./StoreGoodsDetailModal";
+import StoreGoodsDetailModal from './StoreGoodsDetailModal';
 
 export default class AddStoreGoods extends Modal {
-  private goodsList: any = []
-  private moreResults: boolean = false
-  private search: string = ''
+  private goodsList: any = [];
+  private moreResults: boolean = false;
+  private search: string = '';
 
   oninit(vnode) {
     super.oninit(vnode);
 
-    this.loadResults()
+    this.loadResults();
   }
 
   title() {
@@ -19,7 +19,7 @@ export default class AddStoreGoods extends Modal {
   }
 
   className(): string {
-    return "Modal--large";
+    return 'Modal--large';
   }
 
   filteredGoodsList() {
@@ -52,68 +52,71 @@ export default class AddStoreGoods extends Modal {
         </div>
 
         <div className="StorePluginGridScroll">
-        <div className="StorePluginGrid">
-          {goodsList.map((item: object, index: number) => (
-            <div className="StorePluginCard">
-              <div className="StorePluginCard-title">
-                {item.attributes.name}
+          <div className="StorePluginGrid">
+            {goodsList.map((item: object, index: number) => (
+              <div className="StorePluginCard">
+                <div className="StorePluginCard-title">{item.attributes.name}</div>
+                <div className="StorePluginCard-icon">
+                  {item.attributes.icon ? (
+                    <img src={item.attributes.icon} alt="" />
+                  ) : item.attributes.extIcon && (item.attributes.extIcon.name || item.attributes.extIcon.backgroundImage) ? (
+                    <span
+                      className="StorePluginCard-extIcon"
+                      style={{
+                        backgroundColor: item.attributes.extIcon.backgroundColor,
+                        color: item.attributes.extIcon.color,
+                        backgroundImage: item.attributes.extIcon.backgroundImage,
+                      }}
+                    >
+                      {item.attributes.extIcon.name ? <i className={item.attributes.extIcon.name} /> : ''}
+                    </span>
+                  ) : (
+                    <i className="fas fa-puzzle-piece" />
+                  )}
+                </div>
+                <div className="StorePluginCard-tags">
+                  <span className="StoreCodeChip">{item.attributes.code}</span>
+                  {(item.attributes.itemTypes || []).map((t) => (
+                    <span className="StorePluginRow-tag">{app.translator.trans(t.name || t.key)}</span>
+                  ))}
+                </div>
+                <div className="StorePluginCard-footer">
+                  <Button
+                    className="Button Button--primary"
+                    onclick={() => {
+                      app.modal.show(StoreGoodsDetailModal, {
+                        code: item.attributes.code,
+                        title: item.attributes.name,
+                      });
+                    }}
+                  >
+                    {app.translator.trans('mattoid-store.admin.settings.add-store-goods')}
+                  </Button>
+                </div>
               </div>
-              <div className="StorePluginCard-icon">
-                {item.attributes.icon
-                  ? <img src={item.attributes.icon} alt=""/>
-                  : item.attributes.extIcon && (item.attributes.extIcon.name || item.attributes.extIcon.backgroundImage)
-                    ? <span className="StorePluginCard-extIcon"
-                            style={{
-                              backgroundColor: item.attributes.extIcon.backgroundColor,
-                              color: item.attributes.extIcon.color,
-                              backgroundImage: item.attributes.extIcon.backgroundImage
-                            }}>
-                        {item.attributes.extIcon.name ? <i className={item.attributes.extIcon.name}/> : ''}
-                      </span>
-                    : <i className="fas fa-puzzle-piece"/>}
-              </div>
-              <div className="StorePluginCard-tags">
-                <span className="StoreCodeChip">{item.attributes.code}</span>
-                {(item.attributes.itemTypes || []).map((t) => (
-                  <span className="StorePluginRow-tag">{app.translator.trans(t.name || t.key)}</span>
-                ))}
-              </div>
-              <div className="StorePluginCard-footer">
-                <Button
-                  className="Button Button--primary"
-                  onclick={() => {
-                    app.modal.show(StoreGoodsDetailModal, {
-                      code: item.attributes.code,
-                      title: item.attributes.name
-                    });
-                  }}
-                >
-                  {app.translator.trans('mattoid-store.admin.settings.add-store-goods')}
-                </Button>
+            ))}
+          </div>
+
+          {!this.loading && this.goodsList.length > 0 && goodsList.length === 0 && (
+            <div>
+              <div style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">
+                {app.translator.trans('mattoid-store.lib.list-empty')}
               </div>
             </div>
-          ))}
-        </div>
-
-        {!this.loading && this.goodsList.length > 0 && goodsList.length === 0 && (
-          <div>
-            <div
-              style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">{app.translator.trans("mattoid-store.lib.list-empty")}</div>
-          </div>
-        )}
+          )}
         </div>
 
         {!this.loading && this.goodsList.length === 0 && (
           <div>
-            <div
-              style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">{app.translator.trans("mattoid-store.lib.list-empty")}</div>
+            <div style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">
+              {app.translator.trans('mattoid-store.lib.list-empty')}
+            </div>
           </div>
         )}
 
         {!this.loading && this.hasMoreResults() && (
           <div style="text-align:center;padding:20px">
-            <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading}
-                    onclick={() => this.loadMore()}>
+            <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading} onclick={() => this.loadMore()}>
               {app.translator.trans('mattoid-store.lib.list-load-more')}
             </Button>
           </div>
@@ -122,17 +125,20 @@ export default class AddStoreGoods extends Modal {
         {this.loading && (
           <div class="DiscussionList">
             <div class="DiscussionList-loadMore">
-              <div aria-label="loading…" role="status" data-size="medium"
-                   class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium">
+              <div
+                aria-label="loading…"
+                role="status"
+                data-size="medium"
+                class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium"
+              >
                 <div aria-hidden="true" class="LoadingIndicator"></div>
               </div>
             </div>
           </div>
         )}
       </div>
-    )
+    );
   }
-
 
   hasMoreResults() {
     return this.moreResults;
@@ -154,12 +160,11 @@ export default class AddStoreGoods extends Modal {
 
   loadResults(offset = 0) {
     this.loading = true;
-    const filters = {
-    };
+    const filters = {};
 
     return app.store
-      .find("/store/goods", {
-        filter:filters,
+      .find('/store/goods', {
+        filter: filters,
         page: {
           offset,
         },
@@ -167,5 +172,4 @@ export default class AddStoreGoods extends Modal {
       .catch(() => {})
       .then(this.parseResults.bind(this));
   }
-
 }

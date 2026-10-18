@@ -2,13 +2,12 @@ import app from 'flarum/forum/app';
 
 import UserPage from 'flarum/forum/components/UserPage';
 import Button from 'flarum/common/components/Button';
-import BackpackItem from "../component/BackpackItem";
+import BackpackItem from '../component/BackpackItem';
 
 export default class BackpackPage extends UserPage {
-
-  private items: any = []
-  private loading: boolean = false
-  private moreResults: boolean = false
+  private items: any = [];
+  private loading: boolean = false;
+  private moreResults: boolean = false;
 
   oninit(vnode) {
     super.oninit(vnode);
@@ -24,15 +23,13 @@ export default class BackpackPage extends UserPage {
       <div className="Post-body">
         <h2 class="BadgeOverviewTitle">{app.translator.trans('mattoid-store.forum.backpack')}</h2>
         <div className="Store-Body Backpack-Body">
-          {
-            this.items.map((item) => {
-              return (
-                <div className="storeItemContainer backpackItemContainer" key={item.id}>
-                  {BackpackItem.component({item: item, onChanged: () => this.loadResults()})}
-                </div>
-              );
-            })
-          }
+          {this.items.map((item) => {
+            return (
+              <div className="storeItemContainer backpackItemContainer" key={item.id}>
+                {BackpackItem.component({ item: item, onChanged: () => this.loadResults() })}
+              </div>
+            );
+          })}
 
           {!this.loading && this.items.length === 0 && (
             <div>
@@ -53,8 +50,12 @@ export default class BackpackPage extends UserPage {
           {this.loading && (
             <div class="DiscussionList">
               <div class="DiscussionList-loadMore">
-                <div aria-label="loading…" role="status" data-size="medium"
-                     class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium">
+                <div
+                  aria-label="loading…"
+                  role="status"
+                  data-size="medium"
+                  class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium"
+                >
                   <div aria-hidden="true" class="LoadingIndicator"></div>
                 </div>
               </div>
@@ -75,7 +76,7 @@ export default class BackpackPage extends UserPage {
     }
     this.loading = true;
     return app.store
-      .find("/store/backpack/list", {
+      .find('/store/backpack/list', {
         page: {
           offset: reset ? 0 : this.items.length,
         },
