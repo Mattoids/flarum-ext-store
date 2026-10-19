@@ -4,6 +4,7 @@ import type Mithril from 'mithril';
 import Button from 'flarum/common/components/Button';
 import StoreModal from './StoreModal';
 import StoreGoodsDetailModal from './StoreGoodsDetailModal';
+import GiftGoodsModal from './GiftGoodsModal';
 
 interface StoreListItemAttrs extends ComponentAttrs {
   item: StoreApiResource;
@@ -104,6 +105,9 @@ export default class StoreListItem extends Component<StoreListItemAttrs> {
         <div className="StoreAdminItem-actions">
           <Button className="Button" onclick={() => app.modal.show(StoreGoodsDetailModal, { storeData: data })}>
             {app.translator.trans('mattoid-store.admin.settings.goods-edit')}
+          </Button>
+          <Button className="Button" onclick={() => app.modal.show(GiftGoodsModal, { storeData: data })}>
+            {app.translator.trans('mattoid-store.admin.settings.gift-goods')}
           </Button>
           <Button
             className={statusUp ? 'Button Button--danger' : 'Button StoreAdminItem-statusUp'}

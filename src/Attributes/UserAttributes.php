@@ -12,6 +12,7 @@ class UserAttributes
         $actor = $serializer->getActor();
 
         $attributes['canStoreView'] = $actor->can('mattoid-store.group-view');
+        $attributes['canStoreModerate'] = $actor->can('mattoid-store.group-moderate');
 
         return $attributes;
     }

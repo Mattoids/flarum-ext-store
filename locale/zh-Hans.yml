@@ -54,6 +54,20 @@ mattoid-store:
       goods-purchase-limit-period: 限购周期（0:终身限购）
       goods-purchase-limit-period-unit: 周期单位
       days: 天
+      gift-goods: 赠送
+      gift-goods-title: 赠送商品：{title}
+      gift-target: 赠送对象
+      gift-all-users: 全体用户
+      gift-select-users: 选择用户
+      gift-search-user-placeholder: 按用户名搜索
+      gift-all-users-warning: 警告：将向全部用户赠送该商品，操作不可逆，请谨慎执行。
+      gift-all-users-confirm: 确定要向全体用户赠送该商品吗？该操作不可逆。
+      gift-amount: 每人赠送数量
+      gift-amount-invalid: 数量无效（1-99）
+      gift-result-success: 赠送成功：{users} 个用户，共 {count} 件。
+      gift-result-failed-stock: 库存不足，跳过 {count} 个用户。
+      gift-result-failed-owned: 对方已拥有该商品，跳过 {count} 个用户。
+      gift-result-failed-other: 其他错误，跳过 {count} 个用户。
 
     error:
       invalid-product: 无效商品
@@ -62,6 +76,15 @@ mattoid-store:
 
   forum:
     tital: 商店
+    gift-goods: 赠送商品
+    gift-goods-title: 赠送商品给 {username}
+    gift-target-user: 目标用户
+    gift-select-goods: 选择商品
+    gift-select-goods-placeholder: 请选择要赠送的商品
+    gift-amount: 赠送数量
+    gift-amount-invalid: 数量无效（1-99）
+    gift-result-success: 赠送成功，共 {count} 件。
+    gift-result-failed-owned: 对方已拥有该商品，赠送未完成。
     button: 购买
     no-permission-buy: 无购买权限
     backpack: 背包
@@ -86,6 +109,7 @@ mattoid-store:
       store-goods-non-existent: 商品不存在或已下架
       validate-fail: 购买物品失败
       cannot-purchase-repeatedly: 有效期内不允许重复购买
+      gift-already-owned: 对方已拥有「{title}」，该商品不允许重复持有
       buy-goods-fail: 购买【{title}】失败
       file-exist: 文件已存在
       automatic-renewal: 未开启自动续费

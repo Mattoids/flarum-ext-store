@@ -60,7 +60,8 @@ class BackpackUseController extends AbstractCreateController
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.cart-use-fail')]);
         }
 
-        $store = StoreModel::query()->where('id', $cart->store_id)->first();
+        // 不限制商品上下架状态：已持有（含赠送）的道具即便商品下架/软删也应可正常使用
+        $store = StoreModel::withTrashed()->where('id', $cart->store_id)->first();
         if (!$store) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.store-goods-non-existent')]);
         }

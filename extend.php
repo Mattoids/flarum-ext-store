@@ -21,6 +21,7 @@ use Mattoid\Store\Controller\BackpackUseController;
 use Mattoid\Store\Controller\BuyGoodsController;
 use Mattoid\Store\Controller\DeleteStoreController;
 use Mattoid\Store\Controller\FilterOptionsController;
+use Mattoid\Store\Controller\GiftGoodsController;
 use Mattoid\Store\Controller\ListCartController;
 use Mattoid\Store\Controller\ListGoodsController;
 use Mattoid\Store\Controller\ListIconController;
@@ -63,6 +64,7 @@ return [
         ->delete('/store/goods', 'store.goods.delete', DeleteStoreController::class)
         ->post('/store/upload/icon', 'store.upload.icon', StoreUpdateIconController::class)
         ->post('/store/buy/goods', 'store.buy.goods', BuyGoodsController::class)
+        ->post('/store/gift/goods', 'store.gift.goods', GiftGoodsController::class)
         ->post('/store/goods', 'store.goods.post', PostStoreController::class)
         ->get('/store/filter/options', 'store.filter.options', FilterOptionsController::class)
         ->get('/store/backpack/list', 'store.backpack.list', BackpackListController::class)

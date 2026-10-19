@@ -9,9 +9,27 @@ import MyCartPage from './components/pages/MyCartPage';
 import BackpackPage from './components/pages/BackpackPage';
 import initStoreRegistry from './storeRegistry';
 import ItemList from 'flarum/common/utils/ItemList';
+import UserControls from 'flarum/forum/utils/UserControls';
+import Button from 'flarum/common/components/Button';
+import ForumGiftGoodsModal from './components/modal/ForumGiftGoodsModal';
 
 app.initializers.add('mattoid/store', () => {
   initStoreRegistry();
+
+  // 用户主页「操作」菜单：有商店管理权限的用户可向该用户赠送商品
+  extend(UserControls, 'moderationControls', function (items, user) {
+    if (!app.session.user || !app.session.user.attribute('canStoreModerate')) {
+      return;
+    }
+
+    items.add(
+      'mattoid-store-gift-goods',
+      m(Button, {
+        icon: 'fas fa-gift',
+        onclick: () => app.modal.show(ForumGiftGoodsModal, {user})
+      }, app.translator.trans('mattoid-store.forum.gift-goods'))
+    );
+  });
 
   app.routes.store = {
     path: '/store',
