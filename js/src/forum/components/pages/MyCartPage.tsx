@@ -1,20 +1,21 @@
 import app from 'flarum/forum/app';
+import type Mithril from 'mithril';
 
 import UserPage from 'flarum/forum/components/UserPage';
-import CartItem from "../component/CartItem";
-import Button from 'flarum/components/Button';
-import Select from "flarum/common/components/Select";
-import Stream from "flarum/common/utils/Stream";
+import CartItem from '../component/CartItem';
+import Button from 'flarum/common/components/Button';
+import Select from 'flarum/common/components/Select';
+import Stream from 'flarum/common/utils/Stream';
 
 export default class MyCartPage extends UserPage {
+  private type: Stream<string> = Stream('');
+  private status: Stream<string> = Stream('1');
+  private autoDeduction: Stream<string> = Stream('-1');
+  private cartList: StoreApiResource[] = [];
+  private moreResults: boolean = false;
+  private loading: boolean = false;
 
-  private type: number = Stream("");
-  private status: number = Stream("1");
-  private autoDeduction: number = Stream("-1");
-  private cartList: any = []
-  private moreResults: boolean = false
-
-  oninit(vnode) {
+  oninit(vnode: Mithril.Vnode<any, this>) {
     super.oninit(vnode);
 
     this.loadUser(m.route.param('username'));
@@ -22,7 +23,7 @@ export default class MyCartPage extends UserPage {
     this.loadResults();
   }
 
-  content() {
+  content(): Mithril.Children {
     return (
       <div className="Post-body">
         <h2 class="BadgeOverviewTitle">{app.translator.trans('mattoid-store.forum.cart')}</h2>
@@ -39,10 +40,10 @@ export default class MyCartPage extends UserPage {
                 '2': app.translator.trans('mattoid-store.lib.item-cart-status-2'),
                 '9': app.translator.trans('mattoid-store.lib.item-cart-status-9'),
               }}
-              onchange={(e) => {
-                this.status(e)
-                this.cartList = []
-                this.loadResults()
+              onchange={(e: string) => {
+                this.status(e);
+                this.cartList = [];
+                this.loadResults();
               }}
             />
           </div>
@@ -53,13 +54,13 @@ export default class MyCartPage extends UserPage {
               disabled={this.loading}
               options={{
                 '': app.translator.trans('mattoid-store.lib.item-cart-type-all'),
-                'permanent': app.translator.trans('mattoid-store.lib.item-cart-type-permanent'),
-                'limit': app.translator.trans('mattoid-store.lib.item-cart-type-limit'),
+                permanent: app.translator.trans('mattoid-store.lib.item-cart-type-permanent'),
+                limit: app.translator.trans('mattoid-store.lib.item-cart-type-limit'),
               }}
-              onchange={(e) => {
-                this.type(e)
-                this.cartList = []
-                this.loadResults()
+              onchange={(e: string) => {
+                this.type(e);
+                this.cartList = [];
+                this.loadResults();
               }}
             />
           </div>
@@ -73,24 +74,18 @@ export default class MyCartPage extends UserPage {
                 '0': app.translator.trans('mattoid-store.lib.item-cart-auto-deduction-0'),
                 '1': app.translator.trans('mattoid-store.lib.item-cart-auto-deduction-1'),
               }}
-              onchange={(e) => {
-                this.autoDeduction(e)
-                this.cartList = []
-                this.loadResults()
+              onchange={(e: string) => {
+                this.autoDeduction(e);
+                this.cartList = [];
+                this.loadResults();
               }}
             />
           </div>
         </div>
         <div>
-          {
-            this.cartList.map((item) => {
-              return (
-                <div className="">
-                  {CartItem.component({item})}
-                </div>
-              );
-            })
-          }
+          {this.cartList.map((item: StoreApiResource) => {
+            return <div className="">{CartItem.component({ item })}</div>;
+          })}
 
           {!this.loading && this.cartList.length === 0 && (
             <div>
@@ -102,8 +97,7 @@ export default class MyCartPage extends UserPage {
 
           {!this.loading && this.hasMoreResults() && (
             <div style="text-align:center;padding:20px">
-              <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading}
-                      onclick={() => this.loadMore()}>
+              <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading} onclick={() => this.loadMore()}>
                 {app.translator.trans('mattoid-store.lib.list-load-more')}
               </Button>
             </div>
@@ -112,8 +106,12 @@ export default class MyCartPage extends UserPage {
           {this.loading && (
             <div class="DiscussionList">
               <div class="DiscussionList-loadMore">
-                <div aria-label="loading…" role="status" data-size="medium"
-                     class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium">
+                <div
+                  aria-label="loading…"
+                  role="status"
+                  data-size="medium"
+                  class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium"
+                >
                   <div aria-hidden="true" class="LoadingIndicator"></div>
                 </div>
               </div>
@@ -133,9 +131,9 @@ export default class MyCartPage extends UserPage {
     this.loadResults(this.cartList.length);
   }
 
-  parseResults(results) {
+  parseResults(results: any) {
     this.moreResults = !!results.payload.links && !!results.payload.links.next;
-    [].push.apply(this.cartList, results.payload.data);
+    this.cartList.push(...results.payload.data);
     this.loading = false;
     m.redraw();
 
@@ -145,19 +143,18 @@ export default class MyCartPage extends UserPage {
   loadResults(offset = 0) {
     this.loading = true;
     const filters = {
-      'type': this.type(),
-      'status': this.status(),
-      'autoDeduction': this.autoDeduction()
+      type: this.type(),
+      status: this.status(),
+      autoDeduction: this.autoDeduction(),
     };
     return app.store
-      .find("/store/cart/list", {
+      .find('/store/cart/list', {
         filter: filters,
         page: {
           offset,
         },
       })
-      .catch(() => {
-      })
+      .catch(() => {})
       .then(this.parseResults.bind(this));
   }
 }

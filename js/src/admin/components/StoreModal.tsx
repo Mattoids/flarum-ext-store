@@ -1,23 +1,32 @@
 import app from 'flarum/admin/app';
-import Modal from 'flarum/components/Modal';
-import Button from 'flarum/components/Button';
+import Modal, { IInternalModalAttrs } from 'flarum/common/components/Modal';
+import type Mithril from 'mithril';
+import Button from 'flarum/common/components/Button';
 
-export default class StoreModal extends Modal {
-  oninit(vnode) {
+export interface IStoreModalAttrs extends IInternalModalAttrs {
+  title: string;
+  storeData: StoreItemData;
+}
+
+export default class StoreModal extends Modal<IStoreModalAttrs> {
+  private type: string = '';
+  private storeData: StoreItemData = {} as StoreItemData;
+
+  oninit(vnode: Mithril.Vnode<IStoreModalAttrs, this>) {
     super.oninit(vnode);
     this.type = this.attrs.title;
     this.storeData = this.attrs.storeData;
   }
 
-  className() {
+  className(): string {
     return 'Modal--small StoreConfirmModal';
   }
 
-  title() {
+  title(): Mithril.Children {
     return app.translator.trans('mattoid-store.admin.settings.goods-item-' + this.type);
   }
 
-  content() {
+  content(): Mithril.Children {
     const isDelete = this.type === 'delete';
     const icon = this.storeData.icon || this.storeData.pluginIcon;
     const extIcon = this.storeData.pluginExtIcon;
@@ -29,28 +38,36 @@ export default class StoreModal extends Modal {
       <div className="Modal-body">
         <div className="StoreConfirmBody">
           <div className={'StoreConfirmIcon' + (isDelete ? ' StoreConfirmIcon--danger' : '')}>
-            {icon
-              ? (isClassIcon
-                ? <span className={'StoreIconClassPreview ' + icon}>{app.translator.trans('mattoid-store-decoration.lib.item-property-style-text-effect')}</span>
-                : isVideo
-                  ? <video autoplay loop muted playsinline><source src={icon} type="video/webm"/></video>
-                  : <img src={icon}/>)
-              : extIcon && (extIcon.name || extIcon.backgroundImage)
-                ? <span className="StoreAdminItem-extIcon"
-                        style={{
-                          backgroundColor: extIcon.backgroundColor,
-                          color: extIcon.color,
-                          backgroundImage: extIcon.backgroundImage
-                        }}>
-                    {extIcon.name ? <i className={extIcon.name}/> : ''}
-                  </span>
-                : <i className={'fas ' + (isDelete ? 'fa-trash-alt' : 'fa-exchange-alt')}/>}
+            {icon ? (
+              isClassIcon ? (
+                <span className={'StoreIconClassPreview ' + icon}>
+                  {app.translator.trans('mattoid-store-decoration.lib.item-property-style-text-effect')}
+                </span>
+              ) : isVideo ? (
+                <video autoplay loop muted playsinline>
+                  <source src={icon} type="video/webm" />
+                </video>
+              ) : (
+                <img src={icon} />
+              )
+            ) : extIcon && (extIcon.name || extIcon.backgroundImage) ? (
+              <span
+                className="StoreAdminItem-extIcon"
+                style={{
+                  backgroundColor: extIcon.backgroundColor,
+                  color: extIcon.color,
+                  backgroundImage: extIcon.backgroundImage,
+                }}
+              >
+                {extIcon.name ? <i className={extIcon.name} /> : ''}
+              </span>
+            ) : (
+              <i className={'fas ' + (isDelete ? 'fa-trash-alt' : 'fa-exchange-alt')} />
+            )}
           </div>
           <div className="StoreConfirmText">
             <div className="StoreConfirmTitle">{this.storeData.title}</div>
-            <div className="StoreConfirmDesc">
-              {app.translator.trans('mattoid-store.admin.settings.goods-item-' + this.type)}
-            </div>
+            <div className="StoreConfirmDesc">{app.translator.trans('mattoid-store.admin.settings.goods-item-' + this.type)}</div>
           </div>
         </div>
         <div className="StoreConfirmActions">
@@ -68,7 +85,7 @@ export default class StoreModal extends Modal {
               loading: this.loading,
               onclick: () => {
                 this.hide();
-              }
+              },
             },
             app.translator.trans('mattoid-store.lib.cancel')
           )}
@@ -77,25 +94,28 @@ export default class StoreModal extends Modal {
     );
   }
 
-  onsubmit(e) {
+  onsubmit(e: Event) {
     e.preventDefault();
 
     this.loading = true;
 
     const status = this.storeData.status;
-    this.storeData.status = Number(!this.storeData.status)
+    this.storeData.status = this.storeData.status ? 0 : 1;
 
     const method = this.type === 'delete' ? 'DELETE' : 'PUT';
-    app.request({
-      method: method,
-      url: app.forum.attribute('apiUrl') + '/store/goods',
-      body: this.storeData
-    }).then(
-      () => location.reload(),
-      (error) => {
-        this.loading = false;
-        this.storeData.status = status;
-        this.onerror(error);
-      });
+    app
+      .request({
+        method: method,
+        url: app.forum.attribute('apiUrl') + '/store/goods',
+        body: this.storeData,
+      })
+      .then(
+        () => location.reload(),
+        (error: any) => {
+          this.loading = false;
+          this.storeData.status = status;
+          this.onerror(error);
+        }
+      );
   }
 }
