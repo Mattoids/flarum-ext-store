@@ -40,9 +40,7 @@ export default class StoreModal extends Modal<IStoreModalAttrs> {
           <div className={'StoreConfirmIcon' + (isDelete ? ' StoreConfirmIcon--danger' : '')}>
             {icon ? (
               isClassIcon ? (
-                <span className={'StoreIconClassPreview ' + icon}>
-                  {app.translator.trans('mattoid-store-decoration.lib.item-property-style-text-effect')}
-                </span>
+                <span className={'StoreIconClassPreview ' + icon}>{app.translator.trans('mattoid-store.lib.class-icon-preview')}</span>
               ) : isVideo ? (
                 <video autoplay loop muted playsinline>
                   <source src={icon} type="video/webm" />

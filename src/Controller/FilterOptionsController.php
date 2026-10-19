@@ -175,20 +175,7 @@ class FilterOptionsController extends AbstractShowController
     private function applyPriorFilters($query, $plugins, $group, $code, $subtype, $type = null)
     {
         if ($group && $group != '-1') {
-            $inherited = [];
-            foreach ($plugins as $c => $goods) {
-                if (($goods->group ?: 'default') === $group) {
-                    $inherited[] = $c;
-                }
-            }
-            $query->where(function ($q) use ($group, $inherited) {
-                $q->where('group', $group);
-                if (count($inherited)) {
-                    $q->orWhere(function ($qq) use ($inherited) {
-                        $qq->whereNull('group')->whereIn('code', $inherited);
-                    });
-                }
-            });
+            StoreExtend::filterByGroup($query, $group);
         }
         if ($code && $code != '-1') {
             $query->where('code', $code);

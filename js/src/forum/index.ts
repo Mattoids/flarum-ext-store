@@ -24,10 +24,14 @@ app.initializers.add('mattoid/store', () => {
 
     items.add(
       'mattoid-store-gift-goods',
-      m(Button, {
-        icon: 'fas fa-gift',
-        onclick: () => app.modal.show(ForumGiftGoodsModal, {user})
-      }, app.translator.trans('mattoid-store.forum.gift-goods'))
+      m(
+        Button,
+        {
+          icon: 'fas fa-gift',
+          onclick: () => app.modal.show(ForumGiftGoodsModal, { user }),
+        },
+        app.translator.trans('mattoid-store.forum.gift-goods')
+      )
     );
   });
 

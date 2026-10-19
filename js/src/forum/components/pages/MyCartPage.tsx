@@ -6,6 +6,7 @@ import CartItem from '../component/CartItem';
 import Button from 'flarum/common/components/Button';
 import Select from 'flarum/common/components/Select';
 import Stream from 'flarum/common/utils/Stream';
+import LoadingBlock from '../component/LoadingBlock';
 
 export default class MyCartPage extends UserPage {
   private type: Stream<string> = Stream('');
@@ -38,6 +39,7 @@ export default class MyCartPage extends UserPage {
                 '0': app.translator.trans('mattoid-store.lib.item-cart-status-0'),
                 '1': app.translator.trans('mattoid-store.lib.item-cart-status-1'),
                 '2': app.translator.trans('mattoid-store.lib.item-cart-status-2'),
+                '3': app.translator.trans('mattoid-store.lib.item-cart-status-3'),
                 '9': app.translator.trans('mattoid-store.lib.item-cart-status-9'),
               }}
               onchange={(e: string) => {
@@ -84,7 +86,7 @@ export default class MyCartPage extends UserPage {
         </div>
         <div>
           {this.cartList.map((item: StoreApiResource) => {
-            return <div className="">{CartItem.component({ item })}</div>;
+            return <div>{CartItem.component({ item })}</div>;
           })}
 
           {!this.loading && this.cartList.length === 0 && (
@@ -103,20 +105,7 @@ export default class MyCartPage extends UserPage {
             </div>
           )}
 
-          {this.loading && (
-            <div class="DiscussionList">
-              <div class="DiscussionList-loadMore">
-                <div
-                  aria-label="loading…"
-                  role="status"
-                  data-size="medium"
-                  class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium"
-                >
-                  <div aria-hidden="true" class="LoadingIndicator"></div>
-                </div>
-              </div>
-            </div>
-          )}
+          {this.loading && <LoadingBlock />}
         </div>
       </div>
     );
@@ -154,7 +143,10 @@ export default class MyCartPage extends UserPage {
           offset,
         },
       })
-      .catch(() => {})
-      .then(this.parseResults.bind(this));
+      .then(this.parseResults.bind(this))
+      .catch(() => {
+        this.loading = false;
+        m.redraw();
+      });
   }
 }

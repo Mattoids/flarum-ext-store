@@ -3,18 +3,9 @@
 namespace Mattoid\Store\Serializer;
 
 use Flarum\Api\Serializer\AbstractSerializer;
-use Flarum\Locale\Translator;
 
 class CartSerializer extends AbstractSerializer
 {
-
-    protected $translator;
-
-    public function __construct(Translator $translator)
-    {
-        $this->translator = $translator;
-    }
-
     protected function getDefaultAttributes($data) {
         return [
             'id' => $data->id,
@@ -30,7 +21,6 @@ class CartSerializer extends AbstractSerializer
             'updatedAt' => $data->updated_at,
             'renewedAt' => $data->renewed_at,
             'autoDeduction' => $data->auto_deduction,
-            'enableType' => $data->enableType,
             'enable' => $data->enable
         ];
     }

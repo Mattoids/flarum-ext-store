@@ -3,7 +3,6 @@
 namespace Mattoid\Store\Listeners;
 
 use Carbon\Carbon;
-use Flarum\Locale\Translator;
 use Illuminate\Contracts\Events\Dispatcher;
 use Mattoid\Store\Event\StoreCartAddEvent;
 use Mattoid\Store\Event\StoreStockSubEvent;
@@ -15,12 +14,10 @@ use Mattoid\Store\Model\StoreCartModel;
 class StoreCartAddListeners
 {
     private $events;
-    private $translator;
 
-    public function __construct(Dispatcher $events, Translator $translator)
+    public function __construct(Dispatcher $events)
     {
         $this->events = $events;
-        $this->translator = $translator;
     }
 
     public function handle(StoreCartAddEvent $event) {
@@ -48,6 +45,9 @@ class StoreCartAddListeners
         $this->events->dispatch(new StoreStockSubEvent($store));
 
         $cart->save();
+
+        // 通过事件对象回传购物车，调用方不再依赖 dispatch 返回值（第三方监听器返回值会污染返回值数组）
+        $event->cart = $cart;
 
         return $cart;
     }

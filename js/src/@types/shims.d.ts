@@ -69,7 +69,6 @@ declare global {
     orphaned?: boolean;
     payAmt?: number;
     enable?: number | boolean;
-    enableType?: number;
     source?: string;
     itemCount?: number;
     itemStatus?: number | boolean;

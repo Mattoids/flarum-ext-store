@@ -4,6 +4,7 @@ import type Mithril from 'mithril';
 import UserPage from 'flarum/forum/components/UserPage';
 import Button from 'flarum/common/components/Button';
 import BackpackItem from '../component/BackpackItem';
+import LoadingBlock from '../component/LoadingBlock';
 
 export default class BackpackPage extends UserPage {
   private items: StoreApiResource[] = [];
@@ -48,20 +49,7 @@ export default class BackpackPage extends UserPage {
             </div>
           )}
 
-          {this.loading && (
-            <div class="DiscussionList">
-              <div class="DiscussionList-loadMore">
-                <div
-                  aria-label="loading…"
-                  role="status"
-                  data-size="medium"
-                  class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium"
-                >
-                  <div aria-hidden="true" class="LoadingIndicator"></div>
-                </div>
-              </div>
-            </div>
-          )}
+          {this.loading && <LoadingBlock />}
         </div>
       </div>
     );

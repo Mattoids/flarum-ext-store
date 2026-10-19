@@ -31,6 +31,7 @@ mattoid-store:
       goods-item-status-0: 确定要上架该物品吗？
       goods-item-status-1: 确定要下架该物品吗？
       show-icon-button: 图库
+      goods-icon-back: 返回
       goods-icon-effect-preview: 样式预览效果
       goods-auto-deduction: 自动扣费
       goods-usable: 进背包
@@ -126,6 +127,7 @@ mattoid-store:
       cart-use-fail: 商品使用失败
 
   lib:
+    class-icon-preview: 样式预览
     item-status-all: 全部商品状态
     item-status-up: 上架
     item-status-down: 下架

@@ -206,8 +206,9 @@ class GiftGoodsController implements RequestHandlerInterface
     private function giftOnce(StoreModel $store, User $user)
     {
         // 加入购物车 购物车会自动扣除库存（库存不足时监听器抛异常）
-        $carts = $this->events->dispatch(new StoreCartAddEvent($user, $store, 0));
-        $cart = array_shift($carts);
+        $cartEvent = new StoreCartAddEvent($user, $store, 0);
+        $this->events->dispatch($cartEvent);
+        $cart = $cartEvent->cart;
 
         // 赠送：标记持有中（与购买流程一致，交由购物车编辑监听器落库）
         $cart->status = 1;

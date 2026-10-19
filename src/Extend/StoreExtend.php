@@ -14,14 +14,23 @@ use Mattoid\Store\Model\StoreModel;
  */
 class StoreExtend implements ExtenderInterface, LifecycleInterface
 {
+    /** 钩子类型常量（内部注册表 key） */
+    const TYPE_GOODS = 'goods';
+    const TYPE_VALIDATE = 'validate';
+    const TYPE_AFTER = 'after';
+    const TYPE_INVALID = 'invalid';
+    const TYPE_ENABLE = 'enable';
+    const TYPE_USE = 'use';
 
     private $key = '';
-    private static $goodList = [];
-    private static $afterList = [];
-    private static $validateList = [];
-    private static $invalidList = [];
-    private static $enableList = [];
-    private static $useList = [];
+
+    /** @var array [钩子类型 => [code => 类名]] */
+    private static $registry = [];
+
+    /** @var array [钩子类型 => [code => 实例]] 实例缓存，避免每次 get 都 new */
+    private static $instances = [];
+
+    /** @var callable[] 背包条目提供者 */
     private static $backpackProviderList = [];
 
     public function __construct(string $key = '')
@@ -38,8 +47,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
      */
     public function addStoreGoods($callback): self
     {
-        StoreExtend::$goodList[$this->key] = $callback;
-        return $this;
+        return $this->add(self::TYPE_GOODS, $callback);
     }
 
     /**
@@ -51,8 +59,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
      */
     public function addValidate($callback): self
     {
-        StoreExtend::$validateList[$this->key] = $callback;
-        return $this;
+        return $this->add(self::TYPE_VALIDATE, $callback);
     }
 
     /**
@@ -64,8 +71,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
      */
     public function addAfter($callback): self
     {
-        StoreExtend::$afterList[$this->key] = $callback;
-        return $this;
+        return $this->add(self::TYPE_AFTER, $callback);
     }
 
     /**
@@ -77,20 +83,18 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
      */
     public function addInvalid($callback): self
     {
-        StoreExtend::$invalidList[$this->key] = $callback;
-        return $this;
+        return $this->add(self::TYPE_INVALID, $callback);
     }
 
     /**
      * 注册商品使用功能
      *
-     * @param String $key
-     * @return mixed|null
+     * @param $callback
+     * @return $this
      */
     public function addEnable($callback): self
     {
-        StoreExtend::$enableList[$this->key] = $callback;
-        return $this;
+        return $this->add(self::TYPE_ENABLE, $callback);
     }
 
     /**
@@ -105,7 +109,13 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
      */
     public function addUse($callback): self
     {
-        StoreExtend::$useList[$this->key] = $callback;
+        return $this->add(self::TYPE_USE, $callback);
+    }
+
+    private function add(string $type, $callback): self
+    {
+        self::$registry[$type][$this->key] = $callback;
+        unset(self::$instances[$type][$this->key]);
         return $this;
     }
 
@@ -143,64 +153,78 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
     public static function getPlugins(): array
     {
         $plugins = [];
-        foreach (array_keys(self::$goodList) as $key) {
-            $plugins[$key] = self::getStoreGoods($key);
+        foreach (array_keys(self::$registry[self::TYPE_GOODS] ?? []) as $key) {
+            $plugins[$key] = self::get(self::TYPE_GOODS, $key);
         }
         return $plugins;
     }
 
     public static function getStoreGoods(String $key)
     {
-        if (array_key_exists($key, StoreExtend::$goodList)) {
-            $class = StoreExtend::$goodList[$key];
-            return new $class;
-        }
-        return null;
+        return self::get(self::TYPE_GOODS, $key);
     }
 
     public static function getValidate(String $key)
     {
-        if (array_key_exists($key, StoreExtend::$validateList)) {
-            $class = StoreExtend::$validateList[$key];
-            return new $class;
-        }
-        return null;
+        return self::get(self::TYPE_VALIDATE, $key);
     }
 
     public static function getAfter(String $key)
     {
-        if (array_key_exists($key, StoreExtend::$afterList)) {
-            $class = StoreExtend::$afterList[$key];
-            return new $class;
-        }
-        return null;
+        return self::get(self::TYPE_AFTER, $key);
     }
 
     public static function getInvalid(string $key)
     {
-        if (array_key_exists($key, StoreExtend::$invalidList)) {
-            $class = StoreExtend::$invalidList[$key];
-            return new $class;
-        }
-        return null;
+        return self::get(self::TYPE_INVALID, $key);
     }
 
     public static function getEnable(String $key)
     {
-        if (array_key_exists($key, StoreExtend::$enableList)) {
-            $class = StoreExtend::$enableList[$key];
-            return new $class;
-        }
-        return null;
+        return self::get(self::TYPE_ENABLE, $key);
     }
 
     public static function getUse(String $key)
     {
-        if (array_key_exists($key, StoreExtend::$useList)) {
-            $class = StoreExtend::$useList[$key];
-            return new $class;
+        return self::get(self::TYPE_USE, $key);
+    }
+
+    /**
+     * 统一取值入口：按类型从注册表取类名并缓存实例
+     */
+    private static function get(string $type, string $key)
+    {
+        if (!isset(self::$registry[$type][$key])) {
+            return null;
         }
-        return null;
+        if (!isset(self::$instances[$type][$key])) {
+            $class = self::$registry[$type][$key];
+            self::$instances[$type][$key] = new $class;
+        }
+        return self::$instances[$type][$key];
+    }
+
+    /**
+     * 分组过滤（商店列表 / 级联筛选共用）：
+     * store.group 直接匹配，或为 NULL 且其插件声明的分组等于目标分组（继承）
+     */
+    public static function filterByGroup($query, string $group): void
+    {
+        $inherited = [];
+        foreach (self::getPlugins() as $code => $goods) {
+            if (($goods->group ?: 'default') === $group) {
+                $inherited[] = $code;
+            }
+        }
+
+        $query->where(function ($q) use ($group, $inherited) {
+            $q->where('group', $group);
+            if (count($inherited)) {
+                $q->orWhere(function ($qq) use ($inherited) {
+                    $qq->whereNull('group')->whereIn('code', $inherited);
+                });
+            }
+        });
     }
 
     public function extend(Container $container, Extension $extension = null)
@@ -212,9 +236,9 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
      * 开启插件时触发
      * Trigger when opening plugin
      *
-     * 商品插件注册不再写入 store_goods 数据表，注册表（static $goodList）即唯一事实源。
+     * 商品插件注册不再写入 store_goods 数据表，注册表（registry）即唯一事实源。
      * Goods plugin registration no longer writes to the store_goods table;
-     * the runtime registry (static $goodList) is the single source of truth.
+     * the runtime registry is the single source of truth.
      *
      * @param Container $container
      * @param Extension $extension

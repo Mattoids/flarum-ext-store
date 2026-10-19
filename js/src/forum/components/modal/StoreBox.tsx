@@ -5,7 +5,6 @@ import Stream from 'flarum/common/utils/Stream';
 import Button from 'flarum/common/components/Button';
 import Switch from 'flarum/common/components/Switch';
 import Select from 'flarum/common/components/Select';
-import TextEditor from 'flarum/common/components/TextEditor';
 
 export interface IStoreModalAttrs extends IInternalModalAttrs {
   storeData: StoreItemData;
@@ -17,10 +16,6 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
   private params: Record<string, any> = {};
   private range: boolean = false;
   private errorText: any = '';
-
-  static initAttrs(attrs: IStoreModalAttrs) {
-    super.initAttrs(attrs);
-  }
 
   oninit(vnode: Mithril.Vnode<IStoreModalAttrs, this>) {
     super.oninit(vnode);

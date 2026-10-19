@@ -9,6 +9,7 @@ use Mattoid\Store\Model\StoreModel;
 
 /**
  * 减少库存
+ * 无限库存（-99 < 0）天然被 stock > 0 条件排除，条件 UPDATE 原子扣减，防并发超卖
  */
 class StoreStockSubListeners
 {
@@ -20,15 +21,20 @@ class StoreStockSubListeners
     }
 
     public function handle(StoreStockSubEvent $event) {
-        $store = StoreModel::query()->where('id', $event->store->id)->first();
-        if (!$store || $store->stock == StoreModel::STOCK_UNLIMITED) {
+        // 无限库存标记值不参与扣减（-99 < 0，会被下方 stock > 0 条件误伤，先短路）
+        if ($event->store->stock == StoreModel::STOCK_UNLIMITED) {
             return;
         }
 
-        // 原子扣减：仅在库存仍充足时扣减，防止并发超卖
-        $affected = StoreModel::query()->where('id', $store->id)->where('stock', '>', 0)->decrement('stock');
+        $affected = StoreModel::query()
+            ->where('id', $event->store->id)
+            ->where('stock', '>', 0)
+            ->decrement('stock');
+
         if (!$affected) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.insufficient-inventory')]);
         }
+
+        $event->store->stock = $event->store->stock !== null ? $event->store->stock - 1 : null;
     }
 }

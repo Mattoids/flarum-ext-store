@@ -130,8 +130,9 @@ class BuyGoodsController extends AbstractListController
         }
 
         // 加入购物车 购物车会自动扣除库存
-        $carts = $this->events->dispatch(new StoreCartAddEvent($actor, $store, $price));
-        $cart = array_shift($carts);
+        $cartEvent = new StoreCartAddEvent($actor, $store, $price);
+        $this->events->dispatch($cartEvent);
+        $cart = $cartEvent->cart;
 
         // 扣款交由资金管理器：优先 checkin-with-history 资金体系，未安装时回退原生 SQL
         $paid = $this->money->pay(

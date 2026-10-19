@@ -6,6 +6,7 @@ import AddStoreGoods from './AddStoreGoods';
 import Select from 'flarum/common/components/Select';
 import Stream from 'flarum/common/utils/Stream';
 import StoreListItem from './StoreListItem';
+import LoadingBlock from './LoadingBlock';
 
 export default class StoreListPage extends ExtensionPage {
   private storeList: StoreApiResource[] = [];
@@ -15,9 +16,6 @@ export default class StoreListPage extends ExtensionPage {
 
   oninit(vnode: Mithril.Vnode<any, this>) {
     super.oninit(vnode);
-
-    this.status = Stream('-1');
-    this.type = Stream('-1');
 
     this.loadResults();
   }
@@ -113,20 +111,7 @@ export default class StoreListPage extends ExtensionPage {
                 </div>
               )}
 
-              {this.loading && (
-                <div class="DiscussionList">
-                  <div class="DiscussionList-loadMore">
-                    <div
-                      aria-label="loading…"
-                      role="status"
-                      data-size="medium"
-                      class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium"
-                    >
-                      <div aria-hidden="true" class="LoadingIndicator"></div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {this.loading && <LoadingBlock />}
             </div>
           </div>
         </div>
@@ -166,7 +151,10 @@ export default class StoreListPage extends ExtensionPage {
           offset,
         },
       })
-      .catch(() => {})
-      .then(this.parseResults.bind(this));
+      .then(this.parseResults.bind(this))
+      .catch(() => {
+        this.loading = false;
+        m.redraw();
+      });
   }
 }

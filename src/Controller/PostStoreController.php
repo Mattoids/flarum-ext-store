@@ -8,7 +8,6 @@ use Flarum\Foundation\ValidationException;
 use Flarum\Http\RequestUtil;
 use Flarum\Locale\Translator;
 use Flarum\User\Exception\PermissionDeniedException;
-use Flarum\User\UserRepository;
 use Illuminate\Support\Arr;
 use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreModel;
@@ -30,7 +29,7 @@ class PostStoreController extends AbstractCreateController
      */
     public $serializer = StoreSerializer::class;
 
-    public function __construct(UserRepository $repository, Translator $translator)
+    public function __construct(Translator $translator)
     {
         $this->translator = $translator;
     }

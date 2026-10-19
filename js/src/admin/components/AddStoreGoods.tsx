@@ -4,6 +4,7 @@ import type Mithril from 'mithril';
 import Button from 'flarum/common/components/Button';
 import extractText from 'flarum/common/utils/extractText';
 import StoreGoodsDetailModal from './StoreGoodsDetailModal';
+import LoadingBlock from './LoadingBlock';
 
 export default class AddStoreGoods extends Modal {
   private goodsList: GoodsTypeResource[] = [];
@@ -124,20 +125,7 @@ export default class AddStoreGoods extends Modal {
           </div>
         )}
 
-        {this.loading && (
-          <div class="DiscussionList">
-            <div class="DiscussionList-loadMore">
-              <div
-                aria-label="loading…"
-                role="status"
-                data-size="medium"
-                class="LoadingIndicator-container LoadingIndicator-container--block LoadingIndicator-container--medium"
-              >
-                <div aria-hidden="true" class="LoadingIndicator"></div>
-              </div>
-            </div>
-          </div>
-        )}
+        {this.loading && <LoadingBlock />}
       </div>
     );
   }
@@ -171,7 +159,10 @@ export default class AddStoreGoods extends Modal {
           offset,
         },
       })
-      .catch(() => {})
-      .then(this.parseResults.bind(this));
+      .then(this.parseResults.bind(this))
+      .catch(() => {
+        this.loading = false;
+        m.redraw();
+      });
   }
 }

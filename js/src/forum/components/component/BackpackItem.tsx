@@ -42,7 +42,7 @@ export default class BackpackItem extends Component<BackpackItemAttrs> {
     return (
       <div className="BackpackItem">
         <div className="BackpackItem-titleRow">
-          <div className="itemTitle" title={item.title}>
+          <div className="itemTitle" title={item.title} onclick={() => this.showDetail(item)}>
             {item.title}
           </div>
           <span className="StoreItem-type BackpackItem-typeBadge">

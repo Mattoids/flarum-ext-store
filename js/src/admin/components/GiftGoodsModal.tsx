@@ -4,14 +4,14 @@ import Button from 'flarum/common/components/Button';
 import Stream from 'flarum/common/utils/Stream';
 
 export default class GiftGoodsModal extends Modal {
-  private storeData: any = {}
-  private allUsers: boolean = false
-  private amount: any = Stream('1')
-  private selectedUsers: any[] = []
-  private search: string = ''
-  private searchResults: any[] = []
-  private confirmed: boolean = false
-  private result: any = null
+  private storeData: any = {};
+  private allUsers: boolean = false;
+  private amount: any = Stream('1');
+  private selectedUsers: any[] = [];
+  private search: string = '';
+  private searchResults: any[] = [];
+  private confirmed: boolean = false;
+  private result: any = null;
 
   oninit(vnode) {
     super.oninit(vnode);
@@ -23,7 +23,7 @@ export default class GiftGoodsModal extends Modal {
   }
 
   title() {
-    return app.translator.trans('mattoid-store.admin.settings.gift-goods-title', {title: this.storeData.title});
+    return app.translator.trans('mattoid-store.admin.settings.gift-goods-title', { title: this.storeData.title });
   }
 
   content() {
@@ -33,14 +33,23 @@ export default class GiftGoodsModal extends Modal {
 
     return (
       <div className="Modal-body">
-        <form onsubmit={(e) => { e.preventDefault(); this.onsubmit(e); }}>
+        <form
+          onsubmit={(e) => {
+            e.preventDefault();
+            this.onsubmit(e);
+          }}
+        >
           <div className="Form-group">
             <label>{app.translator.trans('mattoid-store.admin.settings.gift-target')}</label>
             <div>
               <label className="checkbox">
-                <input type="checkbox" checked={this.allUsers} onchange={(e: InputEvent) => {
-                  this.allUsers = (e.target as HTMLInputElement).checked;
-                }}/>
+                <input
+                  type="checkbox"
+                  checked={this.allUsers}
+                  onchange={(e: InputEvent) => {
+                    this.allUsers = (e.target as HTMLInputElement).checked;
+                  }}
+                />
                 {app.translator.trans('mattoid-store.admin.settings.gift-all-users')}
               </label>
             </div>
@@ -54,10 +63,12 @@ export default class GiftGoodsModal extends Modal {
                   {this.selectedUsers.map((user, index) => (
                     <span className="StoreCodeChip" key={user.id()}>
                       {user.displayName() || user.username()}
-                      <i className="fas fa-times GiftGoodsModal-remove"
-                         onclick={() => {
-                           this.selectedUsers.splice(index, 1);
-                         }}/>
+                      <i
+                        className="fas fa-times GiftGoodsModal-remove"
+                        onclick={() => {
+                          this.selectedUsers.splice(index, 1);
+                        }}
+                      />
                     </span>
                   ))}
                 </div>
@@ -86,7 +97,7 @@ export default class GiftGoodsModal extends Modal {
 
           {this.allUsers && (
             <div className="Form-group GiftGoodsModal-warning">
-              <i className="fas fa-exclamation-triangle"/>
+              <i className="fas fa-exclamation-triangle" />
               {app.translator.trans('mattoid-store.admin.settings.gift-all-users-warning')}
             </div>
           )}
@@ -114,10 +125,7 @@ export default class GiftGoodsModal extends Modal {
             >
               {app.translator.trans('mattoid-store.lib.confirm')}
             </Button>
-            <Button
-              className="Button storeButton--gray"
-              onclick={() => this.hide()}
-            >
+            <Button className="Button storeButton--gray" onclick={() => this.hide()}>
               {app.translator.trans('mattoid-store.lib.cancel')}
             </Button>
           </div>
@@ -131,21 +139,21 @@ export default class GiftGoodsModal extends Modal {
     return (
       <div className="Modal-body">
         <div className="Form-group">
-          <p>{app.translator.trans('mattoid-store.admin.settings.gift-result-success', {
-            users: this.result.successUsers,
-            count: this.result.successCount
-          })}</p>
+          <p>
+            {app.translator.trans('mattoid-store.admin.settings.gift-result-success', {
+              users: this.result.successUsers,
+              count: this.result.successCount,
+            })}
+          </p>
           {(failed.insufficientStock > 0 || failed.other > 0) && (
             <div className="GiftGoodsModal-warning">
               {failed.insufficientStock > 0 && (
-                <p>{app.translator.trans('mattoid-store.admin.settings.gift-result-failed-stock', {count: failed.insufficientStock})}</p>
+                <p>{app.translator.trans('mattoid-store.admin.settings.gift-result-failed-stock', { count: failed.insufficientStock })}</p>
               )}
               {failed.alreadyOwned > 0 && (
-                <p>{app.translator.trans('mattoid-store.admin.settings.gift-result-failed-owned', {count: failed.alreadyOwned})}</p>
+                <p>{app.translator.trans('mattoid-store.admin.settings.gift-result-failed-owned', { count: failed.alreadyOwned })}</p>
               )}
-              {failed.other > 0 && (
-                <p>{app.translator.trans('mattoid-store.admin.settings.gift-result-failed-other', {count: failed.other})}</p>
-              )}
+              {failed.other > 0 && <p>{app.translator.trans('mattoid-store.admin.settings.gift-result-failed-other', { count: failed.other })}</p>}
             </div>
           )}
         </div>
@@ -164,7 +172,8 @@ export default class GiftGoodsModal extends Modal {
       this.searchResults = [];
       return;
     }
-    app.store.find('users', {filter: {q: keyword}, page: {limit: 10}})
+    app.store
+      .find('users', { filter: { q: keyword }, page: { limit: 10 } })
       .then((results) => {
         this.searchResults = results.filter((user) => {
           return !this.selectedUsers.some((selected) => selected.id() === user.id());
@@ -198,24 +207,27 @@ export default class GiftGoodsModal extends Modal {
 
     this.loading = true;
 
-    app.request({
-      method: 'POST',
-      url: app.forum.attribute('apiUrl') + '/store/gift/goods',
-      body: {
-        storeId: this.storeData.id,
-        userIds: this.selectedUsers.map((user) => user.id()),
-        allUsers: this.allUsers,
-        amount: amount
-      }
-    }).then(
-      (result) => {
-        this.loading = false;
-        this.result = result;
-        m.redraw();
-      },
-      (error) => {
-        this.loading = false;
-        this.onerror(error);
-      });
+    app
+      .request({
+        method: 'POST',
+        url: app.forum.attribute('apiUrl') + '/store/gift/goods',
+        body: {
+          storeId: this.storeData.id,
+          userIds: this.selectedUsers.map((user) => user.id()),
+          allUsers: this.allUsers,
+          amount: amount,
+        },
+      })
+      .then(
+        (result) => {
+          this.loading = false;
+          this.result = result;
+          m.redraw();
+        },
+        (error) => {
+          this.loading = false;
+          this.onerror(error);
+        }
+      );
   }
 }

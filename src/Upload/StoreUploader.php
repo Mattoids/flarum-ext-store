@@ -41,12 +41,4 @@ class StoreUploader{
 
         return md5($stream->getContents());
     }
-
-    public function remove(string $filename){
-        $fullFilename = $filename;
-
-        if ($this->uploadDir->exists($fullFilename)) {
-            $this->uploadDir->delete($fullFilename);
-        }
-    }
 }

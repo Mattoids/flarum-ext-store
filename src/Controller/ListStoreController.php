@@ -2,13 +2,10 @@
 
 namespace Mattoid\Store\Controller;
 
-use Carbon\Carbon;
 use Flarum\Api\Controller\AbstractListController;
 use Flarum\Http\RequestUtil;
 use Flarum\Http\UrlGenerator;
-use Flarum\Locale\Translator;
 use Flarum\User\Exception\PermissionDeniedException;
-use Flarum\User\UserRepository;
 use Illuminate\Support\Arr;
 use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreModel;
@@ -23,19 +20,15 @@ use Tobscure\JsonApi\Document;
 class ListStoreController extends AbstractListController
 {
     protected $url;
-    protected $translator;
-    protected $repository;
 
     /**
      * {@inheritdoc}
      */
     public $serializer = StoreSerializer::class;
 
-    public function __construct(UserRepository $repository, UrlGenerator $url, Translator $translator)
+    public function __construct(UrlGenerator $url)
     {
         $this->url = $url;
-        $this->translator = $translator;
-        $this->repository = $repository;
     }
 
     protected function data(ServerRequestInterface $request, Document $document) {
@@ -63,7 +56,7 @@ class ListStoreController extends AbstractListController
         }
         // 级联筛选：分组 / 商品插件 / 道具类型（插件自定义）/ 折扣
         if ($group && $group != '-1') {
-            $this->applyGroupFilter($query, $group);
+            StoreExtend::filterByGroup($query, $group);
         }
         if ($code && $code != '-1') {
             $query->where('code', $code);
@@ -96,27 +89,5 @@ class ListStoreController extends AbstractListController
         );
 
         return $list;
-    }
-
-    /**
-     * 分组过滤：store.group 直接匹配，或为 NULL 且其插件声明的分组等于目标分组（继承）
-     */
-    private function applyGroupFilter($query, $group)
-    {
-        $inherited = [];
-        foreach (StoreExtend::getPlugins() as $code => $goods) {
-            if (($goods->group ?: 'default') === $group) {
-                $inherited[] = $code;
-            }
-        }
-
-        $query->where(function ($q) use ($group, $inherited) {
-            $q->where('group', $group);
-            if (count($inherited)) {
-                $q->orWhere(function ($qq) use ($inherited) {
-                    $qq->whereNull('group')->whereIn('code', $inherited);
-                });
-            }
-        });
     }
 }

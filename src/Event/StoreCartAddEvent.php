@@ -3,6 +3,7 @@
 namespace Mattoid\Store\Event;
 
 use Flarum\User\User;
+use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Model\StoreModel;
 
 class StoreCartAddEvent
@@ -10,6 +11,9 @@ class StoreCartAddEvent
     public $user;
     public $store;
     public $price;
+
+    /** @var StoreCartModel|null 由 StoreCartAddListeners 创建后回写到事件上 */
+    public $cart;
 
     public function __construct(User $user, StoreModel $store, $price)
     {

@@ -5,11 +5,8 @@ namespace Mattoid\Store\Controller;
 use Flarum\Api\Controller\AbstractListController;
 use Flarum\Http\RequestUtil;
 use Flarum\Http\UrlGenerator;
-use Flarum\Locale\Translator;
 use Flarum\User\Exception\PermissionDeniedException;
-use Flarum\User\UserRepository;
 use Illuminate\Support\Arr;
-use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Serializer\CartSerializer;
 use Psr\Http\Message\ServerRequestInterface;
@@ -17,21 +14,16 @@ use Tobscure\JsonApi\Document;
 
 class ListCartController extends AbstractListController
 {
-
     protected $url;
-    protected $translator;
-    protected $repository;
 
     /**
      * {@inheritdoc}
      */
     public $serializer = CartSerializer::class;
 
-    public function __construct(UserRepository $repository, UrlGenerator $url, Translator $translator)
+    public function __construct(UrlGenerator $url)
     {
         $this->url = $url;
-        $this->translator = $translator;
-        $this->repository = $repository;
     }
 
     protected function data(ServerRequestInterface $request, Document $document) {
@@ -65,10 +57,6 @@ class ListCartController extends AbstractListController
             ->take($limit + 1)
             ->orderByDesc('created_at')
             ->get();
-
-        foreach ($list as $item) {
-            $item->enableType = StoreExtend::getEnable($item->code) ? 1 : 0;
-        }
 
         $results = $limit > 0 && $list->count() > $limit;
         if($results){

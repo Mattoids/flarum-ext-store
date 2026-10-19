@@ -109,30 +109,32 @@ class GoodsInvalidCommand extends AbstractCommand
             throw new RenewalLockException();
         }
 
-        // 续费不参与折扣、不处理库存，按商品当前价续费
-        $user = User::query()->where('id', $cart->user_id)->first();
-        if (!$user) {
-            throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.user-balance-low')]);
-        }
-        // 续费扣款交由资金管理器：优先 checkin-with-history 资金体系，未安装时回退原生 SQL
-        $paid = $this->money->pay(
-            $user,
-            $cart->price,
-            'AUTODEDUCTION',
-            'mattoid-store.forum.money-history.auto-deduction',
-            ['title' => $store->title],
-            $this->translator->trans('mattoid-store.forum.auto-deduction', ['title' => $store->title])
-        );
-        if (!$paid) {
-            throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.user-balance-low')]);
-        }
+        try {
+            // 续费不参与折扣、不处理库存，按商品当前价续费
+            $user = User::query()->where('id', $cart->user_id)->first();
+            if (!$user) {
+                throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.user-balance-low')]);
+            }
+            // 续费扣款交由资金管理器：优先 checkin-with-history 资金体系，未安装时回退原生 SQL
+            $paid = $this->money->pay(
+                $user,
+                $cart->price,
+                'AUTODEDUCTION',
+                'mattoid-store.forum.money-history.auto-deduction',
+                ['title' => $store->title],
+                $this->translator->trans('mattoid-store.forum.auto-deduction', ['title' => $store->title])
+            );
+            if (!$paid) {
+                throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.user-balance-low')]);
+            }
 
-        // 刷新过期时间与续费时间（保留原始购买时间 created_at）
-        $cart->pay_amt = $cart->price;
-        $cart->outtime = Carbon::now()->addDays($store->outtime);
-        $cart->renewed_at = Carbon::now();
-        $cart->save();
-
-        $this->cache->delete($key);
+            // 刷新过期时间与续费时间（保留原始购买时间 created_at）
+            $cart->pay_amt = $cart->price;
+            $cart->outtime = Carbon::now()->addDays($store->outtime);
+            $cart->renewed_at = Carbon::now();
+            $cart->save();
+        } finally {
+            $this->cache->delete($key);
+        }
     }
 }

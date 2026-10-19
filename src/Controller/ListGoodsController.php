@@ -5,7 +5,6 @@ namespace Mattoid\Store\Controller;
 use Flarum\Api\Controller\AbstractListController;
 use Flarum\Extension\ExtensionManager;
 use Flarum\Http\RequestUtil;
-use Flarum\Locale\Translator;
 use Flarum\User\Exception\PermissionDeniedException;
 use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreGoodsModel;
@@ -13,8 +12,6 @@ use Mattoid\Store\Serializer\GoodsSerializer;
 use Mattoid\Store\Utils\ExtensionIconUtil;
 use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Document;
-use Flarum\User\UserRepository;
-use Flarum\Http\UrlGenerator;
 
 /**
  * 获取可添加商品列表（管理端）
@@ -25,10 +22,6 @@ use Flarum\Http\UrlGenerator;
  */
 class ListGoodsController extends AbstractListController
 {
-
-    protected $url;
-    protected $translator;
-    protected $repository;
     protected $extensions;
 
     /**
@@ -36,11 +29,8 @@ class ListGoodsController extends AbstractListController
      */
     public $serializer = GoodsSerializer::class;
 
-    public function __construct(UserRepository $repository, UrlGenerator $url, Translator $translator, ExtensionManager $extensions)
+    public function __construct(ExtensionManager $extensions)
     {
-        $this->url = $url;
-        $this->translator = $translator;
-        $this->repository = $repository;
         $this->extensions = $extensions;
     }
 

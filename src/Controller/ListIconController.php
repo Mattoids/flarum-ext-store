@@ -9,9 +9,7 @@ use Mattoid\Store\Serializer\IconSerializer;
 use Psr\Http\Message\ServerRequestInterface;
 use Flarum\Http\RequestUtil;
 use Flarum\Http\UrlGenerator;
-use Flarum\Locale\Translator;
 use Tobscure\JsonApi\Document;
-use Flarum\User\UserRepository;
 
 /**
  * 获取商品图标列表（管理端使用）
@@ -19,21 +17,16 @@ use Flarum\User\UserRepository;
  */
 class ListIconController extends AbstractListController
 {
-
     protected $url;
-    protected $translator;
-    protected $repository;
 
     /**
      * {@inheritdoc}
      */
     public $serializer = IconSerializer::class;
 
-    public function __construct(UserRepository $repository, UrlGenerator $url, Translator $translator)
+    public function __construct(UrlGenerator $url)
     {
         $this->url = $url;
-        $this->translator = $translator;
-        $this->repository = $repository;
     }
 
     protected function data(ServerRequestInterface $request, Document $document) {

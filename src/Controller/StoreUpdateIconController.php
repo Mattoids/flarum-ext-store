@@ -4,8 +4,9 @@ namespace Mattoid\Store\Controller;
 
 use Flarum\Api\Controller\AbstractCreateController;
 use Flarum\Foundation\ValidationException;
+use Flarum\Http\RequestUtil;
 use Flarum\Locale\Translator;
-use Flarum\Settings\SettingsRepositoryInterface;
+use Flarum\User\Exception\PermissionDeniedException;
 use Illuminate\Support\Arr;
 use Mattoid\Store\Model\StoreGoodsIconModel;
 use Mattoid\Store\Serializer\DataSerializer;
@@ -22,19 +23,22 @@ use Illuminate\Database\QueryException;
 class StoreUpdateIconController extends AbstractCreateController{
     public $serializer = DataSerializer::class;
     public $include = ['store'];
-    protected $settings;
     protected $uploader;
     protected $validator;
     protected $translator;
 
-    public function __construct(SettingsRepositoryInterface $settings, StoreUploader $uploader, StoreValidator $validator, Translator $translator){
+    public function __construct(StoreUploader $uploader, StoreValidator $validator, Translator $translator){
         $this->uploader = $uploader;
-        $this->settings = $settings;
         $this->validator = $validator;
         $this->translator = $translator;
     }
 
     protected function data(ServerRequestInterface $request, Document $document){
+        $actor = RequestUtil::getActor($request);
+        if (!$actor->can('mattoid-store.group-moderate')) {
+            throw new PermissionDeniedException();
+        }
+
         $result = [];
         $file = Arr::get($request->getUploadedFiles(), 'file');
 

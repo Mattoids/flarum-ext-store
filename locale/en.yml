@@ -35,6 +35,7 @@ mattoid-store:
       goods-item-status-0: Are you sure you want to list this item？
       goods-item-status-1: Are you sure you want to remove this item from the shelves？
       show-icon-button: Gallery
+      goods-icon-back: Back
       goods-icon-effect-preview: Style Preview
       goods-auto-deduction: Auto Deduction
       goods-usable: To backpack
@@ -130,6 +131,7 @@ mattoid-store:
       purchase-limit-exceeded-lifetime: This product is limited to {count} lifetime purchases and you have reached the limit
 
   lib:
+    class-icon-preview: Style Preview
     item-status-all: All product statuses
     item-status-up: Listing
     item-status-down: Delisting
