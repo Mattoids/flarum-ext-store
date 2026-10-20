@@ -7,21 +7,29 @@ import Button from 'flarum/common/components/Button';
 import Select from 'flarum/common/components/Select';
 import Stream from 'flarum/common/utils/Stream';
 import LoadingBlock from '../component/LoadingBlock';
+import PaginatedList from '../PaginatedList';
 
 export default class MyCartPage extends UserPage {
   private type: Stream<string> = Stream('');
   private status: Stream<string> = Stream('1');
   private autoDeduction: Stream<string> = Stream('-1');
-  private cartList: StoreApiResource[] = [];
-  private moreResults: boolean = false;
-  private loading: boolean = false;
+  private list: PaginatedList<StoreApiResource> = new PaginatedList({
+    endpoint: '/store/cart/list',
+    params: () => ({
+      filter: {
+        type: this.type(),
+        status: this.status(),
+        autoDeduction: this.autoDeduction(),
+      },
+    }),
+  });
 
   oninit(vnode: Mithril.Vnode<any, this>) {
     super.oninit(vnode);
 
     this.loadUser(m.route.param('username'));
 
-    this.loadResults();
+    this.list.refresh();
   }
 
   content(): Mithril.Children {
@@ -33,7 +41,7 @@ export default class MyCartPage extends UserPage {
             <Select
               style="width: 150px"
               value={this.status()}
-              disabled={this.loading}
+              disabled={this.list.loading}
               options={{
                 '-1': app.translator.trans('mattoid-store.lib.item-cart-status-all'),
                 '0': app.translator.trans('mattoid-store.lib.item-cart-status-0'),
@@ -44,8 +52,7 @@ export default class MyCartPage extends UserPage {
               }}
               onchange={(e: string) => {
                 this.status(e);
-                this.cartList = [];
-                this.loadResults();
+                this.list.refresh();
               }}
             />
           </div>
@@ -53,7 +60,7 @@ export default class MyCartPage extends UserPage {
             <Select
               style="width: 150px"
               value={this.type()}
-              disabled={this.loading}
+              disabled={this.list.loading}
               options={{
                 '': app.translator.trans('mattoid-store.lib.item-cart-type-all'),
                 permanent: app.translator.trans('mattoid-store.lib.item-cart-type-permanent'),
@@ -61,8 +68,7 @@ export default class MyCartPage extends UserPage {
               }}
               onchange={(e: string) => {
                 this.type(e);
-                this.cartList = [];
-                this.loadResults();
+                this.list.refresh();
               }}
             />
           </div>
@@ -70,7 +76,7 @@ export default class MyCartPage extends UserPage {
             <Select
               style="width: 150px"
               value={this.autoDeduction()}
-              disabled={this.loading}
+              disabled={this.list.loading}
               options={{
                 '-1': app.translator.trans('mattoid-store.lib.item-cart-auto-deduction-all'),
                 '0': app.translator.trans('mattoid-store.lib.item-cart-auto-deduction-0'),
@@ -78,18 +84,17 @@ export default class MyCartPage extends UserPage {
               }}
               onchange={(e: string) => {
                 this.autoDeduction(e);
-                this.cartList = [];
-                this.loadResults();
+                this.list.refresh();
               }}
             />
           </div>
         </div>
         <div>
-          {this.cartList.map((item: StoreApiResource) => {
-            return <div>{CartItem.component({ item })}</div>;
+          {this.list.items.map((item: StoreApiResource) => {
+            return <div key={item.id}>{CartItem.component({ item })}</div>;
           })}
 
-          {!this.loading && this.cartList.length === 0 && (
+          {!this.list.loading && this.list.items.length === 0 && (
             <div>
               <div style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">
                 {app.translator.trans('mattoid-store.lib.list-empty')}
@@ -97,56 +102,22 @@ export default class MyCartPage extends UserPage {
             </div>
           )}
 
-          {!this.loading && this.hasMoreResults() && (
+          {!this.list.loading && this.list.hasMore() && (
             <div style="text-align:center;padding:20px">
-              <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading} onclick={() => this.loadMore()}>
+              <Button
+                className={'Button Button--primary'}
+                disabled={this.list.loading}
+                loading={this.list.loading}
+                onclick={() => this.list.loadMore()}
+              >
                 {app.translator.trans('mattoid-store.lib.list-load-more')}
               </Button>
             </div>
           )}
 
-          {this.loading && <LoadingBlock />}
+          {this.list.loading && <LoadingBlock />}
         </div>
       </div>
     );
-  }
-
-  hasMoreResults() {
-    return this.moreResults;
-  }
-
-  loadMore() {
-    this.loading = true;
-    this.loadResults(this.cartList.length);
-  }
-
-  parseResults(results: any) {
-    this.moreResults = !!results.payload.links && !!results.payload.links.next;
-    this.cartList.push(...results.payload.data);
-    this.loading = false;
-    m.redraw();
-
-    return results;
-  }
-
-  loadResults(offset = 0) {
-    this.loading = true;
-    const filters = {
-      type: this.type(),
-      status: this.status(),
-      autoDeduction: this.autoDeduction(),
-    };
-    return app.store
-      .find('/store/cart/list', {
-        filter: filters,
-        page: {
-          offset,
-        },
-      })
-      .then(this.parseResults.bind(this))
-      .catch(() => {
-        this.loading = false;
-        m.redraw();
-      });
   }
 }

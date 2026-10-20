@@ -35,11 +35,12 @@ class BackpackItemSerializer extends AbstractSerializer
             $out['enable'] = $data->enable;
             $out['remaining'] = $data->remaining;
         } else {
-            $out['itemType'] = $data->itemType;
-            $out['itemStatus'] = $data->itemStatus;
-            $out['itemCount'] = $data->itemCount;
-            $out['expiredDays'] = $data->expiredDays;
-            $out['itemPropertyImage'] = $data->itemPropertyImage;
+            // 扩展 provider 提供的条目，字段缺失时回退 null 而非报 undefined property
+            $out['itemType'] = $data->itemType ?? null;
+            $out['itemStatus'] = $data->itemStatus ?? null;
+            $out['itemCount'] = $data->itemCount ?? null;
+            $out['expiredDays'] = $data->expiredDays ?? null;
+            $out['itemPropertyImage'] = $data->itemPropertyImage ?? null;
         }
 
         return $out;

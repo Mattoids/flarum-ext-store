@@ -5,16 +5,24 @@ import Button from 'flarum/common/components/Button';
 import extractText from 'flarum/common/utils/extractText';
 import StoreGoodsDetailModal from './StoreGoodsDetailModal';
 import LoadingBlock from './LoadingBlock';
+import PaginatedList from './PaginatedList';
 
-export default class AddStoreGoods extends Modal {
-  private goodsList: GoodsTypeResource[] = [];
-  private moreResults: boolean = false;
+export interface IAddStoreGoodsAttrs extends IInternalModalAttrs {
+  /** 商品保存成功回调（透传自列表页，用于局部刷新列表） */
+  onChanged?: () => void;
+}
+
+export default class AddStoreGoods extends Modal<IAddStoreGoodsAttrs> {
+  private list: PaginatedList<GoodsTypeResource> = new PaginatedList({
+    endpoint: '/store/goods',
+    params: () => ({ filter: {} }),
+  });
   private search: string = '';
 
   oninit(vnode: Mithril.Vnode<IInternalModalAttrs, this>) {
     super.oninit(vnode);
 
-    this.loadResults();
+    this.list.refresh();
   }
 
   title(): Mithril.Children {
@@ -28,9 +36,9 @@ export default class AddStoreGoods extends Modal {
   filteredGoodsList() {
     const keyword = this.search.trim().toLowerCase();
     if (!keyword) {
-      return this.goodsList;
+      return this.list.items;
     }
-    return this.goodsList.filter((item: GoodsTypeResource) => {
+    return this.list.items.filter((item: GoodsTypeResource) => {
       const name = (item.attributes.name || '').toLowerCase();
       const code = (item.attributes.code || '').toLowerCase();
       return name.indexOf(keyword) !== -1 || code.indexOf(keyword) !== -1;
@@ -56,8 +64,8 @@ export default class AddStoreGoods extends Modal {
 
         <div className="StorePluginGridScroll">
           <div className="StorePluginGrid">
-            {goodsList.map((item: GoodsTypeResource, index: number) => (
-              <div className="StorePluginCard">
+            {goodsList.map((item: GoodsTypeResource) => (
+              <div className="StorePluginCard" key={item.attributes.code}>
                 <div className="StorePluginCard-title">{item.attributes.name}</div>
                 <div className="StorePluginCard-icon">
                   {item.attributes.icon ? (
@@ -90,6 +98,12 @@ export default class AddStoreGoods extends Modal {
                       app.modal.show(StoreGoodsDetailModal, {
                         code: item.attributes.code,
                         title: item.attributes.name,
+                        onSaved: () => {
+                          if (this.attrs.onChanged) {
+                            this.attrs.onChanged();
+                          }
+                          this.hide();
+                        },
                       });
                     }}
                   >
@@ -100,7 +114,7 @@ export default class AddStoreGoods extends Modal {
             ))}
           </div>
 
-          {!this.loading && this.goodsList.length > 0 && goodsList.length === 0 && (
+          {!this.list.loading && this.list.items.length > 0 && goodsList.length === 0 && (
             <div>
               <div style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">
                 {app.translator.trans('mattoid-store.lib.list-empty')}
@@ -109,7 +123,7 @@ export default class AddStoreGoods extends Modal {
           )}
         </div>
 
-        {!this.loading && this.goodsList.length === 0 && (
+        {!this.list.loading && this.list.items.length === 0 && (
           <div>
             <div style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">
               {app.translator.trans('mattoid-store.lib.list-empty')}
@@ -117,52 +131,21 @@ export default class AddStoreGoods extends Modal {
           </div>
         )}
 
-        {!this.loading && this.hasMoreResults() && (
+        {!this.list.loading && this.list.hasMore() && (
           <div style="text-align:center;padding:20px">
-            <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading} onclick={() => this.loadMore()}>
+            <Button
+              className={'Button Button--primary'}
+              disabled={this.list.loading}
+              loading={this.list.loading}
+              onclick={() => this.list.loadMore()}
+            >
               {app.translator.trans('mattoid-store.lib.list-load-more')}
             </Button>
           </div>
         )}
 
-        {this.loading && <LoadingBlock />}
+        {this.list.loading && <LoadingBlock />}
       </div>
     );
-  }
-
-  hasMoreResults() {
-    return this.moreResults;
-  }
-
-  loadMore() {
-    this.loading = true;
-    this.loadResults(this.goodsList.length);
-  }
-
-  parseResults(results: any) {
-    this.moreResults = !!results.payload.links && !!results.payload.links.next;
-    this.goodsList.push(...results.payload.data);
-    this.loading = false;
-    m.redraw();
-
-    return results;
-  }
-
-  loadResults(offset = 0) {
-    this.loading = true;
-    const filters = {};
-
-    return app.store
-      .find('/store/goods', {
-        filter: filters,
-        page: {
-          offset,
-        },
-      })
-      .then(this.parseResults.bind(this))
-      .catch(() => {
-        this.loading = false;
-        m.redraw();
-      });
   }
 }

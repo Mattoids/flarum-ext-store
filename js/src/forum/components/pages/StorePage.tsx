@@ -9,23 +9,34 @@ import Select from 'flarum/common/components/Select';
 import extractText from 'flarum/common/utils/extractText';
 import StoreItem from '../component/StoreItem';
 import LoadingBlock from '../component/LoadingBlock';
+import PaginatedList from '../PaginatedList';
 
 export interface IIndexPageAttrs extends IPageAttrs {}
 
 const FILTER_KEYS = ['code', 'group', 'subtype', 'type', 'discount'];
 
 export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageAttrs> extends IndexPage {
-  private storeList: StoreApiResource[] = [];
-  private moreResults: boolean = false;
+  private list: PaginatedList<StoreApiResource> = new PaginatedList({
+    endpoint: '/store/list',
+    params: () => ({
+      filter: Object.assign(
+        {
+          status: this.status(),
+        },
+        this.filterValues
+      ),
+    }),
+  });
   private filterValues: Record<string, string> = { group: '-1', code: '-1', subtype: '-1', type: '-1', discount: '-1' };
   private dimensions: any[] = [];
   private status: Stream<string> = Stream('1');
-  private loading: boolean = false;
+  // 请求序号：筛选连续变更时丢弃过期响应，防止旧选项覆盖新选项
+  private requestSeq: number = 0;
 
   oninit(vnode: Mithril.Vnode<CustomAttrs, this>) {
     super.oninit(vnode);
 
-    app.setTitle(app.forum.attribute('storeName') || extractText(app.translator.trans('mattoid-store.forum.tital')));
+    app.setTitle(app.forum.attribute('storeName') || extractText(app.translator.trans('mattoid-store.forum.title')));
     app.setTitleCount(0);
   }
 
@@ -33,7 +44,7 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
     super.oncreate(vnode);
 
     this.loadOptions();
-    this.loadResults();
+    this.list.refresh();
   }
 
   view() {
@@ -45,10 +56,10 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
               <ul>{listItems(this.sidebarItems().toArray())}</ul>
             </nav>
             <div className="StorePage-results sideNavOffset">
-              <h2 class="BadgeOverviewTitle">{app.forum.attribute('storeName') || app.translator.trans('mattoid-store.forum.tital')}</h2>
+              <h2 class="BadgeOverviewTitle">{app.forum.attribute('storeName') || app.translator.trans('mattoid-store.forum.title')}</h2>
               {this.renderFilterBar()}
               <div className="Store-Body">
-                {this.storeList.map((item: StoreApiResource) => {
+                {this.list.items.map((item: StoreApiResource) => {
                   if (this.canViewGoodsItem(item)) {
                     return (
                       <div className="storeItemContainer" key={item.id}>
@@ -60,7 +71,7 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
                 })}
               </div>
 
-              {!this.loading && this.storeList.length === 0 && (
+              {!this.list.loading && this.list.items.length === 0 && (
                 <div>
                   <div style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">
                     {app.translator.trans('mattoid-store.lib.list-empty')}
@@ -68,15 +79,20 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
                 </div>
               )}
 
-              {!this.loading && this.hasMoreResults() && (
+              {!this.list.loading && this.list.hasMore() && (
                 <div style="text-align:center;padding:20px">
-                  <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading} onclick={() => this.loadMore()}>
+                  <Button
+                    className={'Button Button--primary'}
+                    disabled={this.list.loading}
+                    loading={this.list.loading}
+                    onclick={() => this.list.loadMore()}
+                  >
                     {app.translator.trans('mattoid-store.lib.list-load-more')}
                   </Button>
                 </div>
               )}
 
-              {this.loading && <LoadingBlock />}
+              {this.list.loading && <LoadingBlock />}
             </div>
           </div>
         </div>
@@ -130,7 +146,7 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
               <Select
                 style="min-width: 130px"
                 value={this.filterValues[dim.key] || '-1'}
-                disabled={this.loading}
+                disabled={this.list.loading}
                 options={options}
                 onchange={(e: string) => this.onFilterChange(dim.key, e)}
               />
@@ -151,12 +167,12 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
       this.filterValues[k] = '-1';
     });
 
-    this.storeList = [];
     this.loadOptions();
-    this.loadResults();
+    this.list.refresh();
   }
 
   loadOptions() {
+    const seq = ++this.requestSeq;
     return app
       .request({
         method: 'GET',
@@ -164,54 +180,15 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
         params: { filter: this.filterValues },
       })
       .then((result: any) => {
+        if (seq !== this.requestSeq) return;
         // JSON:API 响应体：data.attributes.dimensions
         const attrs = result && result.data ? result.data.attributes : null;
         this.dimensions = (attrs && attrs.dimensions) || [];
         m.redraw();
       })
       .catch(() => {
+        if (seq !== this.requestSeq) return;
         this.dimensions = [];
-      });
-  }
-
-  hasMoreResults() {
-    return this.moreResults;
-  }
-
-  loadMore() {
-    this.loading = true;
-    this.loadResults(this.storeList.length);
-  }
-
-  parseResults(results: any) {
-    this.moreResults = !!results.payload.links && !!results.payload.links.next;
-    this.storeList.push(...results.payload.data);
-    this.loading = false;
-    m.redraw();
-
-    return results;
-  }
-
-  loadResults(offset = 0) {
-    this.loading = true;
-    const filters = Object.assign(
-      {
-        status: this.status(),
-      },
-      this.filterValues
-    );
-
-    return app.store
-      .find('/store/list', {
-        filter: filters,
-        page: {
-          offset,
-        },
-      })
-      .then(this.parseResults.bind(this))
-      .catch(() => {
-        this.loading = false;
-        m.redraw();
       });
   }
 }

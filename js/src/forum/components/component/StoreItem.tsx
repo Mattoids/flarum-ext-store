@@ -10,6 +10,7 @@ export interface IStoreItemAttrs extends ComponentAttrs {
 
 export default class StoreItem extends Component<IStoreItemAttrs> {
   private storeData: StoreItemData = {} as StoreItemData;
+  private itemId: string = '';
 
   private descTimer: any = null;
   private showDescTip: boolean = false;
@@ -17,8 +18,10 @@ export default class StoreItem extends Component<IStoreItemAttrs> {
   oninit(vnode: Mithril.Vnode<IStoreItemAttrs, this>) {
     super.oninit(vnode);
 
+    // 只读引用共享 attributes（购买后父组件会原地扣减库存，需要联动），
+    // id 单独存实例字段，避免往共享 attributes 写值污染数据
     this.storeData = this.attrs.item.attributes;
-    this.storeData.id = this.attrs.item.id;
+    this.itemId = this.attrs.item.id;
   }
 
   onremove() {
@@ -37,12 +40,18 @@ export default class StoreItem extends Component<IStoreItemAttrs> {
       this.storeData.price > 0 ? moneyName.replace('[money]', String(this.storeData.price)) : app.translator.trans('mattoid-store.forum.free');
     const discountPrice = moneyName.replace('[money]', String(this.storeData.discountPrice));
     const isVideo = this.storeData.icon && this.storeData.icon.slice(-5) === '.webm';
+    const soldOut = this.storeData.stock != -99 && this.storeData.stock <= 0;
 
     return (
-      <div id={'goods' + this.storeData.id} className="StoreItem" onclick={() => this.showDetails(this.storeData)}>
+      <div
+        id={'goods' + this.itemId}
+        className={'StoreItem' + (soldOut ? ' StoreItem--soldOut' : '')}
+        onclick={() => this.showDetails(this.storeData)}
+      >
+        {soldOut && <div className="StoreItem-soldOutBadge">{app.translator.trans('mattoid-store.forum.sold-out')}</div>}
         <div className="itemTitle">{this.storeData.title}</div>
         <div className="StoreItem-icon">
-          <img className="logo-img" src={this.storeData.icon} style={isVideo ? 'display: none' : ''} />
+          <img className="logo-img" src={this.storeData.icon} alt={this.storeData.title || ''} style={isVideo ? 'display: none' : ''} />
           <video className="logo-video" autoplay loop muted playsinline style={isVideo ? '' : 'display: none'}>
             <source src={this.storeData.icon} type="video/webm" />
           </video>
@@ -72,11 +81,16 @@ export default class StoreItem extends Component<IStoreItemAttrs> {
   }
 
   showDetails(storeData: StoreItemData) {
+    // 售罄商品不打开购买弹窗，避免提交后才报库存不足
+    if (storeData.stock != -99 && storeData.stock <= 0) {
+      return;
+    }
     if (app.session.user) {
       // 商品插件可注册自定义购买/价格弹窗或详情页，未注册时使用默认 StoreBox
       const registry = (app as any).storeRegistry;
       const CustomModal = registry?.priceModal?.get(storeData.code) || registry?.detail?.get(storeData.code);
-      app.modal.show(CustomModal || StoreBox, { storeData, onSuccess: this.attrs.onSuccess });
+      // 传副本并补上 id，避免弹窗拿到缺少 id 的共享 attributes
+      app.modal.show(CustomModal || StoreBox, { storeData: { ...storeData, id: this.itemId }, onSuccess: this.attrs.onSuccess });
     }
   }
 

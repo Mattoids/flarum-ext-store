@@ -35,7 +35,8 @@ class ListIconController extends AbstractListController
         $limit = $this->extractLimit($request);
         $offset = $this->extractOffset($request);
 
-        if (!$actor->can('mattoid-store.group-view')) {
+        // 图标库仅管理端使用，要求管理权限
+        if (!$actor->can('mattoid-store.group-moderate')) {
             throw new PermissionDeniedException();
         }
 

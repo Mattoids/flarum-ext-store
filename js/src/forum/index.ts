@@ -50,29 +50,25 @@ app.initializers.add('mattoid/store', () => {
 
   extend(UserPage.prototype, 'navItems', function (this: UserPage, items: ItemList<Mithril.Children>) {
     const user = this.user;
-    if (!app.session?.user || !app.session.user.attribute('canStoreView') || !user) {
+    // 购买记录与背包属于用户隐私：仅在自己主页显示入口
+    if (!app.session?.user || !user || user.id() !== app.session.user.id()) {
       return;
     }
 
-    items.add(
-      'myCartPage',
-      LinkButton.component(
-        {
-          href: app.route('myCartPage', {
-            username: user.slug(),
-          }),
-          icon: 'fas fa-shopping-cart',
-        },
-        app.translator.trans('mattoid-store.forum.cart')
-      ),
-      15
-    );
-  });
-
-  extend(UserPage.prototype, 'navItems', function (this: UserPage, items: ItemList<Mithril.Children>) {
-    const user = this.user;
-    if (!app.session?.user || !user || user.id() !== app.session.user.id()) {
-      return;
+    if (app.session.user.attribute('canStoreView')) {
+      items.add(
+        'myCartPage',
+        LinkButton.component(
+          {
+            href: app.route('myCartPage', {
+              username: user.slug(),
+            }),
+            icon: 'fas fa-shopping-cart',
+          },
+          app.translator.trans('mattoid-store.forum.cart')
+        ),
+        15
+      );
     }
 
     items.add(
@@ -102,7 +98,7 @@ app.initializers.add('mattoid/store', () => {
           href: app.route('store'),
           icon: 'fas fa-store',
         },
-        app.forum.attribute('storeName') || app.translator.trans('mattoid-store.forum.tital')
+        app.forum.attribute('storeName') || app.translator.trans('mattoid-store.forum.title')
       )
     );
   });

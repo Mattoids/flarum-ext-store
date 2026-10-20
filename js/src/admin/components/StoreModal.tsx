@@ -6,6 +6,8 @@ import Button from 'flarum/common/components/Button';
 export interface IStoreModalAttrs extends IInternalModalAttrs {
   title: string;
   storeData: StoreItemData;
+  /** 操作成功回调（删除时父组件把该行从列表移除，替代整页 reload） */
+  onSuccess?: () => void;
 }
 
 export default class StoreModal extends Modal<IStoreModalAttrs> {
@@ -46,7 +48,7 @@ export default class StoreModal extends Modal<IStoreModalAttrs> {
                   <source src={icon} type="video/webm" />
                 </video>
               ) : (
-                <img src={icon} />
+                <img src={icon} alt={this.storeData.title || ''} />
               )
             ) : extIcon && (extIcon.name || extIcon.backgroundImage) ? (
               <span
@@ -108,7 +110,13 @@ export default class StoreModal extends Modal<IStoreModalAttrs> {
         body: this.storeData,
       })
       .then(
-        () => location.reload(),
+        () => {
+          this.loading = false;
+          if (this.attrs.onSuccess) {
+            this.attrs.onSuccess();
+          }
+          this.hide();
+        },
         (error: any) => {
           this.loading = false;
           this.storeData.status = status;

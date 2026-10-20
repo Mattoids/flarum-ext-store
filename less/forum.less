@@ -112,6 +112,30 @@
   flex-direction: column;
   height: 100%;
 }
+.StoreItem--soldOut {
+  position: relative;
+  cursor: not-allowed;
+}
+.StoreItem--soldOut .StoreItem-icon,
+.StoreItem--soldOut .StoreItem-descWrap,
+.StoreItem--soldOut .StoreItem-footer {
+  opacity: 0.45;
+}
+.StoreItem-soldOutBadge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 4px 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  pointer-events: none;
+  z-index: 1;
+}
 .itemTitle {
   font-size: 16px;
   font-weight: 600;

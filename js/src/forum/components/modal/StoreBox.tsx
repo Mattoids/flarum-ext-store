@@ -1,7 +1,6 @@
 import app from 'flarum/forum/app';
 import Modal, { IInternalModalAttrs } from 'flarum/common/components/Modal';
 import type Mithril from 'mithril';
-import Stream from 'flarum/common/utils/Stream';
 import Button from 'flarum/common/components/Button';
 import Switch from 'flarum/common/components/Switch';
 import Select from 'flarum/common/components/Select';
@@ -14,7 +13,7 @@ export interface IStoreModalAttrs extends IInternalModalAttrs {
 export default class StoreBox extends Modal<IStoreModalAttrs> {
   private storeData: StoreItemData = {} as StoreItemData;
   private params: Record<string, any> = {};
-  private range: boolean = false;
+  private popUpFields: StoreBoxField[] = [];
   private errorText: any = '';
 
   oninit(vnode: Mithril.Vnode<IStoreModalAttrs, this>) {
@@ -22,6 +21,13 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
 
     this.storeData = this.attrs.storeData;
     this.params.id = this.attrs.storeData.id;
+
+    try {
+      const parsed = JSON.parse(this.storeData.popUp || '[]');
+      this.popUpFields = Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      this.errorText = app.translator.trans('mattoid-store.forum.error.validate-fail');
+    }
   }
 
   title(): Mithril.Children {
@@ -33,18 +39,11 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
   }
 
   content(): Mithril.Children {
-    let popUp: StoreBoxField[] = [];
-    try {
-      const parsed = JSON.parse(this.storeData.popUp || '[]');
-      popUp = Array.isArray(parsed) ? parsed : [];
-    } catch (e) {
-      this.errorText = app.translator.trans('mattoid-store.forum.error.validate-fail');
-    }
     const canBuy = app.session.user && app.session.user.attribute('canStoreView');
     return m('.Modal-body.StoreBox-body', [
       this.renderSummary(),
       this.errorText ? m('.Alert.Alert--error', this.errorText) : null,
-      m('.StoreBox-form', this.getHtml(popUp)),
+      m('.StoreBox-form', this.getHtml(this.popUpFields)),
       m('.StoreBox-submit', [
         Button.component(
           {
@@ -124,9 +123,9 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
         input = m('.Form-group', [
           Switch.component(
             {
-              state: this.range,
+              // 以 params 为唯一状态源，多 switch 字段互不覆盖，也天然回填初始值
+              state: !!this.params[column.value],
               onchange: (value: boolean) => {
-                this.range = value;
                 this.params[column.value] = value;
               },
               disabled: this.loading,
@@ -184,12 +183,10 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
       })
       .then(
         () => {
-          // 局部更新余额与商品列表库存，避免整页刷新
+          // 重新拉取用户数据以更新余额（后端按折扣窗口实付，前端不本地推算）
           const user = app.session.user;
-          const paid = (this.storeData.discountPrice || 0) > 0 ? this.storeData.discountPrice : this.storeData.price;
-          const money = user?.attribute<number>('money');
-          if (user && typeof money === 'number') {
-            user.pushAttributes({ money: money - paid });
+          if (user) {
+            app.store.find('users', user.id()).catch(() => {});
           }
           if (this.attrs.onSuccess) {
             this.attrs.onSuccess(this.storeData);

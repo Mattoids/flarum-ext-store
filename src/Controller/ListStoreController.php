@@ -51,7 +51,8 @@ class ListStoreController extends AbstractListController
         if ($type && $type != '-1') {
             $query->where('type', $type);
         }
-        if ($status && $status != '-1') {
+        // '0' 是合法的筛选值（已下架），不能用真值判断
+        if ($status !== null && $status !== '' && $status != '-1') {
             $query->where('status', $status);
         }
         // 级联筛选：分组 / 商品插件 / 道具类型（插件自定义）/ 折扣

@@ -5,19 +5,21 @@ import UserPage from 'flarum/forum/components/UserPage';
 import Button from 'flarum/common/components/Button';
 import BackpackItem from '../component/BackpackItem';
 import LoadingBlock from '../component/LoadingBlock';
+import PaginatedList from '../PaginatedList';
 
 export default class BackpackPage extends UserPage {
-  private items: StoreApiResource[] = [];
-  private loading: boolean = false;
-  private moreResults: boolean = false;
+  private list: PaginatedList<StoreApiResource> = new PaginatedList({
+    endpoint: '/store/backpack/list',
+    // 保留原行为：整页刷新失败时清空列表
+    clearItemsOnRefreshError: true,
+  });
 
   oninit(vnode: Mithril.Vnode<any, this>) {
     super.oninit(vnode);
 
     this.loadUser(m.route.param('username'));
 
-    this.items = [];
-    this.loadResults();
+    this.list.refresh();
   }
 
   content(): Mithril.Children {
@@ -25,15 +27,15 @@ export default class BackpackPage extends UserPage {
       <div className="Post-body">
         <h2 class="BadgeOverviewTitle">{app.translator.trans('mattoid-store.forum.backpack')}</h2>
         <div className="Store-Body Backpack-Body">
-          {this.items.map((item: StoreApiResource) => {
+          {this.list.items.map((item: StoreApiResource) => {
             return (
               <div className="storeItemContainer backpackItemContainer" key={item.id}>
-                {BackpackItem.component({ item: item, onChanged: () => this.loadResults() })}
+                {BackpackItem.component({ item: item, onChanged: () => this.list.refresh() })}
               </div>
             );
           })}
 
-          {!this.loading && this.items.length === 0 && (
+          {!this.list.loading && this.list.items.length === 0 && (
             <div>
               <div style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">
                 {app.translator.trans('mattoid-store.lib.backpack-empty')}
@@ -41,50 +43,22 @@ export default class BackpackPage extends UserPage {
             </div>
           )}
 
-          {!this.loading && this.moreResults && (
+          {!this.list.loading && this.list.hasMore() && (
             <div style="text-align:center;padding:20px">
-              <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading} onclick={() => this.loadMore()}>
+              <Button
+                className={'Button Button--primary'}
+                disabled={this.list.loading}
+                loading={this.list.loading}
+                onclick={() => this.list.loadMore()}
+              >
                 {app.translator.trans('mattoid-store.lib.list-load-more')}
               </Button>
             </div>
           )}
 
-          {this.loading && <LoadingBlock />}
+          {this.list.loading && <LoadingBlock />}
         </div>
       </div>
     );
-  }
-
-  loadMore() {
-    this.loadResults(false);
-  }
-
-  loadResults(reset = true) {
-    if (reset) {
-      this.items = [];
-    }
-    this.loading = true;
-    return app.store
-      .find('/store/backpack/list', {
-        page: {
-          offset: reset ? 0 : this.items.length,
-        },
-      })
-      .then((results: any) => {
-        if (results && results.payload && results.payload.data) {
-          this.items.push(...results.payload.data);
-        }
-        this.moreResults = !!results?.payload?.links && !!results.payload.links.next;
-        this.loading = false;
-        m.redraw();
-        return results;
-      })
-      .catch(() => {
-        if (reset) {
-          this.items = [];
-        }
-        this.loading = false;
-        m.redraw();
-      });
   }
 }

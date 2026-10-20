@@ -7,17 +7,25 @@ import Select from 'flarum/common/components/Select';
 import Stream from 'flarum/common/utils/Stream';
 import StoreListItem from './StoreListItem';
 import LoadingBlock from './LoadingBlock';
+import PaginatedList from './PaginatedList';
 
 export default class StoreListPage extends ExtensionPage {
-  private storeList: StoreApiResource[] = [];
-  private moreResults: boolean = false;
+  private list: PaginatedList<StoreApiResource> = new PaginatedList({
+    endpoint: '/store/list',
+    params: () => ({
+      filter: {
+        type: this.type(),
+        status: this.status(),
+      },
+    }),
+  });
   private status: Stream<string> = Stream('-1');
   private type: Stream<string> = Stream('-1');
 
   oninit(vnode: Mithril.Vnode<any, this>) {
     super.oninit(vnode);
 
-    this.loadResults();
+    this.list.refresh();
   }
 
   content() {
@@ -51,7 +59,10 @@ export default class StoreListPage extends ExtensionPage {
             <div className="StoreAdminPanel">
               <div className="StoreAdminPanel-title">
                 {app.translator.trans('mattoid-store.admin.settings.section-goods')}
-                <Button className="Button Button--primary StoreAdminPanel-add" onclick={() => app.modal.show(AddStoreGoods)}>
+                <Button
+                  className="Button Button--primary StoreAdminPanel-add"
+                  onclick={() => app.modal.show(AddStoreGoods, { onChanged: () => this.refreshList() })}
+                >
                   {app.translator.trans('mattoid-store.admin.settings.add-store-goods')}
                 </Button>
               </div>
@@ -60,7 +71,7 @@ export default class StoreListPage extends ExtensionPage {
                 <div>
                   <Select
                     value={this.status()}
-                    disabled={this.loading}
+                    disabled={this.list.loading}
                     options={{
                       '-1': app.translator.trans('mattoid-store.lib.item-status-all'),
                       '1': app.translator.trans('mattoid-store.lib.item-status-up'),
@@ -68,15 +79,14 @@ export default class StoreListPage extends ExtensionPage {
                     }}
                     onchange={(e: string) => {
                       this.status(e);
-                      this.storeList = [];
-                      this.loadResults();
+                      this.refreshList();
                     }}
                   />
                 </div>
                 <div>
                   <Select
                     value={this.type()}
-                    disabled={this.loading}
+                    disabled={this.list.loading}
                     options={{
                       '-1': app.translator.trans('mattoid-store.lib.item-type-all'),
                       permanent: app.translator.trans('mattoid-store.lib.item-type-permanent'),
@@ -84,34 +94,38 @@ export default class StoreListPage extends ExtensionPage {
                     }}
                     onchange={(e: string) => {
                       this.type(e);
-                      this.storeList = [];
-                      this.loadResults();
+                      this.refreshList();
                     }}
                   />
                 </div>
               </div>
 
               <ul className="StoreAdminList">
-                {this.storeList.map((item: StoreApiResource) => {
-                  return <li>{StoreListItem.component({ item })}</li>;
+                {this.list.items.map((item: StoreApiResource) => {
+                  return <li key={item.id}>{StoreListItem.component({ item, onChanged: () => this.refreshList() })}</li>;
                 })}
               </ul>
 
-              {!this.loading && this.storeList.length === 0 && (
+              {!this.list.loading && this.list.items.length === 0 && (
                 <div>
                   <div className="StoreAdminEmpty">{app.translator.trans('mattoid-store.lib.list-empty')}</div>
                 </div>
               )}
 
-              {!this.loading && this.hasMoreResults() && (
+              {!this.list.loading && this.list.hasMore() && (
                 <div style="text-align:center;padding:20px">
-                  <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading} onclick={() => this.loadMore()}>
+                  <Button
+                    className={'Button Button--primary'}
+                    disabled={this.list.loading}
+                    loading={this.list.loading}
+                    onclick={() => this.list.loadMore()}
+                  >
                     {app.translator.trans('mattoid-store.lib.list-load-more')}
                   </Button>
                 </div>
               )}
 
-              {this.loading && <LoadingBlock />}
+              {this.list.loading && <LoadingBlock />}
             </div>
           </div>
         </div>
@@ -119,42 +133,10 @@ export default class StoreListPage extends ExtensionPage {
     );
   }
 
-  hasMoreResults() {
-    return this.moreResults;
-  }
-
-  loadMore() {
-    this.loading = true;
-    this.loadResults(this.storeList.length);
-  }
-
-  parseResults(results: any) {
-    this.moreResults = !!results.payload.links && !!results.payload.links.next;
-    this.storeList.push(...results.payload.data);
-    this.loading = false;
-    m.redraw();
-
-    return results;
-  }
-
-  loadResults(offset = 0) {
-    this.loading = true;
-    const filters = {
-      type: this.type(),
-      status: this.status(),
-    };
-
-    return app.store
-      .find('/store/list', {
-        filter: filters,
-        page: {
-          offset,
-        },
-      })
-      .then(this.parseResults.bind(this))
-      .catch(() => {
-        this.loading = false;
-        m.redraw();
-      });
+  /**
+   * 商品新增/编辑/删除后局部刷新列表（替代整页 reload）
+   */
+  refreshList() {
+    this.list.refresh();
   }
 }

@@ -76,7 +76,7 @@ mattoid-store:
       validate-fail: 购买物品失败
 
   forum:
-    tital: 商店
+    title: 商店
     gift-goods: 赠送商品
     gift-goods-title: 赠送商品给 {username}
     gift-target-user: 目标用户
@@ -101,8 +101,8 @@ mattoid-store:
     infinite: 无限
     free: 免费
     days: 天
-    ckeck-goods-outtime: 检查商品失效时间
     cart: 购买记录
+    sold-out: 售罄
 
     error:
       insufficient-inventory: 库存不足
@@ -145,6 +145,7 @@ mattoid-store:
     item-cart-status-2: 已失效
     item-cart-status-3: 已使用
     item-cart-status-9: 超时失效
+    item-cart-status-unknown: 未知
 
     item-cart-type-all: 全部购买类型
     item-cart-type-permanent: 永久有效

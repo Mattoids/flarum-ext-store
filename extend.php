@@ -47,7 +47,7 @@ return [
         ->css(__DIR__.'/less/forum.less')
         ->route('/u/{username}/cart', 'mattoid-store.u.user.cart')
         ->route('/u/{username}/backpack', 'mattoid-store.u.user.backpack')
-        ->route('/store', 'mattoid-store.forum.tital'),
+        ->route('/store', 'mattoid-store.forum.title'),
     (new Extend\Frontend('admin'))
         ->js(__DIR__.'/js/dist/admin.js')
         ->css(__DIR__.'/less/admin.less'),

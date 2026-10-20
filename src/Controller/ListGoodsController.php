@@ -37,7 +37,8 @@ class ListGoodsController extends AbstractListController
     protected function data(ServerRequestInterface $request, Document $document) {
         $actor = RequestUtil::getActor($request);
 
-        if (!$actor->can('mattoid-store.group-view')) {
+        // 商品插件注册表与图标库仅管理端使用，要求管理权限而非普通查看权限
+        if (!$actor->can('mattoid-store.group-moderate')) {
             throw new PermissionDeniedException();
         }
 

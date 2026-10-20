@@ -10,6 +10,9 @@ use Flarum\Extension\ExtensionManager;
  */
 class ExtensionIconUtil
 {
+    /** @var array<string, array|null> 单次请求内按类名缓存，避免列表页逐行 reflection + 磁盘 realpath */
+    private static $cache = [];
+
     /**
      * 通过 Goods 类的文件位置反查所属扩展，取其声明的图标数组。
      * Find the owning extension via the Goods class file path and return its declared icon array.
@@ -19,11 +22,17 @@ class ExtensionIconUtil
      */
     public static function resolve($goods, ExtensionManager $extensions): ?array
     {
+        $cacheKey = get_class($goods);
+        if (array_key_exists($cacheKey, self::$cache)) {
+            return self::$cache[$cacheKey];
+        }
+
         $classFile = (new \ReflectionClass($goods))->getFileName();
         $classFile = $classFile ? realpath($classFile) : false;
         if (!$classFile) {
-            return null;
+            return self::$cache[$cacheKey] = null;
         }
+
         $classFile = str_replace('\\', '/', $classFile);
 
         foreach ($extensions->getExtensions() as $extension) {
@@ -35,9 +44,9 @@ class ExtensionIconUtil
             if (strpos($classFile, $extPath . '/') === 0) {
                 $icon = $extension->getIcon();
                 // font-awesome 名与图片图标（backgroundImage）任一存在即视为有效图标
-                return (!empty($icon['name']) || !empty($icon['backgroundImage'])) ? $icon : null;
+                return self::$cache[$cacheKey] = (!empty($icon['name']) || !empty($icon['backgroundImage'])) ? $icon : null;
             }
         }
-        return null;
+        return self::$cache[$cacheKey] = null;
     }
 }

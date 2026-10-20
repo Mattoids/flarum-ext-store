@@ -68,7 +68,8 @@ class PutStoreController extends AbstractCreateController
             $params['class_name'] = $goods->className;
         }
 
-        // 价格或折扣任一变化都要重算折扣价，并重启折扣窗口（只改价格/期限不动 discount 时不重启窗口）
+        // 价格或折扣任一变化都要重算折扣价；仅当 discount 变化时重启折扣窗口
+        // （只改价格不重开窗口，避免进行中的折扣被意外刷新或已过期折扣复活）
         if (array_key_exists('price', $params) || array_key_exists('discount', $params)) {
             $price = $params['price'] ?? $store->price;
             $discount = $params['discount'] ?? $store->discount;

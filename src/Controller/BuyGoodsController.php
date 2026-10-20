@@ -125,7 +125,9 @@ class BuyGoodsController extends AbstractListController
         // 开始扣费：按折扣窗口计算应付金额（窗口起点为 discount_start_at，未设置的老数据回退 updated_at）
         $price = $this->pricing->payablePrice($store);
 
-        if ($actor->money < $price) {
+        // 余额预检：$actor->money 是请求开始时加载的旧值，重新读取当前值避免误拒
+        $balance = $actor->fresh()?->money ?? 0;
+        if ($balance < $price) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.user-balance-low')]);
         }
 

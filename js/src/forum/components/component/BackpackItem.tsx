@@ -58,7 +58,7 @@ export default class BackpackItem extends Component<BackpackItemAttrs> {
                 <source src={icon} type="video/webm" />
               </video>
             ) : (
-              <img src={icon} />
+              <img src={icon} alt={item.title || ''} />
             )
           ) : (
             <span className="BackpackItem-iconPlaceholder">

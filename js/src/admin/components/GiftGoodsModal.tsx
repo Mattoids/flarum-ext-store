@@ -12,10 +12,19 @@ export default class GiftGoodsModal extends Modal {
   private searchResults: any[] = [];
   private confirmed: boolean = false;
   private result: any = null;
+  private searchTimer: any = null;
+  private searchSeq: number = 0;
 
   oninit(vnode) {
     super.oninit(vnode);
     this.storeData = this.attrs.storeData;
+  }
+
+  onremove(vnode) {
+    if (this.searchTimer) {
+      clearTimeout(this.searchTimer);
+      this.searchTimer = null;
+    }
   }
 
   className() {
@@ -80,7 +89,7 @@ export default class GiftGoodsModal extends Modal {
                 placeholder={app.translator.trans('mattoid-store.admin.settings.gift-search-user-placeholder')}
                 oninput={(e: InputEvent) => {
                   this.search = (e.target as HTMLInputElement).value;
-                  this.searchUsers();
+                  this.queueSearch();
                 }}
               />
               {this.searchResults.length > 0 && (
@@ -166,15 +175,30 @@ export default class GiftGoodsModal extends Modal {
     );
   }
 
+  /**
+   * 300ms 防抖，避免每击键一次 API 请求
+   */
+  queueSearch() {
+    if (this.searchTimer) {
+      clearTimeout(this.searchTimer);
+    }
+    this.searchTimer = setTimeout(() => {
+      this.searchTimer = null;
+      this.searchUsers();
+    }, 300);
+  }
+
   searchUsers() {
     const keyword = this.search.trim();
     if (!keyword) {
       this.searchResults = [];
       return;
     }
+    const seq = ++this.searchSeq;
     app.store
       .find('users', { filter: { q: keyword }, page: { limit: 10 } })
       .then((results) => {
+        if (seq !== this.searchSeq) return;
         this.searchResults = results.filter((user) => {
           return !this.selectedUsers.some((selected) => selected.id() === user.id());
         });

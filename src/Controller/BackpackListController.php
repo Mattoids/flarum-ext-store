@@ -49,7 +49,17 @@ class BackpackListController extends AbstractListController
 
         $items = [];
 
-        // 主商店：已支付购买记录（DB 分页，按 id 倒序取一页）
+        // 先取扩展条目（数量有界），其数量决定购物车主查询需要多取多少，
+        // 保证 offset 作用在合并排序后的完整列表上，而不是只作用于购物车子集
+        foreach (StoreExtend::getBackpackProviders() as $provider) {
+            foreach ((array) $provider($userId) as $item) {
+                $items[] = $item;
+            }
+        }
+        $providerCount = count($items);
+
+        // 主商店：已支付购买记录（不跳过 offset——offset 在合并后统一施加；
+        // 多取 providerCount 条，确保合并列表 offset..offset+limit 窗口内的购物车记录一定被取到）
         $carts = StoreCartModel::query()
             ->where('user_id', $userId)
             ->where('status', 1)
@@ -57,15 +67,15 @@ class BackpackListController extends AbstractListController
             // 不允许使用的商品购买后直接生效，不在背包展示。
             // 新增商品时 usable 的表单默认值来自商品插件 Goods 抽象类的 $usable 声明。
             ->whereIn('store_id', StoreModel::withTrashed()->where('usable', 1)->select('id'))
+            // created_at 主排序 + id 决胜：不依赖 id 与创建时间单调一致的假设
+            // （手工改库/导入数据可能导致高 createdAt 低 id 的记录被漏取）
+            ->orderByDesc('created_at')
             ->orderByDesc('id')
-            ->skip($offset)
-            ->take($limit > 0 ? $limit + 1 : 100000)
+            ->take($limit > 0 ? $offset + $limit + $providerCount + 1 : 100000)
             ->get();
 
-        $cartsHasMore = $limit > 0 && $carts->count() > $limit;
-        if ($cartsHasMore) {
-            $carts = $carts->slice(0, $limit)->values();
-        }
+        // 购物车是否还有未取到的记录（取满说明后面可能还有，用于 hasMore 的保守判断）
+        $cartsExhausted = $limit <= 0 || $carts->count() < $offset + $limit + $providerCount + 1;
 
         if ($carts->isNotEmpty()) {
             // 包含已软删除商品，保证背包图标/信息仍可展示
@@ -107,22 +117,15 @@ class BackpackListController extends AbstractListController
             }
         }
 
-        // 扩展接入的背包条目（装饰店等）
-        foreach (StoreExtend::getBackpackProviders() as $provider) {
-            foreach ((array) $provider($userId) as $item) {
-                $items[] = $item;
-            }
-        }
-
-        // 按获得时间倒序合并后，截取本页（购物车主数据已在 DB 层分页，
-        // 这里只对 一页购物车 + 扩展条目 做内存排序，数据量有界）
+        // 按获得时间倒序合并后统一施加 offset/limit（两个来源都参与分页，不再漏条目）
         usort($items, function ($a, $b) {
             return strtotime($b->createdAt) <=> strtotime($a->createdAt);
         });
 
-        $hasMore = $limit > 0 && ($cartsHasMore || count($items) > $limit);
+        $hasMore = false;
         if ($limit > 0) {
-            $items = array_slice($items, 0, $limit);
+            $hasMore = !$cartsExhausted || count($items) > $offset + $limit;
+            $items = array_slice($items, $offset, $limit);
         }
 
         $document->addPaginationLinks(

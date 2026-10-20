@@ -5,6 +5,7 @@ namespace Mattoid\Store\Upload;
 use Illuminate\Contracts\Filesystem\Factory;
 use Illuminate\Support\Str;
 use Psr\Http\Message\UploadedFileInterface;
+use Symfony\Component\Mime\MimeTypes;
 
 class StoreUploader{
     protected $uploadDir;
@@ -14,7 +15,10 @@ class StoreUploader{
     }
 
     public function upload(UploadedFileInterface $file) {
-        $ext = pathinfo($file->getClientFilename(), PATHINFO_EXTENSION);
+        // 文件名扩展名以服务端从 media type 猜测为准（与 StoreValidator 校验口径一致），
+        // 不信任客户端文件名，防止伪造扩展名绕过 MIME 白名单
+        $guessedExtension = MimeTypes::getDefault()->getExtensions($file->getClientMediaType())[0] ?? null;
+        $ext = $guessedExtension ?: pathinfo($file->getClientFilename(), PATHINFO_EXTENSION);
         $filename = time()."_".Str::random().'.'.$ext;
         $stream = $file->getStream();
         $stream->rewind();

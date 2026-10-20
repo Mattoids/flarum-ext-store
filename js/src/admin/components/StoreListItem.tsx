@@ -8,6 +8,8 @@ import GiftGoodsModal from './GiftGoodsModal';
 
 interface StoreListItemAttrs extends ComponentAttrs {
   item: StoreApiResource;
+  /** 数据变化回调（编辑保存/删除后父组件刷新或移除该行） */
+  onChanged?: () => void;
 }
 
 export default class StoreListItem extends Component<StoreListItemAttrs> {
@@ -47,7 +49,7 @@ export default class StoreListItem extends Component<StoreListItemAttrs> {
                 <source src={icon} type="video/webm" />
               </video>
             ) : (
-              <img src={icon} />
+              <img src={icon} alt={data.title || ''} />
             )
           ) : extIcon ? (
             <span
@@ -101,7 +103,7 @@ export default class StoreListItem extends Component<StoreListItemAttrs> {
         </div>
 
         <div className="StoreAdminItem-actions">
-          <Button className="Button" onclick={() => app.modal.show(StoreGoodsDetailModal, { storeData: data })}>
+          <Button className="Button" onclick={() => app.modal.show(StoreGoodsDetailModal, { storeData: data, onSaved: this.attrs.onChanged })}>
             {app.translator.trans('mattoid-store.admin.settings.goods-edit')}
           </Button>
           <Button className="Button" onclick={() => app.modal.show(GiftGoodsModal, { storeData: data })}>
@@ -113,7 +115,10 @@ export default class StoreListItem extends Component<StoreListItemAttrs> {
           >
             {statusUp ? app.translator.trans('mattoid-store.lib.item-status-down') : app.translator.trans('mattoid-store.lib.item-status-up')}
           </Button>
-          <Button className="Button Button--danger" onclick={() => app.modal.show(StoreModal, { storeData: data, title: 'delete' })}>
+          <Button
+            className="Button Button--danger"
+            onclick={() => app.modal.show(StoreModal, { storeData: data, title: 'delete', onSuccess: this.attrs.onChanged })}
+          >
             {app.translator.trans('mattoid-store.admin.settings.goods-delete')}
           </Button>
         </div>

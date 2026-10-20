@@ -42,52 +42,56 @@ class GoodsInvalidCommand extends AbstractCommand
     protected function fire()
     {
         $dateTime = Carbon::now();
-        $invalidList = StoreCartModel::query()->where('outtime', '<=', $dateTime)->where('type', 'limit')->where('status', 1)->get();
-        if ($invalidList->isEmpty()) {
+        // 分块处理，避免过期记录累积后一次性全量加载撑爆内存
+        StoreCartModel::query()->where('outtime', '<=', $dateTime)->where('type', 'limit')->where('status', 1)
+            ->chunkById(200, function ($invalidList) {
+                $storeList = StoreModel::query()->whereIn('id', $invalidList->pluck('store_id')->all())->get();
+                $storeMap = $storeList->keyBy('id');
+
+                foreach ($invalidList as $cart) {
+                    $this->processCart($cart, $storeMap);
+                }
+            });
+    }
+
+    private function processCart(StoreCartModel $cart, $storeMap)
+    {
+        $buyStatus = true;
+        // 获取商品信息
+        $store = $storeMap->get($cart->store_id);
+        if (!$store) {
+            $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.invalid-product')}");
             return;
         }
 
-        $storeList = StoreModel::query()->whereIn('id', $invalidList->pluck('store_id')->all())->get();
-        $storeMap = $storeList->keyBy('id');
-
-        foreach ($invalidList as $cart) {
-            $buyStatus = true;
-            // 获取商品信息
-            $store = $storeMap->get($cart->store_id);
-            if (!$store) {
-                $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.invalid-product')}");
-                continue;
-            }
-
+        try {
+            // 自动扣费，扣费成功
+            $this->autoDeduction($store, $cart);
+        } catch (RenewalLockException $e) {
+            // 防重锁冲突（如手动执行与定时任务重叠）：不是续费失败，跳过等下一分钟重试
+            $this->warn("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.request-processing')}");
+            return;
+        } catch (\Exception $e) {
+            $buyStatus = false;
+            $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.automatic-renewal-fail', ['message' => $e->getMessage()])}");
             try {
-                // 自动扣费，扣费成功
-                $this->autoDeduction($store, $cart);
-            } catch (RenewalLockException $e) {
-                // 防重锁冲突（如手动执行与定时任务重叠）：不是续费失败，跳过等下一分钟重试
-                $this->warn("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.request-processing')}");
-                continue;
-            } catch (\Exception $e) {
-                $buyStatus = false;
-                $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.automatic-renewal-fail', ['message' => $e->getMessage()])}");
-                try {
-                    // 超期商品自动失效（9-超时失效，区别于 2-购买失败）
-                    $invalid = StoreExtend::getInvalid($cart->code);
-                    if ($invalid) {
-                        $invalid->invalid($store, $cart);
-                    }
-
-                    $cart->status = 9;
-                    $cart->save();
-                } catch (\Exception $e) {
-                    $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.goods-invalid-fail', ['message' => $e->getMessage()])}");
+                // 超期商品自动失效（9-超时失效，区别于 2-购买失败）
+                $invalid = StoreExtend::getInvalid($cart->code);
+                if ($invalid) {
+                    $invalid->invalid($store, $cart);
                 }
-            }
 
-            try {
-                $this->events->dispatch(new StoreInvalidEvent($store, $cart, $buyStatus));
+                $cart->status = 9;
+                $cart->save();
             } catch (\Exception $e) {
-                $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.goods-invalid-event-fail', ['message' => $e->getMessage()])}");
+                $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.goods-invalid-fail', ['message' => $e->getMessage()])}");
             }
+        }
+
+        try {
+            $this->events->dispatch(new StoreInvalidEvent($store, $cart, $buyStatus));
+        } catch (\Exception $e) {
+            $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.goods-invalid-event-fail', ['message' => $e->getMessage()])}");
         }
     }
 

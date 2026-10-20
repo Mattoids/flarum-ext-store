@@ -23,7 +23,11 @@ export default class CartItem extends Component<CartItemAttrs> {
       3: { class: 'StoreBadge StoreBadge--info', key: 'mattoid-store.lib.item-cart-status-3' },
       9: { class: 'StoreBadge StoreBadge--warning', key: 'mattoid-store.lib.item-cart-status-9' },
     };
-    const status = statusMeta[this.cartData.status as keyof typeof statusMeta] || statusMeta[2];
+    // 未知状态显示中性文案，不误导为「已失效」
+    const status = statusMeta[this.cartData.status as keyof typeof statusMeta] || {
+      class: 'StoreBadge StoreBadge--muted',
+      key: 'mattoid-store.lib.item-cart-status-unknown',
+    };
     const moneyName = String(app.forum.attribute('antoinefr-money.moneyname') || '[money]');
     const price =
       this.cartData.price > 0 ? moneyName.replace('[money]', String(this.cartData.price)) : app.translator.trans('mattoid-store.forum.free');

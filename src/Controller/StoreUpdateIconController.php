@@ -44,18 +44,28 @@ class StoreUpdateIconController extends AbstractCreateController{
 
         $this->validator->assertValid(['file' => $file]);
 
+        $uuid = $this->uploader->getFileMd5($file);
+
+        // 同一文件（md5 相同）直接复用已有记录并增加引用计数，不产生重复文件
+        $existing = StoreGoodsIconModel::query()->where('uuid', $uuid)->first();
+        if ($existing) {
+            $existing->increment('count');
+            return ['id' => $existing->id, 'path' => $existing->url];
+        }
+
+        // 先上传文件再落库：落库失败（如并发同文件上传撞唯一索引）只遗留孤儿文件，
+        // 不再产生 url=null 的孤儿行；且 md5 不会被未完成的行永久占位
+        $path = $this->uploader->upload($file);
+
         $icon = new StoreGoodsIconModel();
-        $icon->uuid = $this->uploader->getFileMd5($file);
+        $icon->uuid = $uuid;
+        $icon->count = 1;
+        $icon->url = $path;
         try {
             $icon->save();
         } catch (QueryException $e) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.file-exist')]);
         }
-
-        $icon->increment('count');
-
-        $icon->url = $this->uploader->upload($file);
-        $icon->save();
 
         $result['id'] = $icon->id;
         $result['path'] = $icon->url;

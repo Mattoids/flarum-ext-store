@@ -7,16 +7,20 @@ import Switch from 'flarum/common/components/Switch';
 import Select from 'flarum/common/components/Select';
 import extractText from 'flarum/common/utils/extractText';
 import LoadingBlock from './LoadingBlock';
+import PaginatedList from './PaginatedList';
 
 export interface IStoreGoodsDetailModalAttrs extends IInternalModalAttrs {
   storeData?: StoreItemData;
   code?: string;
   title?: string;
+  /** 保存成功回调（父组件局部刷新列表，替代整页 reload） */
+  onSaved?: () => void;
 }
 
 export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalAttrs> {
-  private moreResults: boolean = false;
-  private iconList: { attributes: { url: string } }[] = [];
+  private iconList: PaginatedList<{ attributes: { url: string } }> = new PaginatedList({
+    endpoint: '/store/icon/list',
+  });
   private itemTypes: any = [];
   private method: string = 'POST';
   private defaultsAppliedFor: string = '';
@@ -53,7 +57,6 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
     super.oninit(vnode);
 
     this.method = 'POST';
-    this.moreResults = false;
     this.showIcons = false;
     this.params.code = Stream(this.attrs.code || '');
     this.params.title = Stream(this.attrs.title || '');
@@ -453,7 +456,11 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
               <div className="StoreAdminField StoreAdminIconRow-preview" style={this.params.icon() ? '' : 'display: none'}>
                 <div className="StoreIconPreview">
                   {this.isImageIcon(this.params.icon()) ? (
-                    <img src={this.params.icon()} style={this.params.icon() && this.params.icon().slice(-5) === '.webm' ? 'display: none' : ''} />
+                    <img
+                      src={this.params.icon()}
+                      alt=""
+                      style={this.params.icon() && this.params.icon().slice(-5) === '.webm' ? 'display: none' : ''}
+                    />
                   ) : (
                     <div className="StoreIconEffectPreview">
                       <div className={this.params.icon()}>{app.translator.trans('mattoid-store.admin.settings.goods-icon-effect-preview')}</div>
@@ -506,11 +513,12 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
           }
           return (
             <div>
-              {this.iconList.map((item: { attributes: { url: string } }) => {
+              {this.iconList.items.map((item: { attributes: { url: string } }) => {
                 return (
                   <div className="icon-frame inlineBlock" onclick={() => this.selectIconItem(item.attributes.url)}>
                     <img
                       className="icon-size"
+                      alt=""
                       src={item.attributes.url}
                       style={item.attributes.url && item.attributes.url.slice(-5) === '.webm' ? 'display: none' : ''}
                     />
@@ -527,7 +535,7 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
                   </div>
                 );
               })}
-              {!this.loading && this.iconList.length === 0 && (
+              {!this.iconList.loading && this.iconList.items.length === 0 && (
                 <div>
                   <div style="font-size:1.4em;color: var(--muted-more-color);text-align: center;line-height: 100px;">
                     {app.translator.trans('mattoid-store.lib.list-empty')}
@@ -535,15 +543,20 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
                 </div>
               )}
 
-              {!this.loading && this.hasMoreResults() && (
+              {!this.iconList.loading && this.iconList.hasMore() && (
                 <div style="text-align:center;padding:20px">
-                  <Button className={'Button Button--primary'} disabled={this.loading} loading={this.loading} onclick={() => this.loadMore()}>
+                  <Button
+                    className={'Button Button--primary'}
+                    disabled={this.iconList.loading}
+                    loading={this.iconList.loading}
+                    onclick={() => this.iconList.loadMore()}
+                  >
                     {app.translator.trans('mattoid-store.lib.list-load-more')}
                   </Button>
                 </div>
               )}
 
-              {this.loading && <LoadingBlock />}
+              {this.iconList.loading && <LoadingBlock />}
             </div>
           );
         })()}
@@ -565,40 +578,6 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
     return icon.slice(-5) !== '.webm';
   }
 
-  loadIconList(offset = 0) {
-    this.loading = true;
-
-    return app.store
-      .find('/store/icon/list', {
-        page: {
-          offset,
-        },
-      })
-      .then(this.parseResults.bind(this))
-      .catch(() => {
-        this.loading = false;
-        m.redraw();
-      });
-  }
-
-  parseResults(results: any) {
-    this.moreResults = !!results.payload.links && !!results.payload.links.next;
-    this.iconList.push(...results.payload.data);
-    this.loading = false;
-    m.redraw();
-
-    return results;
-  }
-
-  loadMore() {
-    this.loading = true;
-    this.loadIconList(this.iconList.length);
-  }
-
-  hasMoreResults() {
-    return this.moreResults;
-  }
-
   closeIcon() {
     this.showIcons = false;
   }
@@ -614,23 +593,27 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
 
     // 商品插件注册了自定义图库（iconPicker）时，不加载默认上传图片列表
     if (!(app as any).storeAdminRegistry?.iconPicker?.get(this.params.code())) {
-      this.iconList = [];
-      this.loadIconList();
+      this.iconList.refresh();
     }
   }
 
   uploadIcon(event: Event) {
     event.preventDefault();
 
-    const $input = $('<input type="file">');
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/png,image/jpeg,image/webm';
+    input.style.display = 'none';
+    input.addEventListener(
+      'change',
+      () => {
+        const file = input.files && input.files[0];
+        input.remove();
+        if (!file) return;
 
-    $input
-      .appendTo('body')
-      .hide()
-      .trigger('click')
-      .on('change', (event: any) => {
         const body = new FormData();
-        body.append('file', (event.target as HTMLInputElement).files![0]);
+        body.append('file', file);
+        this.loading = true;
 
         app
           .request({
@@ -638,12 +621,22 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
             method: 'POST',
             body,
           })
-          .then((result: any) => {
-            this.params.icon = Stream(result.data.attributes.path);
-            this.loading = false;
-            m.redraw();
-          });
-      });
+          .then(
+            (result: any) => {
+              this.params.icon = Stream(result.data.attributes.path);
+              this.loading = false;
+              m.redraw();
+            },
+            (error: any) => {
+              this.loading = false;
+              this.onerror(error);
+            }
+          );
+      },
+      { once: true }
+    );
+    document.body.appendChild(input);
+    input.click();
   }
 
   onsubmit(e: Event) {
@@ -658,7 +651,13 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
         body: this.params,
       })
       .then(
-        () => location.reload(),
+        () => {
+          this.loading = false;
+          if (this.attrs.onSaved) {
+            this.attrs.onSaved();
+          }
+          this.hide();
+        },
         (error: any) => {
           this.loading = false;
           this.onerror(error);
