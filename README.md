@@ -23,6 +23,29 @@ php flarum migrate
 php flarum cache:clear
 ```
 
+> ⚠️ **升级后不可仅回退代码**：`2026_10_14` 重构迁移会把存量时间数据从 Asia/Shanghai 墙钟换算为 UTC。若新版出问题，必须连同数据库一起回退（或先用 `mysqldump` 备份），只回退代码会让全部到期时间偏移 8 小时。
+>
+> 另注意：存量购物车的 `auto_deduction` 列为 0，开启自动续费的商品其已购未过期道具到期时走失效而非自动续费，用户重新购买后即恢复正常；如需立即生效可对 `status=1` 且未过期的购物车按商品设置做一次 backfill。
+
+## Permissions
+
+| Permission key | Scope | Description |
+| --- | --- | --- |
+| `mattoid-store.group-view` | Everyone / Members (allow guests optional) | View the store and purchase goods |
+| `mattoid-store.group-moderate` | Mods / Admins | View all purchase records and manage goods/icons in the admin area |
+
+Note: `mattoid-store.group-admin-view` is defined by the companion extension `mattoid/flarum-ext-store-invite`, not by this extension.
+
+## Scheduling
+
+The extension registers a scheduled command that expires time-limited goods and processes renewals (`mattoid:store:check:date`, every five minutes, output appended to `storage/logs/mattoid-store.log`). Flarum's scheduler requires a system cron entry:
+
+```cron
+* * * * * php /path/to/flarum schedule:run >> /dev/null 2>&1
+```
+
+Without this cron, time-limited goods will not expire automatically.
+
 
 ## Help
 ### Register Product Events

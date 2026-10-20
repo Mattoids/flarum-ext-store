@@ -1,11 +1,11 @@
 {
     "name": "mattoid/flarum-ext-store",
-    "description": "flarum-ext-store",
+    "description": "A virtual goods store for Flarum: sell items with stock, limits, discounts, backpack, gifting, and a plugin API for third-party product types",
     "keywords": [
         "flarum"
     ],
     "type": "flarum-extension",
-    "license": "LPL-1.02",
+    "license": "MIT",
     "require": {
         "flarum/core": "^1.2.0"
     },

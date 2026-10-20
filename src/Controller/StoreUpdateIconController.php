@@ -64,6 +64,12 @@ class StoreUpdateIconController extends AbstractCreateController{
         try {
             $icon->save();
         } catch (QueryException $e) {
+            // 并发同文件上传：后到者撞唯一索引时复用既有记录并增加引用计数，而非误报"文件已存在"
+            $existing = StoreGoodsIconModel::query()->where('uuid', $uuid)->first();
+            if ($existing) {
+                $existing->increment('count');
+                return ['id' => $existing->id, 'path' => $existing->url];
+            }
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.file-exist')]);
         }
 

@@ -48,6 +48,22 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
   }
 
   view() {
+    const user = app.session.user;
+    // 无浏览权限的用户（如直访 URL）显示无权限提示，而不是静默空列表
+    if (!user || !user.attribute('canStoreView')) {
+      return (
+        <div className="IndexPage">
+          <div className="container">
+            <div className="StorePage-results sideNavOffset">
+              <p className="helpText" style="text-align:center;line-height:100px;">
+                {app.translator.trans('mattoid-store.forum.no-permission-buy')}
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="IndexPage">
         <div className="container">
@@ -114,12 +130,17 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
   }
 
   /**
-   * 购买成功：局部扣减列表中的库存，避免整页刷新
+   * 购买成功：局部扣减列表中的库存，避免整页刷新；
+   * 统一刷新当前用户余额——不依赖购买弹窗（含插件 priceModal）是否回调 onSuccess
    */
   onItemBought(item: StoreApiResource) {
     const attrs = item.attributes;
     if (attrs.stock != -99 && attrs.stock > 0) {
       attrs.stock = attrs.stock - 1;
+    }
+    const user = app.session.user;
+    if (user) {
+      app.store.find('users', user.id()).catch(() => {});
     }
     m.redraw();
   }

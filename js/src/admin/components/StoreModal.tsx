@@ -30,6 +30,7 @@ export default class StoreModal extends Modal<IStoreModalAttrs> {
 
   content(): Mithril.Children {
     const isDelete = this.type === 'delete';
+    const isRestore = this.type === 'restore';
     const icon = this.storeData.icon || this.storeData.pluginIcon;
     const extIcon = this.storeData.pluginExtIcon;
     const isVideo = icon && icon.slice(-5) === '.webm';
@@ -62,7 +63,7 @@ export default class StoreModal extends Modal<IStoreModalAttrs> {
                 {extIcon.name ? <i className={extIcon.name} /> : ''}
               </span>
             ) : (
-              <i className={'fas ' + (isDelete ? 'fa-trash-alt' : 'fa-exchange-alt')} />
+              <i className={'fas ' + (isDelete ? 'fa-trash-alt' : isRestore ? 'fa-undo' : 'fa-exchange-alt')} />
             )}
           </div>
           <div className="StoreConfirmText">
@@ -99,14 +100,41 @@ export default class StoreModal extends Modal<IStoreModalAttrs> {
 
     this.loading = true;
 
+    const isRestore = this.type === 'restore';
+    // 上下架/删除都要先翻转 status 再提交（PUT 依赖翻转后的值）
     const status = this.storeData.status;
-    this.storeData.status = this.storeData.status ? 0 : 1;
+    if (!isRestore) {
+      this.storeData.status = this.storeData.status ? 0 : 1;
+    }
 
-    const method = this.type === 'delete' ? 'DELETE' : 'PUT';
+    if (this.type === 'delete') {
+      app
+        .request({
+          method: 'DELETE',
+          url: app.forum.attribute('apiUrl') + '/store/goods',
+          body: this.storeData,
+        })
+        .then(
+          () => {
+            this.loading = false;
+            if (this.attrs.onSuccess) {
+              this.attrs.onSuccess();
+            }
+            this.hide();
+          },
+          (error: any) => {
+            this.loading = false;
+            this.storeData.status = status;
+            this.onerror(error);
+          }
+        );
+      return;
+    }
+
     app
       .request({
-        method: method,
-        url: app.forum.attribute('apiUrl') + '/store/goods',
+        method: isRestore ? 'POST' : 'PUT',
+        url: app.forum.attribute('apiUrl') + (isRestore ? '/store/goods/restore' : '/store/goods'),
         body: this.storeData,
       })
       .then(
@@ -119,7 +147,6 @@ export default class StoreModal extends Modal<IStoreModalAttrs> {
         },
         (error: any) => {
           this.loading = false;
-          this.storeData.status = status;
           this.onerror(error);
         }
       );

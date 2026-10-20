@@ -21,6 +21,45 @@ import Component from 'flarum/common/Component';
  *
  * 未注册时使用 store 扩展提供的默认组件。
  */
+
+/**
+ * 商品价格弹窗 attrs（priceModal 槽位）
+ */
+export interface AdminPriceModalProps {
+  /** 商品数据 */
+  storeData: any;
+  /** 保存成功回调 */
+  onSaved?: () => void;
+}
+
+/**
+ * 商品表单扩展区 attrs（goodsForm 槽位）
+ */
+export interface AdminGoodsFormProps {
+  /** 弹窗的 Stream 参数 */
+  params: any;
+  /** 编辑时的商品数据（新增时为空） */
+  storeData?: any;
+}
+
+/**
+ * 商品列表行 attrs（listItem 槽位）
+ */
+export interface AdminListItemProps {
+  /** 商品资源（attributes 为商品数据） */
+  item: any;
+}
+
+/**
+ * 图标库接管组件 attrs（iconPicker 槽位）
+ */
+export interface AdminIconPickerProps {
+  /** 弹窗的 Stream 参数 */
+  params: any;
+  /** 选中图标回调 */
+  onSelect: (url: string) => void;
+}
+
 export interface GoodsFormOptions {
   hideDefaultDesc?: boolean;
 }

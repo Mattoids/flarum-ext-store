@@ -2,6 +2,7 @@
 
 namespace Mattoid\Store\Controller;
 
+use Carbon\Carbon;
 use Flarum\Api\Controller\AbstractCreateController;
 use Flarum\Foundation\ValidationException;
 use Flarum\Http\RequestUtil;
@@ -65,6 +66,10 @@ class BackpackUseController extends AbstractCreateController
         if (!$store) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.store-goods-non-existent')]);
         }
+        // usable=0 的商品购买时直接生效、不进背包，不允许再通过背包触发权益（防止重复发放）
+        if (! $store->usable) {
+            throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.cart-no-use')]);
+        }
 
         // 防连击锁，避免并发下效果被重复执行/重复消耗
         $key = md5("mattoid-store-backpack-use-{$cart->store_id}-{$actor->id}");
@@ -107,11 +112,18 @@ class BackpackUseController extends AbstractCreateController
         if (!$enable::enable($actor, $store, $cart)) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.cart-use-fail')]);
         }
-        $cart->save();
+        // 只条件更新 enable 列并带 status 守卫，避免 stale 模型全行写回把已失效记录复活
+        $affected = StoreCartModel::query()
+            ->where('id', $cart->id)
+            ->where('status', 1)
+            ->update(['enable' => $cart->enable, 'updated_at' => Carbon::now()]);
+        if (!$affected) {
+            throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.cart-status-changed')]);
+        }
     }
 
     /**
-     * 一次性道具：消耗最旧一条未使用的购买记录（调用插件 use 钩子）
+     * 一次性道具：消耗传入的这条购买记录（调用插件 use 钩子）
      */
     private function consume($actor, $store, $cart)
     {
@@ -120,12 +132,10 @@ class BackpackUseController extends AbstractCreateController
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.cart-no-use')]);
         }
 
-        // 同一商品可能有多条购买记录，加行锁取最旧的一条，防止并发重复消耗
+        // 行锁锁住传入记录并复查状态，防止并发重复消耗（与校验的是同一条，语义一致）
         $target = StoreCartModel::query()
-            ->where('user_id', $actor->id)
-            ->where('store_id', $cart->store_id)
+            ->where('id', $cart->id)
             ->where('status', 1)
-            ->orderBy('id')
             ->lockForUpdate()
             ->first();
         if (!$target) {

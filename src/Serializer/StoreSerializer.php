@@ -7,17 +7,22 @@ use Flarum\Extension\ExtensionManager;
 use Flarum\Locale\Translator;
 use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Enum\LimitUnitEnum;
+use Mattoid\Store\Service\PricingService;
 use Mattoid\Store\Utils\ExtensionIconUtil;
 
 class StoreSerializer extends AbstractSerializer
 {
     protected $translator;
     protected $extensions;
+    protected $pricing;
+    /** 单次请求内有效折扣价的计算缓存（窗口判定含 Carbon 解析，逐个商品重复计算浪费） */
+    private $discountPriceCache = [];
 
-    public function __construct(Translator $translator, ExtensionManager $extensions)
+    public function __construct(Translator $translator, ExtensionManager $extensions, PricingService $pricing)
     {
         $this->translator = $translator;
         $this->extensions = $extensions;
+        $this->pricing = $pricing;
     }
 
     protected function getDefaultAttributes($data) {
@@ -32,7 +37,8 @@ class StoreSerializer extends AbstractSerializer
             'discount' => $data->discount,
             'discountLimit' => $data->discount_limit,
             'discountLimitUnit' => $data->discount_limit_unit,
-            'discountPrice' => $data->discount_price,
+            // 输出"当前生效"的折扣价而非静态列：窗口过期后前端不再显示折扣价，与实付口径一致
+            'discountPrice' => $this->effectiveDiscountPrice($data),
             'discountStartAt' => $data->discount_start_at,
             'type' => $data->type,
             'outtime' => $data->outtime,
@@ -55,6 +61,18 @@ class StoreSerializer extends AbstractSerializer
             'pluginExtIcon' => $extIcon,
             'createdAt' => $data->created_at,
             'updatedAt' => $data->updated_at,
+            // 回收站视图依赖此字段判行类型（软删行由 ListStoreController 的 trashed 筛选返回）
+            'deletedAt' => $data->deleted_at,
         ];
+    }
+
+    private function effectiveDiscountPrice($store): float
+    {
+        $key = $store->code ?? $store->id;
+        if (! array_key_exists($key, $this->discountPriceCache)) {
+            $this->discountPriceCache[$key] = $this->pricing->activeDiscountPrice($store);
+        }
+
+        return $this->discountPriceCache[$key];
     }
 }

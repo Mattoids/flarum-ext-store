@@ -30,6 +30,8 @@ mattoid-store:
       goods-item-delete: 确定要删除该物品吗？
       goods-item-status-0: 确定要上架该物品吗？
       goods-item-status-1: 确定要下架该物品吗？
+      goods-restore: 恢复
+      goods-item-restore: 恢复该商品？恢复后处于下架状态，需手动重新上架。
       show-icon-button: 图库
       goods-icon-back: 返回
       goods-icon-effect-preview: 样式预览效果
@@ -104,13 +106,20 @@ mattoid-store:
     cart: 购买记录
     sold-out: 售罄
 
+    notification:
+      notify_gift_label: 商店赠送与到期通知
+      gift-received: 你收到了赠送的商品：{title}
+      goods-invalid: 你的道具"{title}"已到期
+
     error:
       insufficient-inventory: 库存不足
       user-balance-low: 用户余额不足
+      limit-outtime-required: 限时商品必须设置大于 0 的有效天数
       store-goods-non-existent: 商品不存在或已下架
       validate-fail: 购买物品失败
       cannot-purchase-repeatedly: 有效期内不允许重复购买
       gift-already-owned: 对方已拥有「{title}」，该商品不允许重复持有
+      gift-too-many-users: 单次最多指定 {count} 个用户，请分批赠送
       buy-goods-fail: 购买【{title}】失败
       file-exist: 文件已存在
       automatic-renewal: 未开启自动续费
@@ -125,6 +134,7 @@ mattoid-store:
       purchase-limit-exceeded-lifetime: 该商品终身限购 {count} 件，您已购满
       cart-no-use: 该商品没有使用功能
       cart-use-fail: 商品使用失败
+      cart-status-changed: 道具状态已变化，请刷新后重试
 
   lib:
     class-icon-preview: 样式预览
@@ -161,6 +171,7 @@ mattoid-store:
     item-status: 商品状态
     item-status-0: 下架
     item-status-1: 上架
+    item-status-trashed: 已删除
     item-price: 价格
     item-stock: 库存
     infinite: 无限

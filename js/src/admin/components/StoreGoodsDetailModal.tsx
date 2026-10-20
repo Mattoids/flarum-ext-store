@@ -515,7 +515,19 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
             <div>
               {this.iconList.items.map((item: { attributes: { url: string } }) => {
                 return (
-                  <div className="icon-frame inlineBlock" onclick={() => this.selectIconItem(item.attributes.url)}>
+                  <div
+                    className="icon-frame inlineBlock"
+                    role="button"
+                    tabindex={0}
+                    aria-label={extractText(app.translator.trans('mattoid-store.admin.settings.goods-icon'))}
+                    onclick={() => this.selectIconItem(item.attributes.url)}
+                    onkeydown={(e: KeyboardEvent) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.selectIconItem(item.attributes.url);
+                      }
+                    }}
+                  >
                     <img
                       className="icon-size"
                       alt=""

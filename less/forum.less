@@ -229,7 +229,7 @@
 }
 
 .price {
-  color: #e7564f;
+  color: var(--alert-error-color, #e7564f);
   font-size: 18px;
   font-weight: 700;
 }
@@ -268,7 +268,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #fff;
+    background: var(--body-bg);
     border-radius: 8px;
     overflow: hidden;
   }
@@ -290,7 +290,7 @@
     flex-wrap: wrap;
   }
   .StoreBox-priceGroup .price {
-    color: #e7564f;
+    color: var(--alert-error-color, #e7564f);
     font-size: 22px;
     font-weight: 700;
   }
@@ -388,8 +388,29 @@
   min-height: 20px;
 }
 .BackpackItem-info .color-green {
-  color: #7bc17c;
+  color: var(--alert-success-color, #7bc17c);
   font-weight: 600;
+}
+.BackpackItem-iconPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  margin: 0 auto;
+  border-radius: 8px;
+  background: var(--control-bg);
+  color: var(--muted-color);
+  font-size: 28px;
+}
+/* 赠送确认按钮行（与 admin.less 的 .StoreConfirmActions 等价） */
+.StoreConfirmActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid var(--control-bg);
 }
 .BackpackItem-titleRow {
   display: flex;

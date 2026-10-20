@@ -3,6 +3,8 @@
 namespace Mattoid\Store\Listeners;
 
 use Carbon\Carbon;
+use Flarum\Foundation\ValidationException;
+use Flarum\Locale\Translator;
 use Illuminate\Contracts\Events\Dispatcher;
 use Mattoid\Store\Event\StoreCartAddEvent;
 use Mattoid\Store\Event\StoreStockSubEvent;
@@ -14,10 +16,12 @@ use Mattoid\Store\Model\StoreCartModel;
 class StoreCartAddListeners
 {
     private $events;
+    private $translator;
 
-    public function __construct(Dispatcher $events)
+    public function __construct(Dispatcher $events, Translator $translator)
     {
         $this->events = $events;
+        $this->translator = $translator;
     }
 
     public function handle(StoreCartAddEvent $event) {
@@ -34,11 +38,16 @@ class StoreCartAddListeners
         $cart->price = $store->price;
         $cart->pay_amt = $price;
         $cart->type = $store->type;
+        $cart->auto_deduction = $store->auto_deduction;
         $cart->status = 0;
         $cart->enable = 0;
 
         if ($store->type == 'limit') {
-            $cart->outtime = Carbon::now()->addDays($store->outtime);
+            // outtime 非法（0/null）会让道具购买即过期，直接拒绝
+            if ((int) $store->outtime <= 0) {
+                throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.limit-outtime-required')]);
+            }
+            $cart->outtime = Carbon::now()->addDays((int) $store->outtime);
         }
 
         // 先扣除库存，失败则中断且不创建购物车记录

@@ -12,9 +12,21 @@ import ItemList from 'flarum/common/utils/ItemList';
 import UserControls from 'flarum/forum/utils/UserControls';
 import Button from 'flarum/common/components/Button';
 import ForumGiftGoodsModal from './components/modal/ForumGiftGoodsModal';
+import StoreNotification from './components/notification/StoreNotification';
+import NotificationGrid from 'flarum/forum/components/NotificationGrid';
 
 app.initializers.add('mattoid/store', () => {
   initStoreRegistry();
+
+  // 商店赠送/到期通知
+  app.notificationComponents.storeGiftNotification = StoreNotification;
+  extend(NotificationGrid.prototype, 'notificationTypes', function (items) {
+    items.add('storeGiftNotification', {
+      name: 'storeGift',
+      icon: 'fas fa-gift',
+      label: app.translator.trans('mattoid-store.forum.notification.notify_gift_label'),
+    });
+  });
 
   // 用户主页「操作」菜单：有商店管理权限的用户可向该用户赠送商品
   extend(UserControls, 'moderationControls', function (items, user) {

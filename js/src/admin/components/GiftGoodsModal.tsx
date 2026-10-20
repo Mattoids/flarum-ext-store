@@ -2,6 +2,7 @@ import app from 'flarum/admin/app';
 import Modal from 'flarum/common/components/Modal';
 import Button from 'flarum/common/components/Button';
 import Stream from 'flarum/common/utils/Stream';
+import extractText from 'flarum/common/utils/extractText';
 
 export default class GiftGoodsModal extends Modal {
   private storeData: any = {};
@@ -72,12 +73,16 @@ export default class GiftGoodsModal extends Modal {
                   {this.selectedUsers.map((user, index) => (
                     <span className="StoreCodeChip" key={user.id()}>
                       {user.displayName() || user.username()}
-                      <i
-                        className="fas fa-times GiftGoodsModal-remove"
+                      <button
+                        type="button"
+                        className="GiftGoodsModal-remove"
+                        aria-label={extractText(app.translator.trans('mattoid-store.admin.settings.goods-delete'))}
                         onclick={() => {
                           this.selectedUsers.splice(index, 1);
                         }}
-                      />
+                      >
+                        <i className="fas fa-times" />
+                      </button>
                     </span>
                   ))}
                 </div>
@@ -90,6 +95,10 @@ export default class GiftGoodsModal extends Modal {
                 oninput={(e: InputEvent) => {
                   this.search = (e.target as HTMLInputElement).value;
                   this.queueSearch();
+                }}
+                onkeydown={(e: KeyboardEvent) => {
+                  // 阻止回车触发表单提交（本意只是搜索）
+                  if (e.key === 'Enter') e.preventDefault();
                 }}
               />
               {this.searchResults.length > 0 && (
@@ -154,7 +163,7 @@ export default class GiftGoodsModal extends Modal {
               count: this.result.successCount,
             })}
           </p>
-          {(failed.insufficientStock > 0 || failed.other > 0) && (
+          {(failed.insufficientStock > 0 || failed.alreadyOwned > 0 || failed.other > 0) && (
             <div className="GiftGoodsModal-warning">
               {failed.insufficientStock > 0 && (
                 <p>{app.translator.trans('mattoid-store.admin.settings.gift-result-failed-stock', { count: failed.insufficientStock })}</p>
@@ -210,6 +219,7 @@ export default class GiftGoodsModal extends Modal {
   }
 
   addUser(user) {
+    if (this.selectedUsers.some((selected) => selected.id() === user.id())) return;
     this.selectedUsers.push(user);
     this.searchResults = this.searchResults.filter((item) => item.id() !== user.id());
   }
@@ -225,11 +235,21 @@ export default class GiftGoodsModal extends Modal {
 
     const amount = parseInt(this.amount(), 10);
     if (!amount || amount < 1 || amount > 99) {
-      this.onerror(new Error(app.translator.trans('mattoid-store.admin.settings.gift-amount-invalid')));
+      this.onerror(new Error(extractText(app.translator.trans('mattoid-store.admin.settings.gift-amount-invalid'))));
       return;
     }
 
     this.loading = true;
+
+    if (this.allUsers) {
+      // 全体用户模式：后端按批次返回 nextCursor 断点续传，前端循环取尽后合并计数一次性展示
+      this.giftAllUsers(amount, null, {
+        successUsers: 0,
+        successCount: 0,
+        failed: { insufficientStock: 0, alreadyOwned: 0, other: 0 },
+      });
+      return;
+    }
 
     app
       .request({
@@ -247,6 +267,43 @@ export default class GiftGoodsModal extends Modal {
           this.loading = false;
           this.result = result;
           m.redraw();
+        },
+        (error) => {
+          this.loading = false;
+          this.onerror(error);
+        }
+      );
+  }
+
+  giftAllUsers(amount: number, cursor: string | null, acc: any) {
+    app
+      .request({
+        method: 'POST',
+        url: app.forum.attribute('apiUrl') + '/store/gift/goods',
+        body: {
+          storeId: this.storeData.id,
+          userIds: [],
+          allUsers: true,
+          amount: amount,
+          cursor: cursor,
+        },
+      })
+      .then(
+        (result: any) => {
+          acc.successUsers += result.successUsers || 0;
+          acc.successCount += result.successCount || 0;
+          const failed = result.failed || {};
+          acc.failed.insufficientStock += failed.insufficientStock || 0;
+          acc.failed.alreadyOwned += failed.alreadyOwned || 0;
+          acc.failed.other += failed.other || 0;
+
+          if (result.nextCursor) {
+            this.giftAllUsers(amount, result.nextCursor, acc);
+          } else {
+            this.loading = false;
+            this.result = acc;
+            m.redraw();
+          }
         },
         (error) => {
           this.loading = false;

@@ -38,6 +38,37 @@ export default class StoreListItem extends Component<StoreListItemAttrs> {
     const isClassIcon = icon && icon.indexOf('/') === -1 && icon.indexOf('.') === -1;
     const statusUp = Number(data.status) === 1;
 
+    // 已软删商品（回收站视图）：只展示信息 + 恢复入口
+    if (data.deletedAt) {
+      return (
+        <div id={'goods' + data.id} className="StoreAdminItem StoreAdminItem--trashed">
+          <div className="StoreAdminItem-icon">
+            <i className="fas fa-trash-alt StoreAdminItem-iconPlaceholder" />
+          </div>
+          <div className="StoreAdminItem-main">
+            <div className="StoreAdminItem-head">
+              <span className="StoreAdminItem-title">{data.title}</span>
+              <span className="StoreBadge StoreBadge--muted">{app.translator.trans('mattoid-store.lib.item-status-trashed')}</span>
+            </div>
+            <div className="StoreAdminItem-meta">
+              <span>
+                {app.translator.trans('mattoid-store.lib.item-price')}: <b>{price}</b>
+              </span>
+              <span>{app.translator.trans('mattoid-store.lib.item-type-' + data.type)}</span>
+            </div>
+          </div>
+          <div className="StoreAdminItem-actions">
+            <Button
+              className="Button Button--primary"
+              onclick={() => app.modal.show(StoreModal, { storeData: data, title: 'restore', onSuccess: this.attrs.onChanged })}
+            >
+              {app.translator.trans('mattoid-store.admin.settings.goods-restore')}
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div id={'goods' + data.id} className="StoreAdminItem">
         <div className="StoreAdminItem-icon">

@@ -2,6 +2,7 @@ import app from 'flarum/forum/app';
 import Modal from 'flarum/common/components/Modal';
 import Button from 'flarum/common/components/Button';
 import Stream from 'flarum/common/utils/Stream';
+import extractText from 'flarum/common/utils/extractText';
 
 export default class ForumGiftGoodsModal extends Modal {
   private user: any = null;
@@ -20,7 +21,9 @@ export default class ForumGiftGoodsModal extends Modal {
       .then((results) => {
         this.goodsList = results && (results as any).payload ? (results as any).payload.data : [];
       })
-      .catch(() => {})
+      .catch(() => {
+        app.alerts.show({ type: 'error' }, app.translator.trans('mattoid-store.lib.backpack-use-fail'));
+      })
       .then(() => {
         this.loading = false;
         m.redraw();
@@ -122,7 +125,7 @@ export default class ForumGiftGoodsModal extends Modal {
   onsubmit() {
     const amount = parseInt(this.amount(), 10);
     if (!amount || amount < 1 || amount > 99) {
-      this.onerror(new Error(app.translator.trans('mattoid-store.forum.gift-amount-invalid')));
+      this.onerror(new Error(extractText(app.translator.trans('mattoid-store.forum.gift-amount-invalid'))));
       return;
     }
     if (!this.storeId()) {

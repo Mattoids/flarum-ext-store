@@ -5,6 +5,7 @@ namespace Mattoid\Store\Listeners;
 use Flarum\Locale\Translator;
 use Flarum\User\User;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Support\Facades\Log;
 use Mattoid\Store\Event\StoreBuyFailEvent;
 use Mattoid\Store\Event\StoreCartEditEvent;
 use Mattoid\Store\Model\StoreCartModel;
@@ -34,9 +35,14 @@ class StoreBuyFailListeners
         }
         $store = $event->store;
 
-        // 通知购物车购买失败（status=2 会触发库存回滚）
+        // 通知购物车购买失败（status=2 会触发库存回滚）；回滚事件自身失败仅记日志，
+        // 不阻断后续退款，也不让购买者看到 500
         $cart->status = 2;
-        $this->events->dispatch(new StoreCartEditEvent($cart));
+        try {
+            $this->events->dispatch(new StoreCartEditEvent($cart));
+        } catch (\Throwable $e) {
+            Log::error('[mattoid-store] 购买失败库存回滚事件处理异常', ['cart_id' => $cart->id, 'exception' => $e]);
+        }
 
         // 回滚用户余额（交由资金管理器，优先 checkin-with-history 资金体系）
         $user = User::query()->where('id', $event->user->id)->first();

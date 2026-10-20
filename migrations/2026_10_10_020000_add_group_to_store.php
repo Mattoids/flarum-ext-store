@@ -1,4 +1,5 @@
 <?php
+// Flarum 1.x 不支持 rollback，本迁移不可回滚。
 
 use Illuminate\Database\Schema\Builder;
 

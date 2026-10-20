@@ -17,6 +17,47 @@ import Component from 'flarum/common/Component';
  * 管理端对应注册表见 app.storeAdminRegistry（js/src/admin/storeAdminRegistry.ts）。
  * 未注册时使用 store 扩展提供的默认组件。
  */
+
+/**
+ * 商店页商品卡片 attrs（item 槽位）
+ */
+export interface StoreGoodsItemProps {
+  /** 商品资源（attributes 为商品数据） */
+  item: any;
+  /** 购买成功回调（可选） */
+  onSuccess?: (storeData: any) => void;
+}
+
+/**
+ * 购买/价格弹窗 attrs（priceModal/detail 槽位，替换默认 StoreBox）
+ */
+export interface StorePriceModalProps {
+  /** 商品数据（调用方已补 id） */
+  storeData: any;
+  /** 购买成功回调（可选） */
+  onSuccess?: (storeData: any) => void;
+}
+
+/**
+ * 背包条目 attrs（backpackItem 槽位，整体替换）
+ */
+export interface BackpackEntryProps {
+  /** 背包条目 attributes */
+  item: any;
+  /** 背包变更后刷新回调（可选） */
+  onChanged?: () => void;
+}
+
+/**
+ * 背包详情/结果弹窗 attrs（backpackDetail / backpackUseModal 槽位）
+ */
+export interface BackpackModalProps {
+  /** 背包条目 attributes */
+  item: any;
+  /** backpackUseModal：使用/取消使用接口的返回 */
+  result?: any;
+}
+
 export class StoreRegistry {
   private map: Map<string, typeof Component> = new Map();
 

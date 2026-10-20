@@ -12,6 +12,7 @@ use Illuminate\Support\Arr;
 use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreModel;
 use Mattoid\Store\Serializer\StoreSerializer;
+use Mattoid\Store\Service\IconRefCountService;
 use Mattoid\Store\Utils\StoreParamsUtil;
 use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Document;
@@ -23,15 +24,17 @@ use Tobscure\JsonApi\Document;
 class PutStoreController extends AbstractCreateController
 {
     protected $translator;
+    protected $iconRefCount;
 
     /**
      * {@inheritdoc}
      */
     public $serializer = StoreSerializer::class;
 
-    public function __construct(Translator $translator)
+    public function __construct(Translator $translator, IconRefCountService $iconRefCount)
     {
         $this->translator = $translator;
+        $this->iconRefCount = $iconRefCount;
     }
 
     protected function data(ServerRequestInterface $request, Document $document) {
@@ -79,7 +82,13 @@ class PutStoreController extends AbstractCreateController
             $params['discount_start_at'] = $params['discount'] > 0 ? Carbon::now() : null;
         }
 
+        $oldIcon = $store->icon;
         $store->update($params);
+
+        // 更换图标时释放旧图标引用（与上传接口的 increment('count') 对应）
+        if (array_key_exists('icon', $params) && $params['icon'] !== $oldIcon) {
+            $this->iconRefCount->release($oldIcon);
+        }
 
         return $store->refresh();
     }

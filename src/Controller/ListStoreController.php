@@ -7,6 +7,7 @@ use Flarum\Http\RequestUtil;
 use Flarum\Http\UrlGenerator;
 use Flarum\User\Exception\PermissionDeniedException;
 use Illuminate\Support\Arr;
+use Mattoid\Store\Controller\Concerns\PaginatesQueries;
 use Mattoid\Store\Extend\StoreExtend;
 use Mattoid\Store\Model\StoreModel;
 use Mattoid\Store\Serializer\StoreSerializer;
@@ -19,6 +20,8 @@ use Tobscure\JsonApi\Document;
  */
 class ListStoreController extends AbstractListController
 {
+    use PaginatesQueries;
+
     protected $url;
 
     /**
@@ -34,8 +37,6 @@ class ListStoreController extends AbstractListController
     protected function data(ServerRequestInterface $request, Document $document) {
         $actor = RequestUtil::getActor($request);
         $params = $request->getQueryParams();
-        $limit = $this->extractLimit($request);
-        $offset = $this->extractOffset($request);
         $type = Arr::get($params, 'filter.type');
         $status = Arr::get($params, 'filter.status');
         $code = Arr::get($params, 'filter.code');
@@ -47,12 +48,17 @@ class ListStoreController extends AbstractListController
             throw new PermissionDeniedException();
         }
 
-        $query = StoreModel::query();
+        // 'trashed' 是回收站筛选：含软删行（前端恢复入口依赖）
+        if ($status === 'trashed') {
+            $query = StoreModel::withTrashed()->whereNotNull('deleted_at');
+        } else {
+            $query = StoreModel::query();
+        }
         if ($type && $type != '-1') {
             $query->where('type', $type);
         }
-        // '0' 是合法的筛选值（已下架），不能用真值判断
-        if ($status !== null && $status !== '' && $status != '-1') {
+        // '0' 是合法的筛选值（已下架），不能用真值判断；'trashed' 走回收站分支，不再按状态过滤
+        if ($status !== null && $status !== '' && $status != '-1' && $status !== 'trashed') {
             $query->where('status', $status);
         }
         // 级联筛选：分组 / 商品插件 / 道具类型（插件自定义）/ 折扣
@@ -71,24 +77,8 @@ class ListStoreController extends AbstractListController
             $query->where('discount', 0);
         }
 
-        $list = $query
-            ->skip($offset)
-            ->take($limit + 1)
-            ->orderByDesc('id')
-            ->get();
+        $list = $query->orderByDesc('id');
 
-        $results = $limit > 0 && $list->count() > $limit;
-        if($results){
-            $list->pop();
-        }
-        $document->addPaginationLinks(
-            $this->url->to('api')->route('store.list'),
-            $params,
-            $offset,
-            $limit,
-            $results ? null : 0
-        );
-
-        return $list;
+        return $this->paginateList($list, $request, $document, 'store.list');
     }
 }

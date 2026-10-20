@@ -5,6 +5,7 @@ namespace Mattoid\Store\Service;
 use Flarum\User\User;
 use Huoxin\MoneyWithHistory\Service\BalanceManager;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Support\Facades\Log;
 
 /**
  * 商店资金管理器
@@ -57,7 +58,14 @@ class StoreMoneyManager
     public function pay(User $user, float $price, string $source, string $sourceKey, array $params = [], string $legacyMessage = '', ?User $actor = null): bool
     {
         if ($this->balanceManager) {
-            return $this->balanceManager->adjustBalance($user, -$price, $source, $sourceKey, $params, $actor, true);
+            try {
+                return $this->balanceManager->adjustBalance($user, -$price, $source, $sourceKey, $params, $actor, true);
+            } catch (\Throwable $e) {
+                // 扣款异常按失败处理（调用方回滚业务），但必须留痕，否则资金差错无从排查
+                Log::error('[mattoid-store] 资金扣款异常', ['user' => $user->id, 'price' => $price, 'source' => $source, 'exception' => $e]);
+
+                return false;
+            }
         }
 
         // 回退模式：原子扣款，仅当余额仍足额时扣减，防止并发透支
@@ -90,7 +98,19 @@ class StoreMoneyManager
         }
 
         if ($this->balanceManager) {
-            return $this->balanceManager->adjustBalance($user, $amount, $source, $sourceKey, $params, $actor);
+            try {
+                $done = $this->balanceManager->adjustBalance($user, $amount, $source, $sourceKey, $params, $actor);
+                if (! $done) {
+                    Log::error('[mattoid-store] 资金退款未执行（资金体系返回失败）', ['user' => $user->id, 'amount' => $amount, 'source' => $source]);
+                }
+
+                return $done;
+            } catch (\Throwable $e) {
+                // 退款失败只记日志返回 false——此刻购买已失败，向上抛只会让购买者看到 500 且掩盖根因
+                Log::error('[mattoid-store] 资金退款异常', ['user' => $user->id, 'amount' => $amount, 'source' => $source, 'exception' => $e]);
+
+                return false;
+            }
         }
 
         // 回退模式：原子累加退款

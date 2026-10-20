@@ -5,6 +5,7 @@ namespace Mattoid\Store\Service;
 use Carbon\Carbon;
 use Flarum\Foundation\ValidationException;
 use Flarum\Locale\Translator;
+use Illuminate\Support\Facades\Log;
 use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Model\StoreModel;
 
@@ -94,11 +95,18 @@ class PurchaseLimiter
     }
 
     /**
-     * 限购周期单位换算为秒（与 LimitUnitEnum 保持一致）
+     * 限购周期单位换算为秒（与 LimitUnitEnum 保持一致）。
+     * 未知单位记 warning 日志并保守回退为终身限购（0 秒），避免静默改变限购语义
      */
     private static function periodUnitToSeconds($unit)
     {
         $map = ['days' => 86400, 'hour' => 3600, 'minute' => 60, 'second' => 1];
-        return $map[$unit] ?? 0;
+        if (! is_string($unit) || ! array_key_exists($unit, $map)) {
+            Log::warning("[mattoid-store] unknown purchase_limit_period_unit '{$unit}', fallback to lifetime limit");
+
+            return 0;
+        }
+
+        return $map[$unit];
     }
 }

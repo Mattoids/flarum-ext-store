@@ -156,6 +156,7 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
           m('.helpText', app.translator.trans(column.helpText || '')),
           m('textarea.FormControl', {
             value: this.params[column.value],
+            disabled: this.loading,
             onchange: (event: InputEvent) => {
               this.params[column.value] = (event.target as HTMLInputElement).value;
             },
@@ -192,7 +193,7 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
             this.attrs.onSuccess(this.storeData);
           }
           app.alerts.show({ type: 'success' }, app.translator.trans('mattoid-store.forum.error.buy-success'));
-          app.modal.close();
+          this.hide();
         },
         (result: any) => {
           this.loading = false;

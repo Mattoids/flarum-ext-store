@@ -45,7 +45,8 @@ class GoodsInvalidCommand extends AbstractCommand
         // 分块处理，避免过期记录累积后一次性全量加载撑爆内存
         StoreCartModel::query()->where('outtime', '<=', $dateTime)->where('type', 'limit')->where('status', 1)
             ->chunkById(200, function ($invalidList) {
-                $storeList = StoreModel::query()->whereIn('id', $invalidList->pluck('store_id')->all())->get();
+                // 含软删商品：商品被删除后其限时购物车仍须走失效流程，否则永不失效
+                $storeList = StoreModel::query()->withTrashed()->whereIn('id', $invalidList->pluck('store_id')->all())->get();
                 $storeMap = $storeList->keyBy('id');
 
                 foreach ($invalidList as $cart) {
@@ -60,7 +61,15 @@ class GoodsInvalidCommand extends AbstractCommand
         // 获取商品信息
         $store = $storeMap->get($cart->store_id);
         if (!$store) {
-            $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.invalid-product')}");
+            // 商品已物理删除：失效钩子与 StoreInvalidEvent 的签名都要求 StoreModel，
+            // 跳过调用，仅将购物车置为失效（9-超时失效），避免永久停留 status=1
+            try {
+                $cart->status = 9;
+                $cart->save();
+                $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.invalid-product')}");
+            } catch (\Exception $e) {
+                $this->error("[{$cart->code}] {$cart->store_id}:{$cart->id}: {$this->translator->trans('mattoid-store.forum.error.goods-invalid-fail', ['message' => $e->getMessage()])}");
+            }
             return;
         }
 
@@ -107,6 +116,11 @@ class GoodsInvalidCommand extends AbstractCommand
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.invalid-product')]);
         }
 
+        // 有效期非法（老数据/改库）视为不可续费：走失效分支，避免 addDays(0) 后每分钟重复扣款
+        if ((int) $store->outtime <= 0) {
+            throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.automatic-renewal')]);
+        }
+
         // 防重锁冲突不算续费失败（外层捕获后跳过，不触发失效）
         $key = md5("mattoid-store-renew-{$cart->store_id}-{$cart->user_id}");
         if (!$this->cache->add($key, time(), 5)) {
@@ -114,7 +128,8 @@ class GoodsInvalidCommand extends AbstractCommand
         }
 
         try {
-            // 续费不参与折扣、不处理库存，按商品当前价续费
+            // 续费不参与折扣、不处理库存；按购买时实付价（cart.pay_amt 快照）续费，
+            // 不随商品现价/折扣变动——实付价锁定为设计意图，保障老用户续费价格稳定
             $user = User::query()->where('id', $cart->user_id)->first();
             if (!$user) {
                 throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.user-balance-low')]);
@@ -122,7 +137,7 @@ class GoodsInvalidCommand extends AbstractCommand
             // 续费扣款交由资金管理器：优先 checkin-with-history 资金体系，未安装时回退原生 SQL
             $paid = $this->money->pay(
                 $user,
-                $cart->price,
+                $cart->pay_amt,
                 'AUTODEDUCTION',
                 'mattoid-store.forum.money-history.auto-deduction',
                 ['title' => $store->title],
@@ -132,9 +147,8 @@ class GoodsInvalidCommand extends AbstractCommand
                 throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.user-balance-low')]);
             }
 
-            // 刷新过期时间与续费时间（保留原始购买时间 created_at）
-            $cart->pay_amt = $cart->price;
-            $cart->outtime = Carbon::now()->addDays($store->outtime);
+            // 刷新过期时间与续费时间（保留原始购买时间 created_at 与实付价快照 pay_amt）
+            $cart->outtime = Carbon::now()->addDays((int) $store->outtime);
             $cart->renewed_at = Carbon::now();
             $cart->save();
         } finally {

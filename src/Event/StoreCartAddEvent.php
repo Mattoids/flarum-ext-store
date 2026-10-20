@@ -6,6 +6,9 @@ use Flarum\User\User;
 use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Model\StoreModel;
 
+/**
+ * 事件 payload 为只读契约：监听者不得修改属性（cart 属性除外——由 StoreCartAddListeners 回写），结构变更需视为 BC 破坏
+ */
 class StoreCartAddEvent
 {
     public $user;

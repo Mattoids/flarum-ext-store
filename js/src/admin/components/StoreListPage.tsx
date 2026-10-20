@@ -76,6 +76,7 @@ export default class StoreListPage extends ExtensionPage {
                       '-1': app.translator.trans('mattoid-store.lib.item-status-all'),
                       '1': app.translator.trans('mattoid-store.lib.item-status-up'),
                       '0': app.translator.trans('mattoid-store.lib.item-status-down'),
+                      trashed: app.translator.trans('mattoid-store.lib.item-status-trashed'),
                     }}
                     onchange={(e: string) => {
                       this.status(e);

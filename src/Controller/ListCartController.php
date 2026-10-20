@@ -7,6 +7,7 @@ use Flarum\Http\RequestUtil;
 use Flarum\Http\UrlGenerator;
 use Flarum\User\Exception\PermissionDeniedException;
 use Illuminate\Support\Arr;
+use Mattoid\Store\Controller\Concerns\PaginatesQueries;
 use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Serializer\CartSerializer;
 use Psr\Http\Message\ServerRequestInterface;
@@ -14,6 +15,8 @@ use Tobscure\JsonApi\Document;
 
 class ListCartController extends AbstractListController
 {
+    use PaginatesQueries;
+
     protected $url;
 
     /**
@@ -29,8 +32,6 @@ class ListCartController extends AbstractListController
     protected function data(ServerRequestInterface $request, Document $document) {
         $actor = RequestUtil::getActor($request);
         $params = $request->getQueryParams();
-        $limit = $this->extractLimit($request);
-        $offset = $this->extractOffset($request);
         $type = Arr::get($params, 'filter.type');
         $status = Arr::get($params, 'filter.status');
         $autoDeduction = Arr::get($params, 'filter.autoDeduction');
@@ -53,23 +54,9 @@ class ListCartController extends AbstractListController
         $list = StoreCartModel::query()
             ->where('user_id', $actor->id)
             ->where($filter)
-            ->skip($offset)
-            ->take($limit + 1)
             ->orderByDesc('created_at')
-            ->get();
+            ->orderByDesc('id');
 
-        $results = $limit > 0 && $list->count() > $limit;
-        if($results){
-            $list->pop();
-        }
-        $document->addPaginationLinks(
-            $this->url->to('api')->route('store.cart.list'),
-            $params,
-            $offset,
-            $limit,
-            $results ? null : 0
-        );
-
-        return $list;
+        return $this->paginateList($list, $request, $document, 'store.cart.list');
     }
 }

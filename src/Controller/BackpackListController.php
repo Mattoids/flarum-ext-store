@@ -11,6 +11,7 @@ use Mattoid\Store\Model\StoreCartModel;
 use Mattoid\Store\Model\StoreModel;
 use Mattoid\Store\Serializer\BackpackItemSerializer;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
 use Tobscure\JsonApi\Document;
 
 /**
@@ -29,10 +30,12 @@ class BackpackListController extends AbstractListController
     public $serializer = BackpackItemSerializer::class;
 
     protected $url;
+    protected $logger;
 
-    public function __construct(UrlGenerator $url)
+    public function __construct(UrlGenerator $url, LoggerInterface $logger)
     {
         $this->url = $url;
+        $this->logger = $logger;
     }
 
     protected function data(ServerRequestInterface $request, Document $document)
@@ -50,9 +53,22 @@ class BackpackListController extends AbstractListController
         $items = [];
 
         // 先取扩展条目（数量有界），其数量决定购物车主查询需要多取多少，
-        // 保证 offset 作用在合并排序后的完整列表上，而不是只作用于购物车子集
+        // 保证 offset 作用在合并排序后的完整列表上，而不是只作用于购物车子集。
+        // 单个 provider 故障只跳过该来源并记日志，不拖垮整个背包列表
         foreach (StoreExtend::getBackpackProviders() as $provider) {
-            foreach ((array) $provider($userId) as $item) {
+            $providerName = is_object($provider) ? get_class($provider) : gettype($provider);
+            try {
+                $providerItems = (array) $provider($userId);
+            } catch (\Throwable $e) {
+                $this->logger->warning("[store] backpack provider {$providerName} failed: {$e->getMessage()}");
+                continue;
+            }
+            foreach ($providerItems as $item) {
+                // 最小形状校验：缺 createdAt 的畸形条目直接跳过，避免后续序列化 500
+                if (! is_object($item) || ! isset($item->createdAt) || ! strtotime((string) $item->createdAt)) {
+                    $this->logger->warning("[store] backpack provider {$providerName} returned malformed item, skipped");
+                    continue;
+                }
                 $items[] = $item;
             }
         }
@@ -117,9 +133,12 @@ class BackpackListController extends AbstractListController
             }
         }
 
-        // 按获得时间倒序合并后统一施加 offset/limit（两个来源都参与分页，不再漏条目）
+        // 按获得时间倒序合并后统一施加 offset/limit（两个来源都参与分页，不再漏条目）。
+        // 秒级并列时以 id 决胜，保证跨请求顺序稳定，翻页不漏/不重
         usort($items, function ($a, $b) {
-            return strtotime($b->createdAt) <=> strtotime($a->createdAt);
+            $byTime = strtotime((string) $b->createdAt) <=> strtotime((string) $a->createdAt);
+
+            return $byTime !== 0 ? $byTime : strcmp((string) $a->id, (string) $b->id);
         });
 
         $hasMore = false;

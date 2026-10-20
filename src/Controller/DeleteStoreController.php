@@ -6,6 +6,7 @@ use Flarum\Api\Controller\AbstractDeleteController;
 use Flarum\Http\RequestUtil;
 use Flarum\User\Exception\PermissionDeniedException;
 use Mattoid\Store\Model\StoreModel;
+use Mattoid\Store\Service\IconRefCountService;
 use Psr\Http\Message\ServerRequestInterface;
 
 /**
@@ -13,6 +14,13 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 class DeleteStoreController extends AbstractDeleteController
 {
+    protected $iconRefCount;
+
+    public function __construct(IconRefCountService $iconRefCount)
+    {
+        $this->iconRefCount = $iconRefCount;
+    }
+
     protected function delete(ServerRequestInterface $request)
     {
         $actor = RequestUtil::getActor($request);
@@ -25,6 +33,8 @@ class DeleteStoreController extends AbstractDeleteController
         $store = StoreModel::query()->find($id);
         if ($store) {
             $store->delete();
+            // 商品删除后释放其图标引用（与上传接口的 increment('count') 对应）
+            $this->iconRefCount->release($store->icon);
         }
     }
 }

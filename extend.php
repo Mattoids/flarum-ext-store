@@ -12,6 +12,7 @@
 use Flarum\Api\Serializer\BasicUserSerializer;
 use Flarum\Extend;
 use Flarum\Foundation\Paths;
+use Flarum\Frontend\Document;
 use Flarum\Http\UrlGenerator;
 use Mattoid\Store\Attributes\UserAttributes;
 use Mattoid\Store\Console\Command\GoodsInvalidCommand;
@@ -20,6 +21,7 @@ use Mattoid\Store\Controller\BackpackListController;
 use Mattoid\Store\Controller\BackpackUseController;
 use Mattoid\Store\Controller\BuyGoodsController;
 use Mattoid\Store\Controller\DeleteStoreController;
+use Mattoid\Store\Controller\RestoreStoreController;
 use Mattoid\Store\Controller\FilterOptionsController;
 use Mattoid\Store\Controller\GiftGoodsController;
 use Mattoid\Store\Controller\ListCartController;
@@ -32,12 +34,16 @@ use Mattoid\Store\Controller\StoreUpdateIconController;
 use Mattoid\Store\Event\StoreBuyFailEvent;
 use Mattoid\Store\Event\StoreCartAddEvent;
 use Mattoid\Store\Event\StoreCartEditEvent;
+use Mattoid\Store\Event\StoreInvalidEvent;
 use Mattoid\Store\Event\StoreStockAddEvent;
 use Mattoid\Store\Event\StoreStockSubEvent;
 use Mattoid\Store\Extend\StoreExtend;
+use Mattoid\Store\Notification\StoreNotificationBlueprint;
+use Mattoid\Store\Serializer\StoreNotificationTypeSerializer;
 use Mattoid\Store\Listeners\StoreBuyFailListeners;
 use Mattoid\Store\Listeners\StoreCartAddListeners;
 use Mattoid\Store\Listeners\StoreCartEditListeners;
+use Mattoid\Store\Listeners\StoreInvalidListeners;
 use Mattoid\Store\Listeners\StoreStockAddListeners;
 use Mattoid\Store\Listeners\StoreStockSubListeners;
 
@@ -47,7 +53,10 @@ return [
         ->css(__DIR__.'/less/forum.less')
         ->route('/u/{username}/cart', 'mattoid-store.u.user.cart')
         ->route('/u/{username}/backpack', 'mattoid-store.u.user.backpack')
-        ->route('/store', 'mattoid-store.forum.title'),
+        ->route('/store', 'mattoid-store.forum.title')
+        ->content(function (Document $document) {
+            $document->payload['notificationTypes']['storeGiftNotification'] = 'Store Gift Notification';
+        }),
     (new Extend\Frontend('admin'))
         ->js(__DIR__.'/js/dist/admin.js')
         ->css(__DIR__.'/less/admin.less'),
@@ -60,6 +69,7 @@ return [
         ->get('/store/cart/list', 'store.cart.list', ListCartController::class)
         ->put('/store/goods', 'store.goods.put', PutStoreController::class)
         ->delete('/store/goods', 'store.goods.delete', DeleteStoreController::class)
+        ->post('/store/goods/restore', 'store.goods.restore', RestoreStoreController::class)
         ->post('/store/upload/icon', 'store.upload.icon', StoreUpdateIconController::class)
         ->post('/store/buy/goods', 'store.buy.goods', BuyGoodsController::class)
         ->post('/store/gift/goods', 'store.gift.goods', GiftGoodsController::class)
@@ -79,7 +89,11 @@ return [
         ->listen(StoreCartAddEvent::class, StoreCartAddListeners::class)
         ->listen(StoreCartEditEvent::class, StoreCartEditListeners::class)
         ->listen(StoreStockAddEvent::class, StoreStockAddListeners::class)
-        ->listen(StoreStockSubEvent::class, StoreStockSubListeners::class),
+        ->listen(StoreStockSubEvent::class, StoreStockSubListeners::class)
+        ->listen(StoreInvalidEvent::class, StoreInvalidListeners::class),
+
+    (new Extend\Notification())
+        ->type(StoreNotificationBlueprint::class, StoreNotificationTypeSerializer::class, ['alert']),
 
     (new Extend\Filesystem())
         ->disk('mattoid-store', function (Paths $paths, UrlGenerator $url) {

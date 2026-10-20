@@ -6,6 +6,7 @@ use Flarum\Extend\ExtenderInterface;
 use Flarum\Extend\LifecycleInterface;
 use Flarum\Extension\Extension;
 use Illuminate\Contracts\Container\Container;
+use Illuminate\Support\Facades\Log;
 use Mattoid\Store\Model\StoreModel;
 
 /**
@@ -114,6 +115,10 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
 
     private function add(string $type, $callback): self
     {
+        // 同一 code 重复注册时后者覆盖前者，记录日志以便排障
+        if (isset(self::$registry[$type][$this->key])) {
+            Log::warning("[mattoid-store] store extend '{$this->key}' of type '{$type}' re-registered, previous registration overwritten");
+        }
         self::$registry[$type][$this->key] = $callback;
         unset(self::$instances[$type][$this->key]);
         return $this;
@@ -154,7 +159,11 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
     {
         $plugins = [];
         foreach (array_keys(self::$registry[self::TYPE_GOODS] ?? []) as $key) {
-            $plugins[$key] = self::get(self::TYPE_GOODS, $key);
+            $plugin = self::get(self::TYPE_GOODS, $key);
+            // 类加载失败的插件跳过，避免调用方对 null 解引用
+            if ($plugin) {
+                $plugins[$key] = $plugin;
+            }
         }
         return $plugins;
     }
@@ -199,6 +208,11 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
         }
         if (!isset(self::$instances[$type][$key])) {
             $class = self::$registry[$type][$key];
+            // 注册类自动加载失败时不实例化（避免延迟到业务中途才爆 500），记日志并视为未注册
+            if (!class_exists($class)) {
+                Log::warning("[mattoid-store] store extend class '{$class}' (key '{$key}', type '{$type}') not found, treated as unregistered");
+                return null;
+            }
             self::$instances[$type][$key] = new $class;
         }
         return self::$instances[$type][$key];
