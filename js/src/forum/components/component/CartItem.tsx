@@ -28,7 +28,9 @@ export default class CartItem extends Component<CartItemAttrs> {
       class: 'StoreBadge StoreBadge--muted',
       key: 'mattoid-store.lib.item-cart-status-unknown',
     };
-    const moneyName = String(app.forum.attribute('antoinefr-money.moneyname') || '[money]');
+    const moneyName = String(
+      app.forum.attribute('antoinefr-money.moneyname') || app.forum.attribute('huoxin-money-with-history.money_name') || '[money]'
+    );
     const price =
       this.cartData.price > 0 ? moneyName.replace('[money]', String(this.cartData.price)) : app.translator.trans('mattoid-store.forum.free');
     const payAmt =

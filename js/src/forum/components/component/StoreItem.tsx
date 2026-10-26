@@ -35,7 +35,10 @@ export default class StoreItem extends Component<IStoreItemAttrs> {
       return <CustomItem item={this.attrs.item} onSuccess={this.attrs.onSuccess} />;
     }
 
-    const moneyName = String(app.forum.attribute('antoinefr-money.moneyname') || '[money]');
+    // 货币名键：antoinefr-money 原版在前，huoxin-money-with-history（本站使用的分支）回退
+    const moneyName = String(
+      app.forum.attribute('antoinefr-money.moneyname') || app.forum.attribute('huoxin-money-with-history.money_name') || '[money]'
+    );
     const price =
       this.storeData.price > 0 ? moneyName.replace('[money]', String(this.storeData.price)) : app.translator.trans('mattoid-store.forum.free');
     const discountPrice = moneyName.replace('[money]', String(this.storeData.discountPrice));

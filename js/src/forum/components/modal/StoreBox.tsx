@@ -62,7 +62,9 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
     const d = this.storeData;
     if (!d || !d.id) return null;
 
-    const moneyName = String(app.forum.attribute('antoinefr-money.moneyname') || '[money]');
+    const moneyName = String(
+      app.forum.attribute('antoinefr-money.moneyname') || app.forum.attribute('huoxin-money-with-history.money_name') || '[money]'
+    );
     const price = d.price > 0 ? moneyName.replace('[money]', String(d.price)) : app.translator.trans('mattoid-store.forum.free');
     const discountPrice = moneyName.replace('[money]', String(d.discountPrice));
     const isVideo = d.icon && d.icon.slice(-5) === '.webm';

@@ -75,16 +75,13 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
               <h2 class="BadgeOverviewTitle">{app.forum.attribute('storeName') || app.translator.trans('mattoid-store.forum.title')}</h2>
               {this.renderFilterBar()}
               <div className="Store-Body">
-                {this.list.items.map((item: StoreApiResource) => {
-                  if (this.canViewGoodsItem(item)) {
-                    return (
-                      <div className="storeItemContainer" key={item.id}>
-                        {StoreItem.component({ item, onSuccess: () => this.onItemBought(item) })}
-                      </div>
-                    );
-                  }
-                  return null;
-                })}
+                {this.list.items
+                  .filter((item: StoreApiResource) => this.canViewGoodsItem(item))
+                  .map((item: StoreApiResource) => (
+                    <div className="storeItemContainer" key={item.id}>
+                      {StoreItem.component({ item, onSuccess: () => this.onItemBought(item) })}
+                    </div>
+                  ))}
               </div>
 
               {!this.list.loading && this.list.items.length === 0 && (

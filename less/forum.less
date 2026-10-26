@@ -228,8 +228,10 @@
   white-space: nowrap;
 }
 
+// 价格颜色用独立变量，不引用 --alert-error-color：主题（如万圣节）会把 alert 变量
+// 重定义成接近背景色的颜色，导致价格看不清；管理员可通过 --mattoid-store-price-color 覆盖
 .price {
-  color: var(--alert-error-color, #e7564f);
+  color: var(--mattoid-store-price-color, #e7564f);
   font-size: 18px;
   font-weight: 700;
 }
@@ -290,7 +292,7 @@
     flex-wrap: wrap;
   }
   .StoreBox-priceGroup .price {
-    color: var(--alert-error-color, #e7564f);
+    color: var(--mattoid-store-price-color, #e7564f);
     font-size: 22px;
     font-weight: 700;
   }

@@ -5,9 +5,10 @@ namespace Mattoid\Store\Extend;
 use Flarum\Extend\ExtenderInterface;
 use Flarum\Extend\LifecycleInterface;
 use Flarum\Extension\Extension;
-use Illuminate\Contracts\Container\Container;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Container\Container;
+use Illuminate\Contracts\Container\Container as ContainerContract;
 use Mattoid\Store\Model\StoreModel;
+use Psr\Log\LoggerInterface;
 
 /**
  * 商品注册处理类
@@ -117,11 +118,24 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
     {
         // 同一 code 重复注册时后者覆盖前者，记录日志以便排障
         if (isset(self::$registry[$type][$this->key])) {
-            Log::warning("[mattoid-store] store extend '{$this->key}' of type '{$type}' re-registered, previous registration overwritten");
+            self::warn("[mattoid-store] store extend '{$this->key}' of type '{$type}' re-registered, previous registration overwritten");
         }
         self::$registry[$type][$this->key] = $callback;
         unset(self::$instances[$type][$this->key]);
         return $this;
+    }
+
+    /**
+     * 注册表读写可能发生在 extend.php 求值期（扩展启用/禁用流程），
+     * 此时门面尚未挂载，直接用 Log 门面会抛 "A facade root has not been set"。
+     * 改为从容器按需取 PSR 日志，容器不可用或未绑定时静默跳过。
+     */
+    private static function warn(string $message): void
+    {
+        $container = Container::getInstance();
+        if ($container && $container->bound(LoggerInterface::class)) {
+            $container->make(LoggerInterface::class)->warning($message);
+        }
     }
 
     /**
@@ -210,7 +224,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
             $class = self::$registry[$type][$key];
             // 注册类自动加载失败时不实例化（避免延迟到业务中途才爆 500），记日志并视为未注册
             if (!class_exists($class)) {
-                Log::warning("[mattoid-store] store extend class '{$class}' (key '{$key}', type '{$type}') not found, treated as unregistered");
+                self::warn("[mattoid-store] store extend class '{$class}' (key '{$key}', type '{$type}') not found, treated as unregistered");
                 return null;
             }
             self::$instances[$type][$key] = new $class;
@@ -241,7 +255,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
         });
     }
 
-    public function extend(Container $container, Extension $extension = null)
+    public function extend(ContainerContract $container, Extension $extension = null)
     {
     }
 
@@ -258,7 +272,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
      * @param Extension $extension
      * @return void
      */
-    public function onEnable(Container $container, Extension $extension)
+    public function onEnable(ContainerContract $container, Extension $extension)
     {
     }
 
@@ -270,7 +284,7 @@ class StoreExtend implements ExtenderInterface, LifecycleInterface
      * @param Extension $extension
      * @return void
      */
-    public function onDisable(Container $container, Extension $extension)
+    public function onDisable(ContainerContract $container, Extension $extension)
     {
         // 插件关闭自动下架对应商品
         StoreModel::query()->where('code', $this->key)->update(['status' => 0]);
