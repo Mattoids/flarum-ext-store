@@ -45,6 +45,13 @@ export default class StoreListPage extends ExtensionPage {
                 })}
                 {this.buildSettingComponent({
                   type: 'string',
+                  setting: 'mattoid-store.moneyName',
+                  label: app.translator.trans('mattoid-store.admin.settings.money-name'),
+                  placeholder: '[money]',
+                  help: app.translator.trans('mattoid-store.admin.settings.money-name-requirement'),
+                })}
+                {this.buildSettingComponent({
+                  type: 'string',
                   setting: 'mattoid-store.storeTimezone',
                   label: app.translator.trans('mattoid-store.admin.settings.store-timezone'),
                   placeholder: 'Asia/Shanghai',

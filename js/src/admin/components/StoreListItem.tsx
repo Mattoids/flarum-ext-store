@@ -5,6 +5,7 @@ import Button from 'flarum/common/components/Button';
 import StoreModal from './StoreModal';
 import StoreGoodsDetailModal from './StoreGoodsDetailModal';
 import GiftGoodsModal from './GiftGoodsModal';
+import { formatMoney } from '../../common/money';
 
 interface StoreListItemAttrs extends ComponentAttrs {
   item: StoreApiResource;
@@ -31,10 +32,7 @@ export default class StoreListItem extends Component<StoreListItemAttrs> {
     const data = this.storeData;
     const icon = data.icon || data.pluginIcon;
     const extIcon = data.pluginExtIcon;
-    const moneyName = String(
-      app.forum.attribute('antoinefr-money.moneyname') || app.forum.attribute('huoxin-money-with-history.money_name') || '[money]'
-    );
-    const price = data.price > 0 ? moneyName.replace('[money]', String(data.price)) : app.translator.trans('mattoid-store.lib.free');
+    const price = data.price > 0 ? formatMoney(data.price) : app.translator.trans('mattoid-store.lib.free');
     const isVideo = icon && icon.slice(-5) === '.webm';
     // CSS 类名 icon（如用户名颜色 decorationStoreColorText2）不能作为图片地址
     const isClassIcon = icon && icon.indexOf('/') === -1 && icon.indexOf('.') === -1;

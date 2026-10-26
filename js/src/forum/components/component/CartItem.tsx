@@ -1,6 +1,7 @@
 import app from 'flarum/forum/app';
 import Component, { ComponentAttrs } from 'flarum/common/Component';
 import type Mithril from 'mithril';
+import { formatMoney } from '../../../common/money';
 
 interface CartItemAttrs extends ComponentAttrs {
   item: StoreApiResource;
@@ -28,13 +29,10 @@ export default class CartItem extends Component<CartItemAttrs> {
       class: 'StoreBadge StoreBadge--muted',
       key: 'mattoid-store.lib.item-cart-status-unknown',
     };
-    const moneyName = String(
-      app.forum.attribute('antoinefr-money.moneyname') || app.forum.attribute('huoxin-money-with-history.money_name') || '[money]'
-    );
     const price =
-      this.cartData.price > 0 ? moneyName.replace('[money]', String(this.cartData.price)) : app.translator.trans('mattoid-store.forum.free');
+      this.cartData.price > 0 ? formatMoney(this.cartData.price) : app.translator.trans('mattoid-store.forum.free');
     const payAmt =
-      (this.cartData.payAmt || 0) > 0 ? moneyName.replace('[money]', String(this.cartData.payAmt)) : app.translator.trans('mattoid-store.forum.free');
+      (this.cartData.payAmt || 0) > 0 ? formatMoney(this.cartData.payAmt) : app.translator.trans('mattoid-store.forum.free');
     return (
       <div className="frame">
         <div className="row margin-top-10">

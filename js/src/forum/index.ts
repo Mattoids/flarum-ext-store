@@ -15,6 +15,9 @@ import ForumGiftGoodsModal from './components/modal/ForumGiftGoodsModal';
 import StoreNotification from './components/notification/StoreNotification';
 import NotificationGrid from 'flarum/forum/components/NotificationGrid';
 
+// 供商品插件（store-invite / store-decoration 等）跨扩展引用的金额格式化工具
+export { getMoneyName, formatMoney } from '../common/money';
+
 app.initializers.add('mattoid/store', () => {
   initStoreRegistry();
 

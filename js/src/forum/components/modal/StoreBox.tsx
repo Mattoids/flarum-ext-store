@@ -4,6 +4,7 @@ import type Mithril from 'mithril';
 import Button from 'flarum/common/components/Button';
 import Switch from 'flarum/common/components/Switch';
 import Select from 'flarum/common/components/Select';
+import { formatMoney } from '../../../common/money';
 
 export interface IStoreModalAttrs extends IInternalModalAttrs {
   storeData: StoreItemData;
@@ -62,11 +63,8 @@ export default class StoreBox extends Modal<IStoreModalAttrs> {
     const d = this.storeData;
     if (!d || !d.id) return null;
 
-    const moneyName = String(
-      app.forum.attribute('antoinefr-money.moneyname') || app.forum.attribute('huoxin-money-with-history.money_name') || '[money]'
-    );
-    const price = d.price > 0 ? moneyName.replace('[money]', String(d.price)) : app.translator.trans('mattoid-store.forum.free');
-    const discountPrice = moneyName.replace('[money]', String(d.discountPrice));
+    const price = d.price > 0 ? formatMoney(d.price) : app.translator.trans('mattoid-store.forum.free');
+    const discountPrice = formatMoney(d.discountPrice);
     const isVideo = d.icon && d.icon.slice(-5) === '.webm';
     const stockText = d.stock == -99 ? app.translator.trans('mattoid-store.forum.infinite') : d.stock;
     const typeText =

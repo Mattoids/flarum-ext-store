@@ -2,6 +2,7 @@ import app from 'flarum/forum/app';
 import Component, { ComponentAttrs } from 'flarum/common/Component';
 import type Mithril from 'mithril';
 import StoreBox from '../modal/StoreBox';
+import { formatMoney } from '../../../common/money';
 
 export interface IStoreItemAttrs extends ComponentAttrs {
   item: StoreApiResource;
@@ -35,13 +36,8 @@ export default class StoreItem extends Component<IStoreItemAttrs> {
       return <CustomItem item={this.attrs.item} onSuccess={this.attrs.onSuccess} />;
     }
 
-    // 货币名键：antoinefr-money 原版在前，huoxin-money-with-history（本站使用的分支）回退
-    const moneyName = String(
-      app.forum.attribute('antoinefr-money.moneyname') || app.forum.attribute('huoxin-money-with-history.money_name') || '[money]'
-    );
-    const price =
-      this.storeData.price > 0 ? moneyName.replace('[money]', String(this.storeData.price)) : app.translator.trans('mattoid-store.forum.free');
-    const discountPrice = moneyName.replace('[money]', String(this.storeData.discountPrice));
+    const price = this.storeData.price > 0 ? formatMoney(this.storeData.price) : app.translator.trans('mattoid-store.forum.free');
+    const discountPrice = formatMoney(this.storeData.discountPrice);
     const isVideo = this.storeData.icon && this.storeData.icon.slice(-5) === '.webm';
     const soldOut = this.storeData.stock != -99 && this.storeData.stock <= 0;
 
