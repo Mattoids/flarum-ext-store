@@ -3,8 +3,6 @@ mattoid-store:
     settings:
       store-name: 商店名称
       store-name-requirement: 商店名称会显示在首页菜单与标题栏
-      money-name: 货币单位
-      money-name-requirement: 价格单位模板，用 [money] 占位金额，如 "[money] 药丸"；留空则回退到货币扩展的配置
       store-timezone: 时区设置
       store-timezone-requirement: 设置时区。默认为 "Asia/Shanghai"
       group-view: 允许用户组访问商店

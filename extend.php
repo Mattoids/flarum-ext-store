@@ -79,8 +79,7 @@ return [
         ->post('/store/backpack/use', 'store.backpack.use', BackpackUseController::class),
 
     (new Extend\Settings())
-        ->serializeToForum('storeName', 'mattoid-store.storeName')
-        ->serializeToForum('storeMoneyName', 'mattoid-store.moneyName'),
+        ->serializeToForum('storeName', 'mattoid-store.storeName'),
 
     (new Extend\ApiSerializer(BasicUserSerializer::class))
         ->attributes(UserAttributes::class),

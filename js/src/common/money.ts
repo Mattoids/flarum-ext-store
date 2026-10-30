@@ -4,18 +4,16 @@ import app from 'flarum/common/app';
  * 金额显示工具：商品插件（store-invite / store-decoration 等）统一从这里取单位，
  * 保证所有商品卡片的价格口径与商店插件一致。
  *
- * 货币单位优先级：
- *  1. 商店插件自身配置 mattoid-store.moneyName（管理端「商店设置」可配）
+ * 货币单位一律以 money 插件（huoxin/money-with-history）的设置为准：
+ *  1. huoxin-money-with-history.money_name（money 插件设置，含其默认 '[money]'）
  *  2. antoinefr-money.moneyname（原版货币扩展，兼容旧站）
- *  3. huoxin-money-with-history.money_name（本站在用的货币扩展分支）
- *  4. 兜底 '[money]'
+ *  3. 兜底 '[money]'
  */
 
 export function getMoneyName(): string {
   return String(
-    app.forum.attribute('storeMoneyName') ||
+    app.forum.attribute('huoxin-money-with-history.money_name') ||
       app.forum.attribute('antoinefr-money.moneyname') ||
-      app.forum.attribute('huoxin-money-with-history.money_name') ||
       '[money]'
   );
 }
