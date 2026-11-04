@@ -43,6 +43,7 @@ class ListStoreController extends AbstractListController
         $subtype = Arr::get($params, 'filter.subtype');
         $group = Arr::get($params, 'filter.group');
         $discount = Arr::get($params, 'filter.discount');
+        $keyword = trim((string) Arr::get($params, 'filter.query', ''));
 
         if (!$actor->can('mattoid-store.group-view')) {
             throw new PermissionDeniedException();
@@ -75,6 +76,11 @@ class ListStoreController extends AbstractListController
             $query->where('discount', '>', 0);
         } elseif ($discount === '0') {
             $query->where('discount', 0);
+        }
+        // 标题搜索：%/_ 转义为字面量，避免通配符注入
+        if ($keyword !== '') {
+            $escaped = addcslashes($keyword, '%_');
+            $query->where('title', 'like', '%' . $escaped . '%');
         }
 
         $list = $query->orderByDesc('sort')->orderByDesc('id');

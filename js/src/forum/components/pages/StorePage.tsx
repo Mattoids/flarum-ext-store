@@ -11,7 +11,6 @@ import StoreItem from '../component/StoreItem';
 import LoadingBlock from '../component/LoadingBlock';
 import PaginatedList from '../PaginatedList';
 import bindInfiniteScroll from '../../utils/bindInfiniteScroll';
-import isMobile from '../../utils/isMobile';
 
 export interface IIndexPageAttrs extends IPageAttrs {}
 
@@ -24,12 +23,15 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
       filter: Object.assign(
         {
           status: this.status(),
+          query: this.search(),
         },
         this.filterValues
       ),
     }),
   });
   private filterValues: Record<string, string> = { group: '-1', code: '-1', subtype: '-1', type: '-1', discount: '-1' };
+  private search: Stream<string> = Stream('');
+  private searchTimer: any = null;
   private dimensions: any[] = [];
   private status: Stream<string> = Stream('1');
   private unbindScroll: (() => void) | null = null;
@@ -104,8 +106,8 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
                 </div>
               )}
 
-              {/* 桌面端显示加载按钮；手机端为瀑布流（滚动到底自动加载，见 oncreate） */}
-              {!isMobile() && !this.list.loading && this.list.hasMore() && (
+              {/* 「加载更多」按钮与手机端瀑布流（滚动到底自动加载，见 oncreate）并存 */}
+              {this.list.hasMore() && (
                 <div style="text-align:center;padding:20px">
                   <Button
                     className={'Button Button--primary'}
@@ -167,7 +169,8 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
         {this.dimensions.map((dim: any) => {
           if (dim.hidden) return null;
 
-          const options: Record<string, any> = { '-1': app.translator.trans('mattoid-store.lib.filter-all') };
+          // 「全部」项文案按维度区分（如「全部商品插件」「全部有效期」），让用途一目了然
+          const options: Record<string, any> = { '-1': dim.allLabel || app.translator.trans('mattoid-store.lib.filter-all') };
           (dim.options || []).forEach((opt: any) => {
             options[opt.value] = opt.label;
           });
@@ -184,8 +187,31 @@ export default class StorePage<CustomAttrs extends IIndexPageAttrs = IIndexPageA
             </span>
           );
         })}
+        <input
+          className="FormControl Store-SearchInput"
+          type="text"
+          value={this.search()}
+          placeholder={app.translator.trans('mattoid-store.lib.search-placeholder')}
+          oninput={(e: InputEvent) => {
+            this.search((e.target as HTMLInputElement).value);
+            this.queueSearch();
+          }}
+        />
       </div>
     );
+  }
+
+  /**
+   * 搜索防抖：300ms 内连续输入只触发一次列表刷新
+   */
+  queueSearch() {
+    if (this.searchTimer) {
+      clearTimeout(this.searchTimer);
+    }
+    this.searchTimer = setTimeout(() => {
+      this.searchTimer = null;
+      this.list.refresh();
+    }, 300);
   }
 
   onFilterChange(key: string, value: string) {

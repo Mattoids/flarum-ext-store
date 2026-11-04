@@ -131,7 +131,7 @@ export default class AddStoreGoods extends Modal<IAddStoreGoodsAttrs> {
           </div>
         )}
 
-        {!this.list.loading && this.list.hasMore() && (
+        {this.list.hasMore() && (
           <div style="text-align:center;padding:20px">
             <Button
               className={'Button Button--primary'}

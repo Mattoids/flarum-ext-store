@@ -226,14 +226,20 @@ mattoid-store:
     backpack-use-fail: 操作失败，请稍后重试
 
     filter-all: 全部
-    filter-group: 分组
-    group-default: 默认
     filter-code: 商品插件
+    filter-code-all: 全部商品插件
+    filter-group: 分组
+    filter-group-all: 全部分组
+    group-default: 默认
     filter-subtype: 道具类型
+    filter-subtype-all: 全部道具类型
     filter-type: 有效期
+    filter-type-all: 全部有效期
     filter-discount: 折扣
+    filter-discount-all: 全部折扣
     filter-discount-on: 有折扣
     filter-discount-off: 无折扣
+    search-placeholder: 搜索商品名称
 
     cancel: 取消
     confirm: 确定

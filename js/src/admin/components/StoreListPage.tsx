@@ -16,11 +16,14 @@ export default class StoreListPage extends ExtensionPage {
       filter: {
         type: this.type(),
         status: this.status(),
+        query: this.search(),
       },
     }),
   });
   private status: Stream<string> = Stream('-1');
   private type: Stream<string> = Stream('-1');
+  private search: Stream<string> = Stream('');
+  private searchTimer: any = null;
 
   oninit(vnode: Mithril.Vnode<any, this>) {
     super.oninit(vnode);
@@ -89,13 +92,25 @@ export default class StoreListPage extends ExtensionPage {
                     value={this.type()}
                     disabled={this.list.loading}
                     options={{
-                      '-1': app.translator.trans('mattoid-store.lib.item-type-all'),
+                      '-1': app.translator.trans('mattoid-store.lib.filter-type-all'),
                       permanent: app.translator.trans('mattoid-store.lib.item-type-permanent'),
                       limit: app.translator.trans('mattoid-store.lib.item-type-limit'),
                     }}
                     onchange={(e: string) => {
                       this.type(e);
                       this.refreshList();
+                    }}
+                  />
+                </div>
+                <div className="StoreAdminToolbar-search">
+                  <input
+                    className="FormControl"
+                    type="text"
+                    value={this.search()}
+                    placeholder={app.translator.trans('mattoid-store.lib.search-placeholder')}
+                    oninput={(e: InputEvent) => {
+                      this.search((e.target as HTMLInputElement).value);
+                      this.queueSearch();
                     }}
                   />
                 </div>
@@ -113,7 +128,7 @@ export default class StoreListPage extends ExtensionPage {
                 </div>
               )}
 
-              {!this.list.loading && this.list.hasMore() && (
+              {this.list.hasMore() && (
                 <div style="text-align:center;padding:20px">
                   <Button
                     className={'Button Button--primary'}
@@ -139,5 +154,18 @@ export default class StoreListPage extends ExtensionPage {
    */
   refreshList() {
     this.list.refresh();
+  }
+
+  /**
+   * 搜索防抖：300ms 内连续输入只触发一次列表刷新
+   */
+  queueSearch() {
+    if (this.searchTimer) {
+      clearTimeout(this.searchTimer);
+    }
+    this.searchTimer = setTimeout(() => {
+      this.searchTimer = null;
+      this.list.refresh();
+    }, 300);
   }
 }

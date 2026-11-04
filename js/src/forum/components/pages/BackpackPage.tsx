@@ -7,7 +7,6 @@ import BackpackItem from '../component/BackpackItem';
 import LoadingBlock from '../component/LoadingBlock';
 import PaginatedList from '../PaginatedList';
 import bindInfiniteScroll from '../../utils/bindInfiniteScroll';
-import isMobile from '../../utils/isMobile';
 
 export default class BackpackPage extends UserPage {
   private list: PaginatedList<StoreApiResource> = new PaginatedList({
@@ -58,8 +57,8 @@ export default class BackpackPage extends UserPage {
             </div>
           )}
 
-          {/* 桌面端显示加载按钮；手机端为瀑布流（滚动到底自动加载，见 oncreate） */}
-          {!isMobile() && !this.list.loading && this.list.hasMore() && (
+          {/* 「加载更多」按钮与手机端瀑布流（滚动到底自动加载，见 oncreate）并存 */}
+          {this.list.hasMore() && (
             <div style="text-align:center;padding:20px">
               <Button
                 className={'Button Button--primary'}

@@ -150,11 +150,11 @@ class FilterOptionsController extends AbstractShowController
         $result = new \stdClass();
         $result->id = 'filter-options';
         $result->dimensions = [
-            ['key' => 'code', 'label' => $this->translator->trans('mattoid-store.lib.filter-code'), 'options' => $codeOptions, 'hidden' => count($codeOptions) === 0],
-            ['key' => 'group', 'label' => $this->translator->trans('mattoid-store.lib.filter-group'), 'options' => $groupOptions, 'hidden' => count($groupOptions) <= 1],
-            ['key' => 'subtype', 'label' => $this->translator->trans('mattoid-store.lib.filter-subtype'), 'options' => $subtypeOptions, 'hidden' => count($subtypeOptions) === 0],
-            ['key' => 'type', 'label' => $this->translator->trans('mattoid-store.lib.filter-type'), 'options' => $typeOptions, 'hidden' => false],
-            ['key' => 'discount', 'label' => $this->translator->trans('mattoid-store.lib.filter-discount'), 'options' => $discountOptions, 'hidden' => count($discountOptions) === 0],
+            ['key' => 'code', 'label' => $this->translator->trans('mattoid-store.lib.filter-code'), 'allLabel' => $this->translator->trans('mattoid-store.lib.filter-code-all'), 'options' => $codeOptions, 'hidden' => count($codeOptions) === 0],
+            ['key' => 'group', 'label' => $this->translator->trans('mattoid-store.lib.filter-group'), 'allLabel' => $this->translator->trans('mattoid-store.lib.filter-group-all'), 'options' => $groupOptions, 'hidden' => count($groupOptions) <= 1],
+            ['key' => 'subtype', 'label' => $this->translator->trans('mattoid-store.lib.filter-subtype'), 'allLabel' => $this->translator->trans('mattoid-store.lib.filter-subtype-all'), 'options' => $subtypeOptions, 'hidden' => count($subtypeOptions) === 0],
+            ['key' => 'type', 'label' => $this->translator->trans('mattoid-store.lib.filter-type'), 'allLabel' => $this->translator->trans('mattoid-store.lib.filter-type-all'), 'options' => $typeOptions, 'hidden' => false],
+            ['key' => 'discount', 'label' => $this->translator->trans('mattoid-store.lib.filter-discount'), 'allLabel' => $this->translator->trans('mattoid-store.lib.filter-discount-all'), 'options' => $discountOptions, 'hidden' => count($discountOptions) === 0],
         ];
 
         return $result;

@@ -224,11 +224,17 @@ mattoid-store:
     backpack-use-fail: Operation failed, please try again later
 
     filter-all: All
-    filter-group: Group
-    group-default: General
     filter-code: Goods plugin
+    filter-code-all: All goods plugins
+    filter-group: Group
+    filter-group-all: All groups
+    group-default: General
     filter-subtype: Item type
+    filter-subtype-all: All item types
     filter-type: Validity
+    filter-type-all: All validity
     filter-discount: Discount
+    filter-discount-all: All discounts
     filter-discount-on: Discounted
     filter-discount-off: No discount
+    search-placeholder: Search goods title
