@@ -57,6 +57,12 @@ class StoreMoneyManager
      */
     public function pay(User $user, float $price, string $source, string $sourceKey, array $params = [], string $legacyMessage = '', ?User $actor = null): bool
     {
+        // 免费商品（0 元）无需扣款，直接视为成功；
+        // 资金体系（BalanceManager）对 0 变动按约定返回 false，会被调用方误判为余额不足
+        if ($price <= 0) {
+            return true;
+        }
+
         if ($this->balanceManager) {
             try {
                 return $this->balanceManager->adjustBalance($user, -$price, $source, $sourceKey, $params, $actor, true);

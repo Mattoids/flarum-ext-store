@@ -24,6 +24,8 @@ interface BackpackItemAttrs extends ComponentAttrs {
 
 export default class BackpackItem extends Component<BackpackItemAttrs> {
   private loading: boolean = false;
+  /** 正在执行的操作（用于只在被点击的按钮上显示加载动画） */
+  private loadingAction: 'use' | 'cancel' | 'decoration' | null = null;
 
   view(): Mithril.Children {
     // 每次渲染直接读 attrs，避免背包刷新后复用组件实例导致状态过期
@@ -47,7 +49,7 @@ export default class BackpackItem extends Component<BackpackItemAttrs> {
           </div>
           <span className="StoreItem-type BackpackItem-typeBadge">
             {item.source === 'store'
-              ? app.translator.trans('mattoid-store.lib.item-use-type-' + (item.useType || 'permanent'))
+              ? app.translator.trans('mattoid-store.lib.item-use-type-' + this.useTypeKey(item))
               : app.translator.trans('mattoid-store.lib.item-type-' + (item.type || 'permanent'))}
           </span>
         </div>
@@ -81,9 +83,15 @@ export default class BackpackItem extends Component<BackpackItemAttrs> {
         <div>
           <label className="Cart-Label">{app.translator.trans('mattoid-store.lib.item-cart-type')}: </label>
           <span>{app.translator.trans('mattoid-store.lib.item-type-' + (item.type || 'permanent'))}</span> &nbsp;|&nbsp;
-          <label className="Cart-Label">{app.translator.trans('mattoid-store.lib.item-use-type-' + (item.useType || 'permanent'))}</label>
+          <label className="Cart-Label">{app.translator.trans('mattoid-store.lib.item-use-type-' + this.useTypeKey(item))}</label>
           {item.useType === 'consumable' && (
             <span> &nbsp;|&nbsp; {app.translator.trans('mattoid-store.lib.backpack-remaining', { count: item.remaining })}</span>
+          )}
+          {item.type === 'limit' && item.outtime && (
+            <span>
+              {' '}
+              &nbsp;|&nbsp; {app.translator.trans('mattoid-store.lib.item-cart-outtime')}: {new Date(item.outtime).toLocaleDateString()}
+            </span>
           )}
           {item.useType === 'permanent' && item.enable ? (
             <span className="color-green"> &nbsp;|&nbsp; {app.translator.trans('mattoid-store.lib.backpack-in-use')}</span>
@@ -112,15 +120,30 @@ export default class BackpackItem extends Component<BackpackItemAttrs> {
           ? app.translator.trans('mattoid-store.lib.backpack-cancel-use')
           : app.translator.trans('mattoid-store.lib.backpack-use');
 
+      // 仅「订阅中」（自动续费开启）的限时商品显示取消订阅；取消后按钮消失
+      const subscribable = item.type === 'limit' && item.autoDeduction;
+
       return (
-        <Button
-          className={'Button Button--primary BackpackItem-fullBtn'}
-          disabled={this.loading}
-          loading={this.loading}
-          onclick={() => this.useStoreItem(item)}
-        >
-          {label}
-        </Button>
+        <div className="BackpackItem-actions">
+          {subscribable && (
+            <Button
+              className={'Button BackpackItem-fullBtn BackpackItem-subscribeBtn'}
+              disabled={this.loading}
+              loading={this.loadingAction === 'cancel'}
+              onclick={() => this.cancelSubscribe(item)}
+            >
+              {app.translator.trans('mattoid-store.lib.backpack-cancel-subscribe')}
+            </Button>
+          )}
+          <Button
+            className={'Button Button--primary BackpackItem-fullBtn'}
+            disabled={this.loading}
+            loading={this.loadingAction === 'use'}
+            onclick={() => this.useStoreItem(item)}
+          >
+            {label}
+          </Button>
+        </div>
       );
     }
 
@@ -130,12 +153,20 @@ export default class BackpackItem extends Component<BackpackItemAttrs> {
       <Button
         className={'Button Button--primary BackpackItem-fullBtn'}
         disabled={this.loading}
-        loading={this.loading}
+        loading={this.loadingAction === 'decoration'}
         onclick={() => this.toggleDecoration(item, equip)}
       >
         {equip ? app.translator.trans('mattoid-store.lib.backpack-equip') : app.translator.trans('mattoid-store.lib.backpack-unequip')}
       </Button>
     );
+  }
+
+  /**
+   * 使用方式展示键：use_type 的 permanent 指「使用/取消使用」的交互方式，与有效期无关；
+   * 限时商品若直接展示「永久道具」会被误解为永久有效，改为「限时道具」
+   */
+  useTypeKey(item: any) {
+    return item.useType === 'permanent' && item.type === 'limit' ? 'limit' : item.useType || 'permanent';
   }
 
   /**
@@ -160,6 +191,7 @@ export default class BackpackItem extends Component<BackpackItemAttrs> {
 
   useStoreItem(item: any) {
     this.loading = true;
+    this.loadingAction = 'use';
     m.redraw();
 
     app
@@ -171,11 +203,43 @@ export default class BackpackItem extends Component<BackpackItemAttrs> {
       .then(
         (result: any) => {
           this.loading = false;
+          this.loadingAction = null;
           this.showUseResult(item, result);
           if (this.attrs.onChanged) this.attrs.onChanged();
         },
         (error: any) => {
           this.loading = false;
+          this.loadingAction = null;
+          this.showError(error);
+        }
+      );
+  }
+
+  cancelSubscribe(item: any) {
+    this.loading = true;
+    this.loadingAction = 'cancel';
+    m.redraw();
+
+    app
+      .request({
+        method: 'POST',
+        url: app.forum.attribute('apiUrl') + '/store/backpack/cancel-subscribe',
+        body: { id: item.refId },
+      })
+      .then(
+        () => {
+          this.loading = false;
+          this.loadingAction = null;
+          app.alerts.show(
+            Alert,
+            { type: 'success' },
+            app.translator.trans('mattoid-store.lib.backpack-cancel-subscribe-success', { title: item.title })
+          );
+          if (this.attrs.onChanged) this.attrs.onChanged();
+        },
+        (error: any) => {
+          this.loading = false;
+          this.loadingAction = null;
           this.showError(error);
         }
       );
@@ -183,6 +247,7 @@ export default class BackpackItem extends Component<BackpackItemAttrs> {
 
   toggleDecoration(item: any, equip: boolean) {
     this.loading = true;
+    this.loadingAction = 'decoration';
     m.redraw();
 
     app
@@ -194,10 +259,12 @@ export default class BackpackItem extends Component<BackpackItemAttrs> {
       .then(
         () => {
           this.loading = false;
+          this.loadingAction = null;
           if (this.attrs.onChanged) this.attrs.onChanged();
         },
         (error: any) => {
           this.loading = false;
+          this.loadingAction = null;
           this.showError(error);
         }
       );

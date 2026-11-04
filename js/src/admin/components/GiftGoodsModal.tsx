@@ -8,6 +8,8 @@ export default class GiftGoodsModal extends Modal {
   private storeData: any = {};
   private allUsers: boolean = false;
   private amount: any = Stream('1');
+  // 赠送时限（天）：仅限时商品可填，留空则用商品上架配置
+  private outtimeDays: any = Stream('');
   private selectedUsers: any[] = [];
   private search: string = '';
   private searchResults: any[] = [];
@@ -134,6 +136,25 @@ export default class GiftGoodsModal extends Modal {
             />
           </div>
 
+          {this.storeData.type === 'limit' && (
+            <div className="Form-group">
+              <label>{app.translator.trans('mattoid-store.admin.settings.gift-outtime')}</label>
+              <input
+                className="FormControl"
+                type="number"
+                min="1"
+                placeholder={this.storeData.outtime ? String(this.storeData.outtime) : ''}
+                value={this.outtimeDays()}
+                oninput={(e: InputEvent) => {
+                  this.outtimeDays((e.target as HTMLInputElement).value);
+                }}
+              />
+              <div className="helpText">
+                {app.translator.trans('mattoid-store.admin.settings.gift-outtime-help', { days: this.storeData.outtime })}
+              </div>
+            </div>
+          )}
+
           <div className="Form-group StoreConfirmActions">
             <Button
               className="Button Button--primary"
@@ -239,11 +260,21 @@ export default class GiftGoodsModal extends Modal {
       return;
     }
 
+    // 赠送时限：仅限时商品可填；留空用商品上架配置，填写必须是正整数
+    let outtimeDays = 0;
+    if (this.storeData.type === 'limit' && String(this.outtimeDays()).trim() !== '') {
+      outtimeDays = parseInt(this.outtimeDays(), 10);
+      if (!outtimeDays || outtimeDays < 1) {
+        this.onerror(new Error(extractText(app.translator.trans('mattoid-store.admin.settings.gift-outtime-invalid'))));
+        return;
+      }
+    }
+
     this.loading = true;
 
     if (this.allUsers) {
       // 全体用户模式：后端按批次返回 nextCursor 断点续传，前端循环取尽后合并计数一次性展示
-      this.giftAllUsers(amount, null, {
+      this.giftAllUsers(amount, outtimeDays, null, {
         successUsers: 0,
         successCount: 0,
         failed: { insufficientStock: 0, alreadyOwned: 0, other: 0 },
@@ -260,6 +291,7 @@ export default class GiftGoodsModal extends Modal {
           userIds: this.selectedUsers.map((user) => user.id()),
           allUsers: this.allUsers,
           amount: amount,
+          outtimeDays: outtimeDays,
         },
       })
       .then(
@@ -275,7 +307,7 @@ export default class GiftGoodsModal extends Modal {
       );
   }
 
-  giftAllUsers(amount: number, cursor: string | null, acc: any) {
+  giftAllUsers(amount: number, outtimeDays: number, cursor: string | null, acc: any) {
     app
       .request({
         method: 'POST',
@@ -285,6 +317,7 @@ export default class GiftGoodsModal extends Modal {
           userIds: [],
           allUsers: true,
           amount: amount,
+          outtimeDays: outtimeDays,
           cursor: cursor,
         },
       })
@@ -298,7 +331,7 @@ export default class GiftGoodsModal extends Modal {
           acc.failed.other += failed.other || 0;
 
           if (result.nextCursor) {
-            this.giftAllUsers(amount, result.nextCursor, acc);
+            this.giftAllUsers(amount, outtimeDays, result.nextCursor, acc);
           } else {
             this.loading = false;
             this.result = acc;

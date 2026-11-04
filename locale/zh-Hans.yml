@@ -67,6 +67,9 @@ mattoid-store:
       gift-all-users-confirm: 确定要向全体用户赠送该商品吗？该操作不可逆。
       gift-amount: 每人赠送数量
       gift-amount-invalid: 数量无效（1-99）
+      gift-outtime: 赠送时限（天）
+      gift-outtime-help: 留空则使用商品上架配置（{days} 天）；填写后覆盖上架配置，受赠者的有效期以填写值为准
+      gift-outtime-invalid: 时限无效，必须是不小于 1 的整数
       gift-result-success: 赠送成功：{users} 个用户，共 {count} 件。
       gift-result-failed-stock: 库存不足，跳过 {count} 个用户。
       gift-result-failed-owned: 对方已拥有该商品，跳过 {count} 个用户。
@@ -135,6 +138,7 @@ mattoid-store:
       cart-no-use: 该商品没有使用功能
       cart-use-fail: 商品使用失败
       cart-status-changed: 道具状态已变化，请刷新后重试
+      cart-not-subscribable: 该商品不支持取消订阅
 
   lib:
     class-icon-preview: 样式预览
@@ -200,12 +204,15 @@ mattoid-store:
 
     item-use-type-permanent: 永久道具
     item-use-type-consumable: 一次性道具
+    item-use-type-limit: 限时道具
     backpack-use: 使用
     backpack-cancel-use: 取消使用
     backpack-remaining: 剩余 {count} 件
     backpack-equip: 佩戴
     backpack-unequip: 卸下
     backpack-in-use: 使用中
+    backpack-cancel-subscribe: 取消订阅
+    backpack-cancel-subscribe-success: 已取消订阅「{title}」，到期后将自动失效并从背包中移除
     backpack-empty: 背包空空如也
     backpack-use-fail: 操作失败，请稍后重试
 

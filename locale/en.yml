@@ -69,6 +69,9 @@ mattoid-store:
       gift-all-users-confirm: 'Are you sure you want to gift this goods to ALL users? This operation cannot be undone.'
       gift-amount: Quantity per user
       gift-amount-invalid: Invalid quantity (1-99)
+      gift-outtime: Gift validity (days)
+      gift-outtime-help: 'Leave empty to use the shelf config ({days} days); if set, it overrides the shelf config and recipients get this validity'
+      gift-outtime-invalid: Invalid validity, must be an integer of at least 1
       gift-result-success: 'Gift succeeded: {users} users, {count} items.'
       gift-result-failed-stock: 'Skipped {count} users due to insufficient stock.'
       gift-result-failed-owned: 'Skipped {count} users who already own this goods.'
@@ -132,6 +135,7 @@ mattoid-store:
       cart-no-use: This Goods does not have any functional use
       cart-use-fail: Goods usage failed
       cart-status-changed: The item status has changed, please refresh and try again
+      cart-not-subscribable: This goods does not support canceling subscription
       request-processing: Request is being processed, please do not resubmit
       buy-success: Purchase successful
       purchase-limit-exceeded: Purchase limit reached for this period, please try again later
@@ -198,12 +202,15 @@ mattoid-store:
 
     item-use-type-permanent: Permanent item
     item-use-type-consumable: Consumable item
+    item-use-type-limit: Time-limited item
     backpack-use: Use
     backpack-cancel-use: Cancel use
     backpack-remaining: "{count} remaining"
     backpack-equip: Equip
     backpack-unequip: Unequip
     backpack-in-use: In use
+    backpack-cancel-subscribe: Cancel subscription
+    backpack-cancel-subscribe-success: 'Subscription of "{title}" canceled. It will expire and be removed from your backpack when due.'
     backpack-empty: Your backpack is empty
     backpack-use-fail: Operation failed, please try again later
 

@@ -17,6 +17,7 @@ use Flarum\Http\UrlGenerator;
 use Mattoid\Store\Attributes\UserAttributes;
 use Mattoid\Store\Console\Command\GoodsInvalidCommand;
 use Mattoid\Store\Console\PublishSchedule;
+use Mattoid\Store\Controller\BackpackCancelSubscribeController;
 use Mattoid\Store\Controller\BackpackListController;
 use Mattoid\Store\Controller\BackpackUseController;
 use Mattoid\Store\Controller\BuyGoodsController;
@@ -76,7 +77,8 @@ return [
         ->post('/store/goods', 'store.goods.post', PostStoreController::class)
         ->get('/store/filter/options', 'store.filter.options', FilterOptionsController::class)
         ->get('/store/backpack/list', 'store.backpack.list', BackpackListController::class)
-        ->post('/store/backpack/use', 'store.backpack.use', BackpackUseController::class),
+        ->post('/store/backpack/use', 'store.backpack.use', BackpackUseController::class)
+        ->post('/store/backpack/cancel-subscribe', 'store.backpack.cancel-subscribe', BackpackCancelSubscribeController::class),
 
     (new Extend\Settings())
         ->serializeToForum('storeName', 'mattoid-store.storeName'),
