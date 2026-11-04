@@ -330,10 +330,15 @@ class GiftGoodsController implements RequestHandlerInterface
             }
         }
 
-        // 赠送：标记持有中（与购买流程一致，交由购物车编辑监听器落库）
-        $cart->status = 1;
         // 赠送强制关闭自动续费：受赠者未同意续费，且 pay_amt=0 + auto_deduction=1 会导致到期扣 0 元无限免费续期
         $cart->auto_deduction = 0;
+
+        // ⚠️ 覆盖值必须先落库：后续 StoreCartEditEvent 的监听器按 id 从库里重载记录、
+        // 只保存 status，不落库这里的修改会被整体丢弃（时限覆盖与关闭续费曾因此失效）
+        $cart->save();
+
+        // 赠送：标记持有中（与购买流程一致，交由购物车编辑监听器落库）
+        $cart->status = 1;
         $this->events->dispatch(new StoreCartEditEvent($cart));
 
         // 通知其他插件购买完成（商品插件在此发放实际权益）
