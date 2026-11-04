@@ -85,6 +85,12 @@ export default class ForumGiftGoodsModal extends Modal {
               value={this.storeId()}
               onchange={(e: InputEvent) => {
                 this.storeId((e.target as HTMLSelectElement).value);
+                // 切换商品时清空时限输入：placeholder 提示商品配置（限时=上架天数，永久=0），留空即以商品配置为准
+                this.outtimeDays('');
+                // 不允许重复购买的商品：数量固定为 1
+                if (!this.selectedGoodsRepeat()) {
+                  this.amount('1');
+                }
               }}
             >
               <option value="">{app.translator.trans('mattoid-store.forum.gift-select-goods-placeholder')}</option>
@@ -105,26 +111,33 @@ export default class ForumGiftGoodsModal extends Modal {
               min="1"
               max="99"
               value={this.amount()}
+              disabled={this.storeId() !== '' && !this.selectedGoodsRepeat()}
               oninput={(e: InputEvent) => {
                 this.amount((e.target as HTMLInputElement).value);
               }}
             />
+            {this.storeId() !== '' && !this.selectedGoodsRepeat() && (
+              <div className="helpText">{app.translator.trans('mattoid-store.forum.gift-amount-unique')}</div>
+            )}
           </div>
 
-          {this.selectedGoodsType() === 'limit' && (
+          {this.storeId() && (
             <div className="Form-group">
               <label>{app.translator.trans('mattoid-store.forum.gift-outtime')}</label>
               <input
                 className="FormControl"
                 type="number"
                 min="0"
+                placeholder={this.storeId() ? (this.selectedGoodsType() === 'limit' ? this.selectedGoodsOuttime() : '0') : ''}
                 value={this.outtimeDays()}
                 oninput={(e: InputEvent) => {
                   this.outtimeDays((e.target as HTMLInputElement).value);
                 }}
               />
               <div className="helpText">
-                {app.translator.trans('mattoid-store.forum.gift-outtime-help', { days: this.selectedGoodsOuttime() })}
+                {this.selectedGoodsType() === 'limit'
+                  ? app.translator.trans('mattoid-store.forum.gift-outtime-help', { days: this.selectedGoodsOuttime() })
+                  : app.translator.trans('mattoid-store.forum.gift-outtime-help-permanent')}
               </div>
             </div>
           )}
@@ -152,6 +165,12 @@ export default class ForumGiftGoodsModal extends Modal {
     return goods ? String(goods.attributes.outtime || 0) : '0';
   }
 
+  // 选中商品是否允许重复购买（repeat=1）；未选中时按允许处理
+  selectedGoodsRepeat(): boolean {
+    const goods = this.goodsList.find((item) => String(item.id) === String(this.storeId()));
+    return goods ? Number(goods.attributes.repeat) === 1 : true;
+  }
+
   onsubmit() {
     const amount = parseInt(this.amount(), 10);
     if (!amount || amount < 1 || amount > 99) {
@@ -162,9 +181,9 @@ export default class ForumGiftGoodsModal extends Modal {
       return;
     }
 
-    // 赠送时限：-1 表示留空（用商品上架配置）；0 = 不限时（转为永久）；>0 = 指定天数
+    // 赠送时限：-1 表示留空（限时商品用上架配置，永久商品保持永久）；0 = 不限时（转为永久）；>0 = 指定天数（转为限时）
     let outtimeDays = -1;
-    if (this.selectedGoodsType() === 'limit' && String(this.outtimeDays()).trim() !== '') {
+    if (String(this.outtimeDays()).trim() !== '') {
       outtimeDays = parseInt(this.outtimeDays(), 10);
       if (isNaN(outtimeDays) || outtimeDays < 0) {
         this.onerror(new Error(extractText(app.translator.trans('mattoid-store.forum.gift-outtime-invalid'))));

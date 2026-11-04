@@ -318,14 +318,15 @@ class GiftGoodsController implements RequestHandlerInterface
         $this->events->dispatch($cartEvent);
         $cart = $cartEvent->cart;
 
-        // 赠送时限覆盖（仅限时商品生效）：
-        //  -1 = 用商品上架配置（缺省）
-        //   0 = 不限时，受赠商品转为永久（outtime 列保持零值，与正常永久购买一致）
-        //  >0 = 指定有效期天数，覆盖上架配置（如上架 30 天、赠送 90 天）
-        if ($store->type == 'limit' && $outtimeDays >= 0) {
+        // 赠送时限覆盖（与商品上架类型无关，任何商品可互相转换）：
+        //  -1 = 缺省（限时商品用上架配置，永久商品保持永久）
+        //   0 = 不限时，受赠商品转为永久（outtime 不参与失效判定，与正常永久购买一致）
+        //  >0 = 指定有效期天数，受赠商品转为限时（outtime = now + N 天）
+        if ($outtimeDays >= 0) {
             if ($outtimeDays === 0) {
                 $cart->type = 'permanent';
             } else {
+                $cart->type = 'limit';
                 $cart->outtime = Carbon::now()->addDays($outtimeDays);
             }
         }

@@ -69,8 +69,10 @@ mattoid-store:
       gift-all-users-confirm: 确定要向全体用户赠送该商品吗？该操作不可逆。
       gift-amount: 每人赠送数量
       gift-amount-invalid: 数量无效（1-99）
+      gift-amount-unique: 该商品不允许重复购买，数量固定为 1
       gift-outtime: 赠送时限（天）
-      gift-outtime-help: 留空则使用商品上架配置（{days} 天）；填 0 表示不限时（受赠商品转为永久）；填写大于 0 的整数则覆盖上架配置
+      gift-outtime-help: 填 0 表示永久有效
+      gift-outtime-help-permanent: 填 0 表示永久有效
       gift-outtime-invalid: 时限无效，必须是大于等于 0 的整数
       gift-result-success: 赠送成功：{users} 个用户，共 {count} 件。
       gift-result-failed-stock: 库存不足，跳过 {count} 个用户。
@@ -91,8 +93,10 @@ mattoid-store:
     gift-select-goods-placeholder: 请选择要赠送的商品
     gift-amount: 赠送数量
     gift-amount-invalid: 数量无效（1-99）
+    gift-amount-unique: 该商品不允许重复购买，数量固定为 1
     gift-outtime: 赠送时限（天）
-    gift-outtime-help: 留空则使用商品上架配置（{days} 天）；填 0 表示不限时（受赠商品转为永久）；填写大于 0 的整数则覆盖上架配置
+    gift-outtime-help: 填 0 表示永久有效
+    gift-outtime-help-permanent: 填 0 表示永久有效
     gift-outtime-invalid: 时限无效，必须是大于等于 0 的整数
     gift-result-success: 赠送成功，共 {count} 件。
     gift-result-failed-owned: 对方已拥有该商品，赠送未完成。
