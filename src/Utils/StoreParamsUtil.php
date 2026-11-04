@@ -19,6 +19,7 @@ class StoreParamsUtil
         'hide', 'repeat', 'desc', 'auto_deduction', 'use_type', 'subtype',
         'group', 'purchase_limit_enable', 'purchase_limit_count',
         'purchase_limit_period', 'purchase_limit_period_unit', 'usable',
+        'sort',
     ];
 
     const ALLOWED_TYPES = ['permanent', 'limit'];
@@ -45,6 +46,7 @@ class StoreParamsUtil
         'purchase_limit_period' => 0,
         'purchase_limit_period_unit' => 'days',
         'usable' => 0,
+        'sort' => 0,
     ];
 
     /**
@@ -170,6 +172,14 @@ class StoreParamsUtil
                 $fail();
             }
             $data['outtime'] = (int) $data['outtime'];
+        }
+
+        // 排序：整数（可负），列表按此倒序
+        if (array_key_exists('sort', $data)) {
+            if (!is_numeric($data['sort'])) {
+                $fail();
+            }
+            $data['sort'] = (int) $data['sort'];
         }
 
         // 0/1 开关字段

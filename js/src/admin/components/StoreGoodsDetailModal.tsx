@@ -51,6 +51,7 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
     purchaseLimitPeriod: Stream(0),
     purchaseLimitPeriodUnit: Stream('days'),
     usable: Stream(0),
+    sort: Stream(0),
   };
 
   oninit(vnode: Mithril.Vnode<IStoreGoodsDetailModalAttrs, this>) {
@@ -87,6 +88,7 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
       this.params.purchaseLimitPeriod = Stream(this.attrs.storeData.purchaseLimitPeriod || 0);
       this.params.purchaseLimitPeriodUnit = Stream(this.attrs.storeData.purchaseLimitPeriodUnit || 'days');
       this.params.usable = Stream(this.attrs.storeData.usable || 0);
+      this.params.sort = Stream(this.attrs.storeData.sort || 0);
     }
 
     this.loadPlugins();
@@ -215,6 +217,11 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
             <div className="StoreAdminField">
               <label>{app.translator.trans('mattoid-store.admin.settings.goods-title')}</label>
               <input required class="FormControl" type="text" bidi={this.params.title} />
+            </div>
+            <div className="StoreAdminField StoreAdminField--sort">
+              <label>{app.translator.trans('mattoid-store.admin.settings.goods-sort')}</label>
+              <input class="FormControl" type="number" step="1" bidi={this.params.sort} />
+              <div className="helpText">{app.translator.trans('mattoid-store.admin.settings.goods-sort-help')}</div>
             </div>
             {!(app as any).storeAdminRegistry?.goodsForm?.getOptions(this.params.code()).hideDefaultDesc && (
               <div className="StoreAdminField">

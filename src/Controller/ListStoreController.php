@@ -77,7 +77,7 @@ class ListStoreController extends AbstractListController
             $query->where('discount', 0);
         }
 
-        $list = $query->orderByDesc('id');
+        $list = $query->orderByDesc('sort')->orderByDesc('id');
 
         return $this->paginateList($list, $request, $document, 'store.list');
     }

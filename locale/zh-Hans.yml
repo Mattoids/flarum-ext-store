@@ -12,6 +12,8 @@ mattoid-store:
       edit-store-goods: 修改商品
       goods-status: 商品状态
       goods-title: 商品名称
+      goods-sort: 排序
+      goods-sort-help: 数值越大越靠前，列表按此倒序排列；相同则后创建的在前面
       goods-code: 商品编码
       goods-desc: 商品描述
       goods-price: 价格
@@ -68,8 +70,8 @@ mattoid-store:
       gift-amount: 每人赠送数量
       gift-amount-invalid: 数量无效（1-99）
       gift-outtime: 赠送时限（天）
-      gift-outtime-help: 留空则使用商品上架配置（{days} 天）；填写后覆盖上架配置，受赠者的有效期以填写值为准
-      gift-outtime-invalid: 时限无效，必须是不小于 1 的整数
+      gift-outtime-help: 留空则使用商品上架配置（{days} 天）；填 0 表示不限时（受赠商品转为永久）；填写大于 0 的整数则覆盖上架配置
+      gift-outtime-invalid: 时限无效，必须是大于等于 0 的整数
       gift-result-success: 赠送成功：{users} 个用户，共 {count} 件。
       gift-result-failed-stock: 库存不足，跳过 {count} 个用户。
       gift-result-failed-owned: 对方已拥有该商品，跳过 {count} 个用户。
@@ -89,6 +91,9 @@ mattoid-store:
     gift-select-goods-placeholder: 请选择要赠送的商品
     gift-amount: 赠送数量
     gift-amount-invalid: 数量无效（1-99）
+    gift-outtime: 赠送时限（天）
+    gift-outtime-help: 留空则使用商品上架配置（{days} 天）；填 0 表示不限时（受赠商品转为永久）；填写大于 0 的整数则覆盖上架配置
+    gift-outtime-invalid: 时限无效，必须是大于等于 0 的整数
     gift-result-success: 赠送成功，共 {count} 件。
     gift-result-failed-owned: 对方已拥有该商品，赠送未完成。
     button: 购买

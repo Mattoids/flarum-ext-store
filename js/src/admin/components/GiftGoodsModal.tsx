@@ -260,11 +260,11 @@ export default class GiftGoodsModal extends Modal {
       return;
     }
 
-    // 赠送时限：仅限时商品可填；留空用商品上架配置，填写必须是正整数
-    let outtimeDays = 0;
+    // 赠送时限：-1 表示留空（用商品上架配置）；0 = 不限时（转为永久）；>0 = 指定天数
+    let outtimeDays = -1;
     if (this.storeData.type === 'limit' && String(this.outtimeDays()).trim() !== '') {
       outtimeDays = parseInt(this.outtimeDays(), 10);
-      if (!outtimeDays || outtimeDays < 1) {
+      if (isNaN(outtimeDays) || outtimeDays < 0) {
         this.onerror(new Error(extractText(app.translator.trans('mattoid-store.admin.settings.gift-outtime-invalid'))));
         return;
       }

@@ -9,6 +9,8 @@ export default class ForumGiftGoodsModal extends Modal {
   private goodsList: any[] = [];
   private storeId: any = Stream('');
   private amount: any = Stream('1');
+  // 赠送时限（天）：仅限时商品可填，留空 = 用商品上架配置，0 = 不限时，>0 = 指定天数
+  private outtimeDays: any = Stream('');
   private result: any = null;
 
   oninit(vnode) {
@@ -109,6 +111,24 @@ export default class ForumGiftGoodsModal extends Modal {
             />
           </div>
 
+          {this.selectedGoodsType() === 'limit' && (
+            <div className="Form-group">
+              <label>{app.translator.trans('mattoid-store.forum.gift-outtime')}</label>
+              <input
+                className="FormControl"
+                type="number"
+                min="0"
+                value={this.outtimeDays()}
+                oninput={(e: InputEvent) => {
+                  this.outtimeDays((e.target as HTMLInputElement).value);
+                }}
+              />
+              <div className="helpText">
+                {app.translator.trans('mattoid-store.forum.gift-outtime-help', { days: this.selectedGoodsOuttime() })}
+              </div>
+            </div>
+          )}
+
           <div className="Form-group StoreConfirmActions">
             <Button className="Button Button--primary" type="submit" loading={this.loading} disabled={!this.storeId()}>
               {app.translator.trans('mattoid-store.lib.confirm')}
@@ -122,6 +142,16 @@ export default class ForumGiftGoodsModal extends Modal {
     );
   }
 
+  selectedGoodsType(): string {
+    const goods = this.goodsList.find((item) => String(item.id) === String(this.storeId()));
+    return goods ? goods.attributes.type : '';
+  }
+
+  selectedGoodsOuttime(): string {
+    const goods = this.goodsList.find((item) => String(item.id) === String(this.storeId()));
+    return goods ? String(goods.attributes.outtime || 0) : '0';
+  }
+
   onsubmit() {
     const amount = parseInt(this.amount(), 10);
     if (!amount || amount < 1 || amount > 99) {
@@ -130,6 +160,16 @@ export default class ForumGiftGoodsModal extends Modal {
     }
     if (!this.storeId()) {
       return;
+    }
+
+    // 赠送时限：-1 表示留空（用商品上架配置）；0 = 不限时（转为永久）；>0 = 指定天数
+    let outtimeDays = -1;
+    if (this.selectedGoodsType() === 'limit' && String(this.outtimeDays()).trim() !== '') {
+      outtimeDays = parseInt(this.outtimeDays(), 10);
+      if (isNaN(outtimeDays) || outtimeDays < 0) {
+        this.onerror(new Error(extractText(app.translator.trans('mattoid-store.forum.gift-outtime-invalid'))));
+        return;
+      }
     }
 
     this.loading = true;
@@ -142,6 +182,7 @@ export default class ForumGiftGoodsModal extends Modal {
           storeId: this.storeId(),
           userIds: [this.user.id()],
           amount: amount,
+          outtimeDays: outtimeDays,
         },
       })
       .then(

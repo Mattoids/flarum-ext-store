@@ -71,15 +71,15 @@ class GiftGoodsController implements RequestHandlerInterface
         $userIds = Arr::get($params, 'userIds', []);
         $allUsers = (bool) Arr::get($params, 'allUsers', false);
         $amount = (int) Arr::get($params, 'amount', 1);
-        // 赠送时限（天）：仅对限时商品生效，覆盖商品上架时的有效期配置（如上架 30 天、赠送 90 天）
-        $outtimeDays = (int) Arr::get($params, 'outtimeDays', 0);
+        // 赠送时限（天）：-1 = 用商品上架配置（默认）；0 = 不限时（转为永久）；>0 = 指定天数
+        $outtimeDays = (int) Arr::get($params, 'outtimeDays', -1);
         // 全体模式的续传游标（前端超时重试时回传）
         $this->requestCursor = Arr::get($params, 'cursor');
 
         if (!$storeId || $amount < 1 || $amount > self::MAX_AMOUNT) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.validate-fail')]);
         }
-        if ($outtimeDays < 0) {
+        if ($outtimeDays < -1) {
             throw new ValidationException(['message' => $this->translator->trans('mattoid-store.forum.error.validate-fail')]);
         }
         if (!$allUsers && (!is_array($userIds) || count($userIds) === 0)) {
@@ -106,7 +106,7 @@ class GiftGoodsController implements RequestHandlerInterface
     /**
      * 指定用户赠送：整体一个事务，单件失败仅记录跳过（与全体模式语义一致）
      */
-    private function giftToUsers(StoreModel $store, array $userIds, int $amount, int $outtimeDays = 0): ResponseInterface
+    private function giftToUsers(StoreModel $store, array $userIds, int $amount, int $outtimeDays = -1): ResponseInterface
     {
         $successUsers = 0;
         $successCount = 0;
@@ -157,7 +157,7 @@ class GiftGoodsController implements RequestHandlerInterface
      * 全体用户赠送：按用户分批提交事务，库存不足的单件记录后跳过。
      * 通过持久化游标断点续传：请求超时中断后，前端拿着 nextCursor 重试不会重复赠送
      */
-    private function giftToAllUsers(StoreModel $store, int $amount, int $outtimeDays = 0): ResponseInterface
+    private function giftToAllUsers(StoreModel $store, int $amount, int $outtimeDays = -1): ResponseInterface
     {
         $successUsers = 0;
         $successCount = 0;
@@ -311,17 +311,23 @@ class GiftGoodsController implements RequestHandlerInterface
     /**
      * 赠送一件商品：创建购物车记录（同事务扣库存），并触发 StoreBuyEvent 由各商品插件完成发放
      */
-    private function giftOnce(StoreModel $store, User $user, int $outtimeDays = 0)
+    private function giftOnce(StoreModel $store, User $user, int $outtimeDays = -1)
     {
         // 加入购物车 购物车会自动扣除库存（库存不足时监听器抛异常）
         $cartEvent = new StoreCartAddEvent($user, $store, 0);
         $this->events->dispatch($cartEvent);
         $cart = $cartEvent->cart;
 
-        // 赠送时限覆盖：限时商品可指定与上架配置不同的有效期（如上架 30 天、赠送 90 天），
-        // 仅在请求传入合法正数时生效，否则保留商品上架配置
-        if ($store->type == 'limit' && $outtimeDays > 0) {
-            $cart->outtime = Carbon::now()->addDays($outtimeDays);
+        // 赠送时限覆盖（仅限时商品生效）：
+        //  -1 = 用商品上架配置（缺省）
+        //   0 = 不限时，受赠商品转为永久（outtime 列保持零值，与正常永久购买一致）
+        //  >0 = 指定有效期天数，覆盖上架配置（如上架 30 天、赠送 90 天）
+        if ($store->type == 'limit' && $outtimeDays >= 0) {
+            if ($outtimeDays === 0) {
+                $cart->type = 'permanent';
+            } else {
+                $cart->outtime = Carbon::now()->addDays($outtimeDays);
+            }
         }
 
         // 赠送：标记持有中（与购买流程一致，交由购物车编辑监听器落库）
