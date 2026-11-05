@@ -359,6 +359,110 @@
   background: color-mix(in srgb, coral 15%, transparent);
 }
 
+/* ============ 记录卡片（赠送记录 / 开启记录）：网格卡片，每行最多 3 个 ============ */
+.StoreRecordGrid {
+  // 父容器 .Store-Body 是 flex 布局，网格必须显式占满整行，
+  // 否则 flex item 宽度按内容收缩，网格退化为单列
+  flex: 1 1 100%;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.StoreRecordCard {
+  background: var(--body-bg);
+  border: 1px solid var(--control-bg);
+  border-radius: var(--border-radius);
+  padding: 18px 20px;
+  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  min-width: 0;
+
+  &:hover {
+    background: var(--control-bg-light);
+    border-color: var(--control-bg-shaded);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  &-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--control-bg-shaded);
+
+    > * {
+      min-width: 0;
+    }
+
+    .StoreRecordCard-stat-value--main {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  &-body {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  &-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+
+    &--row {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 10px;
+    }
+  }
+
+  &-stat-label {
+    font-size: 13px;
+    color: var(--muted-color);
+    font-weight: 600;
+    white-space: nowrap;
+    flex: none;
+  }
+
+  &-stat-value {
+    font-size: 16px;
+    color: var(--text-color);
+    min-width: 0;
+
+    &--main {
+      font-weight: 600;
+      font-size: 17px;
+    }
+
+    &--credit {
+      color: var(--success-color, green);
+    }
+
+    &--time {
+      color: var(--muted-color);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+  }
+
+  &-amount {
+    font-style: normal;
+    font-weight: 400;
+    color: var(--muted-color);
+    font-size: 14px;
+  }
+}
+
 /* ============ 购物车 / 背包条目卡片 ============ */
 .frame {
   margin-top: 0;

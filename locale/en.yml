@@ -118,6 +118,11 @@ mattoid-store:
     free: Free
     days: day
     cart: cart
+    gifts: Gifts
+    gifts-empty: No gifts yet
+    gifts-amount: "×{count}"
+    gifts-from: From
+    gifts-got-at: Received at
     sold-out: Sold out
 
     notification:

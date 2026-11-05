@@ -7,6 +7,7 @@ import UserPage from 'flarum/forum/components/UserPage';
 import StorePage from './components/pages/StorePage';
 import MyCartPage from './components/pages/MyCartPage';
 import BackpackPage from './components/pages/BackpackPage';
+import GiftsPage from './components/pages/GiftsPage';
 import initStoreRegistry from './storeRegistry';
 import ItemList from 'flarum/common/utils/ItemList';
 import UserControls from 'flarum/forum/utils/UserControls';
@@ -17,6 +18,8 @@ import NotificationGrid from 'flarum/forum/components/NotificationGrid';
 
 // 供商品插件（store-invite / store-decoration 等）跨扩展引用的金额格式化工具
 export { getMoneyName, formatMoney } from '../common/money';
+
+export { default as extend } from './extend';
 
 app.initializers.add('mattoid/store', () => {
   initStoreRegistry();
@@ -62,6 +65,10 @@ app.initializers.add('mattoid/store', () => {
     path: '/u/:username/backpack',
     component: BackpackPage,
   };
+  app.routes.gifts = {
+    path: '/u/:username/gifts',
+    component: GiftsPage,
+  };
 
   extend(UserPage.prototype, 'navItems', function (this: UserPage, items: ItemList<Mithril.Children>) {
     const user = this.user;
@@ -98,6 +105,20 @@ app.initializers.add('mattoid/store', () => {
         app.translator.trans('mattoid-store.forum.backpack')
       ),
       10
+    );
+
+    items.add(
+      'gifts',
+      LinkButton.component(
+        {
+          href: app.route('gifts', {
+            username: user.slug(),
+          }),
+          icon: 'fas fa-gift',
+        },
+        app.translator.trans('mattoid-store.forum.gifts')
+      ),
+      9
     );
   });
 

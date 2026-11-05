@@ -96,12 +96,13 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
 
   /**
    * 加载已注册商品插件列表（运行时注册表），用于 subtype 下拉选项
+   *
+   * 每次打开弹窗都重新请求：插件列表（含各插件动态的 itemTypes，
+   * 如礼包插件按数据库实时生成）可能随后台配置变化，静态缓存会导致
+   * 新增的礼包/插件迟迟不出现在 subtype 下拉中。
    */
   loadPlugins() {
-    if (StoreGoodsDetailModal.pluginList) {
-      this.applyItemTypes();
-      return;
-    }
+    this.itemTypes = [];
 
     app.store
       .find('/store/goods')

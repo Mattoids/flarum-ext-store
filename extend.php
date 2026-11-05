@@ -26,7 +26,7 @@ use Mattoid\Store\Controller\RestoreStoreController;
 use Mattoid\Store\Controller\FilterOptionsController;
 use Mattoid\Store\Controller\GiftGoodsController;
 use Mattoid\Store\Controller\ListCartController;
-use Mattoid\Store\Controller\ListGoodsController;
+use Mattoid\Store\Controller\ListGiftLogController;use Mattoid\Store\Controller\ListGoodsController;
 use Mattoid\Store\Controller\ListIconController;
 use Mattoid\Store\Controller\ListStoreController;
 use Mattoid\Store\Controller\PostStoreController;
@@ -68,6 +68,7 @@ return [
         ->get('/store/goods', 'store.goods.list', ListGoodsController::class)
         ->get('/store/icon/list', 'store.icon.list', ListIconController::class)
         ->get('/store/cart/list', 'store.cart.list', ListCartController::class)
+        ->get('/store/gift/list', 'store.gift.list', ListGiftLogController::class)
         ->put('/store/goods', 'store.goods.put', PutStoreController::class)
         ->delete('/store/goods', 'store.goods.delete', DeleteStoreController::class)
         ->post('/store/goods/restore', 'store.goods.restore', RestoreStoreController::class)

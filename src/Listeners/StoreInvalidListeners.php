@@ -31,6 +31,8 @@ class StoreInvalidListeners
 
         // fromUser 用持有者本人（cron 场景无实际操作者）
         $blueprint = new StoreNotificationBlueprint($event->store, $user, [
+            // cartId 使每条到期通知唯一，避免通知系统按 subject+data 去重后只通知一次
+            'cartId' => $event->cart->id,
             'url' => '/store',
             'message' => $this->translator->trans('mattoid-store.forum.notification.goods-invalid', ['title' => $event->store->title]),
         ]);

@@ -16,6 +16,7 @@ use Mattoid\Store\Event\StoreBuyEvent;
 use Mattoid\Store\Event\StoreCartAddEvent;
 use Mattoid\Store\Event\StoreCartEditEvent;
 use Mattoid\Store\Model\StoreCartModel;
+use Mattoid\Store\Model\StoreGiftLogModel;
 use Mattoid\Store\Model\StoreModel;
 use Mattoid\Store\Notification\StoreNotificationBlueprint;
 use Psr\Http\Message\ResponseInterface;
@@ -128,14 +129,18 @@ class GiftGoodsController implements RequestHandlerInterface
                     continue;
                 }
                 try {
+                    $lastCart = null;
                     for ($i = 0; $i < $amount; $i++) {
                         $cart = $this->giftOnce($store, $user, $outtimeDays);
                         if ($cart) {
                             $successCount++;
+                            $lastCart = $cart;
                         }
                     }
                     $successUsers++;
-                    $this->notifyGift($user, $store);
+                    if ($lastCart) {
+                        $this->notifyGift($user, $store, $lastCart);
+                    }
                 } catch (ValidationException $e) {
                     $this->classifyValidationFailure($e, $failed);
                 } catch (\Throwable $e) {
@@ -214,12 +219,14 @@ class GiftGoodsController implements RequestHandlerInterface
                         continue;
                     }
                     $userSuccess = 0;
+                    $lastCart = null;
                     try {
-                        $this->connection->transaction(function () use ($store, $user, $amount, $outtimeDays, &$userSuccess) {
+                        $this->connection->transaction(function () use ($store, $user, $amount, $outtimeDays, &$userSuccess, &$lastCart) {
                             for ($i = 0; $i < $amount; $i++) {
                                 $cart = $this->giftOnce($store, $user, $outtimeDays);
                                 if ($cart) {
                                     $userSuccess++;
+                                    $lastCart = $cart;
                                 }
                             }
                         });
@@ -231,7 +238,9 @@ class GiftGoodsController implements RequestHandlerInterface
                     if ($userSuccess > 0) {
                         $successUsers++;
                         $successCount += $userSuccess;
-                        $this->notifyGift($user, $store);
+                        if ($lastCart) {
+                            $this->notifyGift($user, $store, $lastCart);
+                        }
                     }
                 }
             }
@@ -271,17 +280,24 @@ class GiftGoodsController implements RequestHandlerInterface
     /**
      * 赠送成功通知受赠者（每人一次，而非每件一次）
      */
-    private function notifyGift(User $user, StoreModel $store)
+    private function notifyGift(User $user, StoreModel $store, StoreCartModel $cart)
     {
         try {
             $blueprint = new StoreNotificationBlueprint($store, $this->operator, [
-                'url' => '/store',
+                // cartId 使每次赠送的通知唯一：通知系统按 type+from_user+subject+data 去重，
+                // 缺少唯一字段时同一商品的赠送只会通知一次
+                'cartId' => $cart->id,
+                'url' => '/u/'.resolve(\Flarum\Http\SlugManager::class)->forResource(\Flarum\User\User::class)->toSlug($user).'/backpack',
                 'message' => $this->translator->trans('mattoid-store.forum.notification.gift-received', ['title' => $store->title]),
             ]);
             $this->syncer->sync($blueprint, [$user]);
         } catch (\Throwable $e) {
-            // 通知失败不影响赠送主流程
-            \Illuminate\Support\Facades\Log::warning('[mattoid-store] 赠送通知发送失败', ['user_id' => $user->id, 'store_id' => $store->id, 'exception' => $e]);
+            // 通知失败不影响赠送主流程（facade 在 HTTP 环境不可用，用 PSR logger 保证错误可见）
+            resolve(\Psr\Log\LoggerInterface::class)->warning('[mattoid-store] 赠送通知发送失败', [
+                'user_id' => $user->id,
+                'store_id' => $store->id,
+                'exception' => $e,
+            ]);
         }
     }
 
@@ -344,6 +360,19 @@ class GiftGoodsController implements RequestHandlerInterface
 
         // 通知其他插件购买完成（商品插件在此发放实际权益）
         $this->events->dispatch(new StoreBuyEvent($user, $store, $cart, []));
+
+        // 赠送记录（获赠视角）：供用户在「赠送记录」页查询自己获得的内容
+        StoreGiftLogModel::query()->create([
+            'user_id' => $user->id,
+            'from_user_id' => $this->operator->id,
+            'from_username' => (string) $this->operator->username,
+            'from_display_name' => (string) ($this->operator->display_name ?? $this->operator->username),
+            'from_avatar_url' => (string) $this->operator->avatar_url,
+            'store_id' => $store->id,
+            'cart_id' => $cart->id,
+            'title' => $store->title,
+            'amount' => 1,
+        ]);
 
         return $cart;
     }

@@ -116,6 +116,11 @@ mattoid-store:
     free: 免费
     days: 天
     cart: 购买记录
+    gifts: 赠送记录
+    gifts-empty: 暂无赠送记录
+    gifts-amount: "×{count}"
+    gifts-from: 赠送人
+    gifts-got-at: 获得时间
     sold-out: 售罄
 
     notification:
