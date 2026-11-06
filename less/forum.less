@@ -17,10 +17,30 @@
 .Store-FilterBar > span {
   margin-right: 0 !important;
 }
-/* 商品名称搜索框：占满剩余空间 */
+/* 商品名称搜索框：占满剩余空间，样式与旁边下拉（.Select select）保持一致 */
 .Store-FilterBar .Store-SearchInput {
   flex: 1;
   min-width: 160px;
+  background-color: var(--body-bg);
+  border: 1px solid var(--control-bg);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.Store-FilterBar .Store-SearchInput:hover {
+  border-color: var(--muted-more-color);
+}
+.Store-FilterBar .Store-SearchInput:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 18%, transparent);
+}
+.Store-FilterBar .Store-SearchInput::placeholder {
+  color: var(--muted-color);
 }
 .Store-FilterBar .Invite-Input {
   margin: 0;
