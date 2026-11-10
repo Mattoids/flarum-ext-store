@@ -18,6 +18,7 @@ mattoid-store:
       goods-desc: 商品描述
       goods-price: 价格
       goods-stock: 库存
+      goods-stock-help: "0 表示无库存，-99 表示无限库存。"
       goods-discount: 折扣(%)
       goods-discount-limit: 折扣时限
       goods-discount-limit-unit: 单位
