@@ -17,6 +17,7 @@ mattoid-store:
       goods-desc: Desc
       goods-price: Price
       goods-stock: Stock
+      goods-stock-help: "0 means out of stock. Use -99 for unlimited stock."
       goods-discount: Discount(%)
       goods-discount-limit: Discount limit
       goods-discount-limit-unit: Unit

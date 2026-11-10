@@ -96,12 +96,12 @@ class StoreParamsUtil
             $data['price'] = (float) $data['price'];
         }
 
-        // 库存：0 或 -99 视为无限
+        // 0 表示无库存，-99 表示无限库存。
         if (array_key_exists('stock', $data)) {
             if (!is_numeric($data['stock'])) {
                 $fail();
             }
-            $data['stock'] = ((int) $data['stock'] == 0 || (int) $data['stock'] == -99) ? -99 : (int) $data['stock'];
+            $data['stock'] = (int) $data['stock'];
         }
 
         // 折扣 0-100

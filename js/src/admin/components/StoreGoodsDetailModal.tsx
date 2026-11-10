@@ -33,7 +33,7 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
     title: Stream(),
     desc: Stream(),
     price: Stream(0),
-    stock: Stream(0),
+    stock: Stream(-99),
     discount: Stream(0),
     discountLimit: Stream(0),
     discountLimitUnit: Stream('days'),
@@ -70,7 +70,7 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
       this.params.title = Stream(this.attrs.storeData.title);
       this.params.desc = Stream(this.attrs.storeData.desc);
       this.params.price = Stream(this.attrs.storeData.price);
-      this.params.stock = Stream(this.attrs.storeData.stock == -99 ? 0 : this.attrs.storeData.stock);
+      this.params.stock = Stream(this.attrs.storeData.stock);
       this.params.discount = Stream(this.attrs.storeData.discount);
       this.params.discountLimit = Stream(this.attrs.storeData.discountLimit);
       this.params.discountLimitUnit = Stream(this.attrs.storeData.discountLimitUnit);
@@ -243,7 +243,8 @@ export default class StoreGoodsDetailModal extends Modal<IStoreGoodsDetailModalA
               </div>
               <div className="StoreAdminField">
                 <label>{app.translator.trans('mattoid-store.admin.settings.goods-stock')}</label>
-                <input required class="FormControl" type="number" step="1" min="0" bidi={this.params.stock} />
+                <input required class="FormControl" type="number" step="1" min="-99" bidi={this.params.stock} />
+                <div className="helpText">{app.translator.trans('mattoid-store.admin.settings.goods-stock-help')}</div>
               </div>
               <div className="StoreAdminField">
                 <label>{app.translator.trans('mattoid-store.admin.settings.goods-discount')}</label>
