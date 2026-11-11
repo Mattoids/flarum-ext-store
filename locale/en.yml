@@ -130,6 +130,7 @@ mattoid-store:
       notify_gift_label: Store gift & expiry notifications
       gift-received: 'You received a gift: {title}'
       goods-invalid: 'Your goods "{title}" has expired'
+      goods-renewed: 'Your goods "{title}" has been auto-renewed. View your money history'
 
     error:
       insufficient-inventory: Insufficient inventory

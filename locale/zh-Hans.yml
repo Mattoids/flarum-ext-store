@@ -128,6 +128,7 @@ mattoid-store:
       notify_gift_label: 商店赠送与到期通知
       gift-received: 你收到了赠送的商品：{title}
       goods-invalid: 你的道具"{title}"已到期
+      goods-renewed: 你的道具"{title}"已自动续期，点击查看资金交易记录
 
     error:
       insufficient-inventory: 库存不足

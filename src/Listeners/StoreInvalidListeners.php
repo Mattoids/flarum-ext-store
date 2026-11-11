@@ -29,12 +29,17 @@ class StoreInvalidListeners
             return;
         }
 
+        // 自动续费成功：发"续期提醒"，点击跳转本人资金交易记录；续费失败（到期）：跳转商店
+        $renewed = $event->status === true;
         // fromUser 用持有者本人（cron 场景无实际操作者）
         $blueprint = new StoreNotificationBlueprint($event->store, $user, [
-            // cartId 使每条到期通知唯一，避免通知系统按 subject+data 去重后只通知一次
+            // cartId 使每条通知唯一，避免通知系统按 subject+data 去重后只通知一次
             'cartId' => $event->cart->id,
-            'url' => '/store',
-            'message' => $this->translator->trans('mattoid-store.forum.notification.goods-invalid', ['title' => $event->store->title]),
+            'url' => $renewed ? '/u/'.$user->username.'/money/history' : '/store',
+            'message' => $this->translator->trans(
+                $renewed ? 'mattoid-store.forum.notification.goods-renewed' : 'mattoid-store.forum.notification.goods-invalid',
+                ['title' => $event->store->title]
+            ),
         ]);
         $this->syncer->sync($blueprint, [$user]);
     }
